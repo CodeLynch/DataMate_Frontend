@@ -41,22 +41,26 @@ const theme = createTheme({
 function App() {
   const [open, setOpen] = useState(false);
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
+  // const handleDrawerOpen = () => {
+  //   setOpen(true);
+  // };
+
+  const toggleDrawerOpen = () => {
+    setOpen(!open);
   };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+  // const handleDrawerClose = () => {
+  //   setOpen(false);
+  // };
 
   return (
     <ThemeProvider theme={theme}>
       <SnackbarContextProvider>
         <Router>
-          <Modal open={open} onClose={handleDrawerClose}>
+          {/* <Modal open={open} onClose={handleDrawerClose}>
             <Navbar open={open} handleDrawerClose={handleDrawerClose} />
-          </Modal>
-          <Topbar open={open} handleDrawerOpen={handleDrawerOpen} />
+          </Modal> */}
+          <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
           <Routes>
             {/* Add your routes here */}
           </Routes>

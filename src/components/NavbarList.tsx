@@ -15,7 +15,7 @@ const NavbarList = ({ open }: NavbarListProps) => {
   }
 
   return (
-    <>
+    <div style={{height:"100vh"}}>
       {/* Main List */}
       <List>
         <ListItem disablePadding sx={{ display: 'block' }}>
@@ -34,17 +34,15 @@ const NavbarList = ({ open }: NavbarListProps) => {
           <NavbarLink to="/contact-us" text="Contact us"  open={open} end={false} />
         </ListItem>   
       </List>
-
-
       {/* Log out option */}
     <List>
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '50vh' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '40vh' }}>
             <div style={{ marginTop: 'auto' }}>
             <ListItem disablePadding>
                 <ListItemButton onClick={handleLogout} 
                 sx={{ 
                     color: "tertiary.contrastText",
-                    minHeight: 48,
+                    minHeight: 30,
                     justifyContent: open ? 'initial' : 'center',
                     px: 2.5,
                     "&.Mui-selected": { backgroundColor: "secondary.main" },
@@ -57,7 +55,7 @@ const NavbarList = ({ open }: NavbarListProps) => {
         </div>
     </List>
 
-    </>
+    </div>
   );
 }
 
