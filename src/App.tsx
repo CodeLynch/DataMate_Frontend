@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import SnackbarContextProvider from './helpers/SnackbarContext';
 import Topbar from './components/Topbar';
 import Navbar from './components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
 import { PaletteColorOptions, createTheme } from '@mui/material/styles';
 import { Modal } from '@mui/material';
+import './styles/SupportStyles.css';
+import Homepage from './pages/Homepage';
+
 
 
 /* Customize default MUI theme */
@@ -59,6 +62,9 @@ function App() {
           <Topbar open={open} handleDrawerOpen={handleDrawerOpen} />
           <Routes>
             {/* Add your routes here */}
+            <Route path="/home">
+              <Route index element={<Homepage></Homepage>} />
+            </Route>
           </Routes>
         </Router>
       </SnackbarContextProvider>
