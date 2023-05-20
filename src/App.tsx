@@ -1,75 +1,45 @@
-import React, { useState } from 'react';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import SnackbarContextProvider from './helpers/SnackbarContext';
-import Topbar from './components/Topbar';
-import Navbar from './components/Navbar';
-import { ThemeProvider } from '@mui/material/styles';
-import { PaletteColorOptions, createTheme } from '@mui/material/styles';
-import { Modal } from '@mui/material';
-import './styles/SupportStyles.css';
-import Homepage from './pages/Homepage';
+import React from 'react';
+import { Dialog, DialogTitle, DialogContent, Button } from '@mui/material';
+import { styled } from '@mui/system';
 
+const DropArea = styled('div')(({ theme }) => ({
+  border: '2px dashed black',
+  padding: 16,
+  textAlign: 'center',
+  position: 'relative',
+  backgroundColor: theme.palette.tertiary.main,
+}));
 
-
-/* Customize default MUI theme */
-declare module '@mui/material/styles' {
-  interface PaletteOptions {
-    tertiary?: PaletteColorOptions;
-  }
-}
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#0E9EA7',
-      contrastText: '#fff',
-    },
-    secondary: {
-      main: "#71C887",
-      contrastText: '#fff',
-    },
-    tertiary: {
-      main: '#DCF1EC',
-      contrastText: '#374248',
-    },
-  },
-  
-  typography: {
-    fontFamily: [
-      'inter',
-      'sans-serif',
-    ].join(','),
-  },
+const DashLine = styled('div')({
+  position: 'absolute',
+  width: '100%',
+  height: '100%',
+  border: '2px dashed black',
+  pointerEvents: 'none',
+  top: 0,
+  left: 0,
 });
 
-function App() {
-  const [open, setOpen] = useState(false);
-
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-
-  return (
-    <ThemeProvider theme={theme}>
-      <SnackbarContextProvider>
-        <Router>
-          <Modal open={open} onClose={handleDrawerClose}>
-            <Navbar open={open} handleDrawerClose={handleDrawerClose} />
-          </Modal>
-          <Topbar open={open} handleDrawerOpen={handleDrawerOpen} />
-          <Routes>
-            {/* Add your routes here */}
-            <Route path="/home">
-              <Route index element={<Homepage></Homepage>} />
-            </Route>
-          </Routes>
-        </Router>
-      </SnackbarContextProvider>
-    </ThemeProvider>
-  );
+interface ImportProps {
+  open: boolean;
+  onClose: () => void;
 }
 
-export default App;
+const ImportFile: React.FC<ImportProps> = ({ open, onClose }) => {
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogContent>
+        <DropArea>
+          <DashLine />
+          <p>Drag your file here</p>
+          <Button variant="contained" color="primary" component="label">
+            Upload
+            <input type="file" style={{ display: 'none' }} />
+          </Button>
+        </DropArea>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default ImportFile;

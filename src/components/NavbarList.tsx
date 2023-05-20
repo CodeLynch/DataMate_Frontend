@@ -37,18 +37,21 @@ const NavbarList = ({ open }: NavbarListProps) => {
 
 
       {/* Log out option */}
-    <List>
+      <List>
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '50vh' }}>
-            <div style={{ marginTop: 'auto' }}>
+            <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
             <ListItem disablePadding>
-                <ListItemButton onClick={handleLogout} 
-                sx={{ 
-                    color: "tertiary.contrastText",
+                <ListItemButton
+                onClick={handleLogout}
+                sx={{
+                    color: 'tertiary.contrastText',
                     minHeight: 48,
-                    justifyContent: open ? 'initial' : 'center',
                     px: 2.5,
-                    "&.Mui-selected": { backgroundColor: "secondary.main" },
-                    "&.Mui-selected:hover": { backgroundColor: "secondary.main" },
+                    '&:hover': { backgroundColor: 'secondary.main' },
+                    '&.Mui-selected': { backgroundColor: 'secondary.main' },
+                    '& .MuiListItemText-root': {
+                    color: 'inherit',
+                    },
                 }}>
                 <ListItemText primary={<Typography variant="body1" sx={{ fontWeight: 'bold' }}>Log out</Typography>} />
                 </ListItemButton>
