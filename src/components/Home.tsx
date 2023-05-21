@@ -49,8 +49,8 @@ export default function Home(){
             </section>
 
             <section ref={helpSectionRef}>
-                <h2 style={{paddingLeft: '6rem'}}>How can we help you?</h2>
-                <p style={{paddingLeft: '6rem'}}>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
+                <h2 style={{paddingLeft: '8rem'}}>How can we help you?</h2>
+                <p style={{paddingLeft: '8rem'}}>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
                 <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Stack direction="row" sx={{paddingBottom: '6rem', paddingTop: '2rem'}}>
                         <img src={TemplatesScreen} style={{width: 605, height: 393}}/>
