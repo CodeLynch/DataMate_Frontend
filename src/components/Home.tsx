@@ -8,9 +8,19 @@ import TemplateSample from '../images/templatesample.png';
 import UploadFile from '../images/UploadFile.png';
 import Restructure from '../images/Path2Loading.png';
 import ConvertDownload from '../images/convertdownload.png';
+import ImportFile from '../prompts/ImportFile';
 
 export default function Home(){
-    
+    const [importFile, setImportFile] = React.useState(false);
+
+    const handleImportFileClick = () => {
+        setImportFile(true);
+    };
+  
+    const handleCloseModal = () => {
+        setImportFile(false);
+    };
+  
     const helpSectionRef = React.useRef<HTMLDivElement | null>(null);
     const handleGetStartedClick = () => {
         if (helpSectionRef.current) {
@@ -79,7 +89,8 @@ export default function Home(){
                         <h3 className='g1' style={{ paddingRight: '8rem' , paddingTop: '3rem'}}>Convert your <br/> spreadsheet into a <br/> <span style={{ color: '#71C887' }}>database</span> or <span style={{ color: '#71C887' }}>download</span> it</h3>
                         <img src={ConvertDownload} style={{width: 605, height: 380}}/>
                     </Stack>
-                    <Button variant="contained" sx={{fontWeight: 'bold', backgroundColor: '#71C887', color:'white',  borderRadius: 50, paddingInline: 4, marginBottom: '10rem'}}>IMPORT SPREADSHEET</Button>
+                    <Button  onClick={handleImportFileClick} variant="contained" sx={{fontWeight: 'bold', backgroundColor: '#71C887', color:'white',  borderRadius: 50, paddingInline: 4, marginBottom: '10rem'}}>IMPORT SPREADSHEET</Button>
+                    <ImportFile open={importFile} onClose={handleCloseModal} />
                 </Stack>
             </section>
 

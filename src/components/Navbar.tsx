@@ -1,7 +1,6 @@
 import { Drawer, DrawerHeader } from '../styles/NavbarStyles';
-import { ChevronLeft } from '@mui/icons-material';
 import NavbarList from './NavbarList';
-import { Box, Divider, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import Logo from '../images/datamate-logo.png';
 import { Menu} from "@mui/icons-material";
 
@@ -15,7 +14,7 @@ type NavbarProps = {
         <Drawer variant="permanent" open={open} sx={{ "& .MuiPaper-root": { backgroundColor: "tertiary.main" } }}>
         <DrawerHeader onClick={handleDrawerClose} sx={{ display: 'flex', alignItems: 'center' }}>
           <Box sx={{ display: 'flex'}}>
-            <img src={Logo} alt="datamate logo" style={{ width: '120px', height: '50px', marginLeft: '50x' , marginRight: '40px'}} />
+            <img src={Logo} alt="datamate logo" style={{ width: '120px', height: '35px', marginLeft: '50x' , marginRight: '40px', paddingTop: '10px'}} />
             <IconButton sx={{ color: "tertiary.contrastText" }}>
               <Menu />
             </IconButton>

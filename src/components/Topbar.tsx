@@ -1,9 +1,9 @@
-import { Badge, Box, IconButton, Toolbar } from "@mui/material";
-import { AppBar } from "../styles/TopbarStyles";
+import { Box, IconButton, Toolbar } from "@mui/material";
 import Logo from '../images/datamate-logo.png';
 import { Menu} from "@mui/icons-material";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from "react-router-dom";
+import { AppBar } from "../styles/TopbarSytles";
 
 
 type TopbarProps = {
@@ -24,7 +24,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
           <Menu />
         </IconButton>
         <Box sx={{ width: "100%" }}>
-            <img src={Logo} alt={"datamate logo"} style={{ maxWidth: '10%', maxHeight: '10%' }} />
+            <img src={Logo} alt={"datamate logo"} style={{ width: '120px', height: '35px' }} />
         </Box>
         <IconButton sx={{ color: '#000000' }} onClick={handleProfileClick}>
             <AccountCircleIcon />

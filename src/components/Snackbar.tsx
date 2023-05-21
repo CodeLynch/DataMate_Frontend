@@ -1,6 +1,6 @@
 import { Snackbar as SnackbarBase, IconButton } from "@mui/material";
 import { useContext } from "react";
-import { Close, Menu } from "@mui/icons-material";
+import { Menu } from "@mui/icons-material";
 import { SnackbarContext, SnackbarContextType } from "../helpers/SnackbarContext";
 
 const Snackbar = () => {
@@ -30,5 +30,4 @@ const Snackbar = () => {
 }
 
 export default Snackbar;
-
 export {};

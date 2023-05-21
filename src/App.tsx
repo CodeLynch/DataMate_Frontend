@@ -8,7 +8,7 @@ import { PaletteColorOptions, createTheme } from '@mui/material/styles';
 import { Modal } from '@mui/material';
 import './styles/SupportStyles.css';
 import Homepage from './pages/Homepage';
-
+import { Box} from "@mui/material"
 
 
 /* Customize default MUI theme */
@@ -53,19 +53,33 @@ function App() {
   };
 
   return (
+
     <ThemeProvider theme={theme}>
       <SnackbarContextProvider>
         <Router>
           <Modal open={open} onClose={handleDrawerClose}>
-            <Navbar open={open} handleDrawerClose={handleDrawerClose} />
+           <Navbar open={open} handleDrawerClose={handleDrawerClose} />
           </Modal>
           <Topbar open={open} handleDrawerOpen={handleDrawerOpen} />
-          <Routes>
-            {/* Add your routes here */}
-            <Route path="/home">
-              <Route index element={<Homepage></Homepage>} />
-            </Route>
-          </Routes>
+            <Box sx={{ display: 'flex', marginTop: '50px' }}>
+                <Navbar open={open} handleDrawerClose={handleDrawerClose} />
+              <Box sx={{ flexGrow: 1 }}>
+                <Routes>
+                  {/* Add your routes here */}
+                  <Route path="/home">
+                    <Route
+                      index
+                      element={
+                        <Box sx={{ padding: '1px' }}>
+                          <Homepage />
+                        </Box>
+                      }
+                    />
+                  </Route>
+                  {/* Add your other routes here */}
+                </Routes>
+              </Box>
+            </Box>
         </Router>
       </SnackbarContextProvider>
     </ThemeProvider>
