@@ -1,5 +1,4 @@
-import { Badge, Box, Drawer, IconButton, Toolbar } from "@mui/material";
-import { AppBar } from "../styles/TopbarStyles";
+import { AppBar, Badge, Box, Drawer, IconButton, Toolbar } from "@mui/material";
 import Logo from '../images/datamate-logo.png';
 import { Menu} from "@mui/icons-material";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';

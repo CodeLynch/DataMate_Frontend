@@ -1,5 +1,4 @@
-import { Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
-import { Logout, Person, Dashboard, Payment, Commute, People, Mail, DriveEta } from '@mui/icons-material';
+import { List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
 import { NavbarLink } from './NavbarLink';
 import { useNavigate } from 'react-router-dom';
 

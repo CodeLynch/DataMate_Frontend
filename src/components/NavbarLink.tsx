@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { ListItemButton, ListItemText } from '@mui/material';
 import { NavLink as NavLinkBase, NavLinkProps as NavLinkBaseProps } from 'react-router-dom';
 
 type NavbarLinkProps = React.PropsWithChildren<{

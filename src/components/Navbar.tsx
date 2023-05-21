@@ -1,7 +1,6 @@
 import { Drawer, DrawerHeader } from '../styles/NavbarStyles';
-import { ChevronLeft } from '@mui/icons-material';
 import NavbarList from './NavbarList';
-import { Box, Divider, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import Logo from '../images/datamate-logo.png';
 import { Menu} from "@mui/icons-material";
 

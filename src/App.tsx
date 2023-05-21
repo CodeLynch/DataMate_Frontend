@@ -2,19 +2,21 @@ import React, { useState } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import SnackbarContextProvider from './helpers/SnackbarContext';
 import Topbar from './components/Topbar';
-import Navbar from './components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
 import { PaletteColorOptions, createTheme } from '@mui/material/styles';
 import { Box, Button, Modal, Typography } from '@mui/material';
-import HomePage from './components/HomePage';
 import './App.css';
-import UploadPrompt from './components/UploadPrompt';
+import Home from './components/Home';
+import ImportFile from './prompts/ImportFile';
+import './styles/SupportStyles.css'
+import Filepage from './pages/Filepage';
 
 
 /* Customize default MUI theme */
 declare module '@mui/material/styles' {
   interface PaletteOptions {
     tertiary?: PaletteColorOptions;
+
   }
 }
 const theme = createTheme({
@@ -61,6 +63,7 @@ function App() {
   //   setOpen(false);
   // };
   return (
+
     <ThemeProvider theme={theme}>
       <SnackbarContextProvider>
         <Router>
@@ -70,17 +73,26 @@ function App() {
           <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
           <Routes>
             {/* Add your routes here */}
-            <Route path="/" element={
-            <div style={{marginTop:"90px"}}>
-            <h1>Upload File</h1>
+            <Route index path="/" element={
+            <div style={{marginTop:"50px"}}>
             <Modal open={showUpload} onClose={toggleUpload}>
               <div>
-                <UploadPrompt/>
+                <ImportFile toggleImport={toggleUpload}/>
               </div>  
             </Modal>
-            <HomePage handleUpload={toggleUpload}/>
-            </div>}>
-            </Route>
+            <Box>
+                <div>
+                  <div>
+                      <Home toggleImport={toggleUpload}/>
+                  </div>
+                </div>
+            </Box>          
+            </div>}/>
+            <Route path="/file" element={
+              <>
+              <Filepage/>
+              </>
+            }/>
           </Routes>
         </Router>
       </SnackbarContextProvider>
