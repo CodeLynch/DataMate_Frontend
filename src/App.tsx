@@ -9,6 +9,7 @@ import { Modal } from '@mui/material';
 import './styles/SupportStyles.css';
 import Homepage from './pages/Homepage';
 import { Box} from "@mui/material"
+import SpecificTemplatePage from './pages/SpecificTemplatePage';
 
 
 /* Customize default MUI theme */
@@ -72,6 +73,16 @@ function App() {
                       element={
                         <Box sx={{ padding: '1px' }}>
                           <Homepage />
+                        </Box>
+                      }
+                    />
+                  </Route>
+                  <Route path="/template-one">
+                    <Route
+                      index
+                      element={
+                        <Box sx={{ padding: '1px' }}>
+                          <SpecificTemplatePage/>
                         </Box>
                       }
                     />
