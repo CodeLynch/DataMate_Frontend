@@ -8,7 +8,7 @@ import TemplateSample from '../images/templatesample.png';
 import UploadFile from '../images/UploadFile.png';
 import Restructure from '../images/Path2Loading.png';
 import ConvertDownload from '../images/convertdownload.png';
-// import ImportFile from '../prompts/ImportFile';
+import ImportFile from '../prompts/ImportFile';
 
 export default function Home(){
     const [importFile, setImportFile] = React.useState(false);
@@ -90,10 +90,7 @@ export default function Home(){
                         <img src={ConvertDownload} style={{width: 605, height: 380}}/>
                     </Stack>
                     <Button  onClick={handleImportFileClick} variant="contained" sx={{fontWeight: 'bold', backgroundColor: '#71C887', color:'white',  borderRadius: 50, paddingInline: 4, marginBottom: '10rem'}}>IMPORT SPREADSHEET</Button>
-                    {/* <ImportFile open={importFile} onClose={handleCloseModal} /> */}
-                    {/* <ImportFile open={importFile} onClose={handleCloseModal}/> */}
-
-
+                    <ImportFile open={importFile} onClose={handleCloseModal} />
                 </Stack>
             </section>
 
