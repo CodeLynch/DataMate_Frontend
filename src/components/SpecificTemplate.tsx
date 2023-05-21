@@ -18,8 +18,8 @@ export default function SpecificTemplate(){
     return(
     <div>
       <Stack direction="row" className='gradientbg'>
-        <h1 style={{color: 'white', padding: '1rem', paddingLeft: '8rem'}}>Template 1</h1>
-        <IconButton sx={{ marginTop: '1.8rem', paddingLeft:'73rem' }}>
+        <h1 style={{ marginTop: '2rem', color: 'white', padding: '1rem', paddingLeft: '8rem'}}>Template 1</h1>
+        <IconButton sx={{ marginTop: '2.3rem', paddingLeft:'73rem' }}>
           <DownloadForOfflineIcon sx={{color: 'white', width: '40px', height: '40px'}}></DownloadForOfflineIcon>
         </IconButton>
       </Stack>
