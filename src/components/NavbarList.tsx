@@ -19,7 +19,7 @@ const NavbarList = ({ open }: NavbarListProps) => {
       {/* Main List */}
       <List>
         <ListItem disablePadding sx={{ display: 'block' }}>
-          <NavbarLink to="/home" text="Home" open={open} end={true} />
+          <NavbarLink to="/" text="Home" open={open} end={true} />
         </ListItem>
         <ListItem disablePadding sx={{ display: 'block' }}>
           <NavbarLink to="/databases" text="Databases" open={open} end={false} />

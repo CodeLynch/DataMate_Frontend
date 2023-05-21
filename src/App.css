@@ -1,3 +1,27 @@
+.Upload-box {
+  margin:20;
+  background-color:#EEF8F6;
+  border-style: dotted;
+  border-color: #374248;
+  display:flex;
+  justify-content:center;
+  align-content:center;
+  height:100%; 
+} 
+
+.Upload-box-hover {
+  margin:20;
+  background-color:#DDE4E4;
+  border-style: dotted;
+  border-color: #374248;
+  display:flex;
+  justify-content:center;
+  align-content:center;
+  height:100%; 
+} 
+
+
+
 .App {
   text-align: center;
 }
@@ -36,3 +60,15 @@
     transform: rotate(360deg);
   }
 }
+
+.upload-modal {
+  position: 'absolute' as 'absolute';
+  top: '50%';
+  left: '50%';
+  transform: 'translate(-50%, -50%)';
+  width: 400;
+  background-color: '#DCF1EC';
+  box-shadow: 24,;
+  padding: 4,
+};
+
