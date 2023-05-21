@@ -10,6 +10,7 @@ import Restructure from '../images/Path2Loading.png';
 import ConvertDownload from '../images/convertdownload.png';
 
 export default function Home(){
+    
     const helpSectionRef = React.useRef<HTMLDivElement | null>(null);
     const handleGetStartedClick = () => {
         if (helpSectionRef.current) {
@@ -38,8 +39,8 @@ export default function Home(){
             </section>
 
             <section ref={helpSectionRef}>
-                <h2>How can we help you?</h2>
-                <p>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
+                <h2 style={{paddingLeft: '6rem'}}>How can we help you?</h2>
+                <p style={{paddingLeft: '6rem'}}>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
                 <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Stack direction="row" sx={{paddingBottom: '6rem', paddingTop: '2rem'}}>
                         <img src={TemplatesScreen} style={{width: 605, height: 393}}/>
@@ -74,7 +75,7 @@ export default function Home(){
                         <img src={Restructure} style={{width: 595, height: 372}}/>
                         <h3 className='g1' style={{paddingLeft: '18rem', paddingTop: '2rem'}}>Our app <span style={{ color: '#71C887' }}>will <br/> restructure</span> your <br/> spreadsheet</h3>
                     </Stack>
-                    <Stack direction="row" sx={{paddingBottom: '6rem', paddingTop: '2rem'}}>
+                    <Stack direction="row" sx={{paddingBottom: '8rem', paddingTop: '2rem'}}>
                         <h3 className='g1' style={{ paddingRight: '8rem' , paddingTop: '3rem'}}>Convert your <br/> spreadsheet into a <br/> <span style={{ color: '#71C887' }}>database</span> or <span style={{ color: '#71C887' }}>download</span> it</h3>
                         <img src={ConvertDownload} style={{width: 605, height: 380}}/>
                     </Stack>
@@ -83,11 +84,10 @@ export default function Home(){
             </section>
 
             <section className='footer'>
-            <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <p style={{ fontSize: 15, color: 'white', paddingTop: '1rem'}}>© 2023  All Rights Reserved, DataMate</p>
-                <p style={{ fontSize: 15, color: 'white', marginTop: '-0.5rem', paddingBottom: '1rem'}}>Privacy Policy  |   Terms</p>
-            </Stack>
-
+                <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <p style={{ fontSize: 15, color: 'white', paddingTop: '1rem'}}>© 2023  All Rights Reserved, DataMate</p>
+                    <p style={{ fontSize: 15, color: 'white', marginTop: '-0.5rem', paddingBottom: '1rem'}}>Privacy Policy  |   Terms</p>
+                </Stack>
             </section>
         </Box> 
     )
