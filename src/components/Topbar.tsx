@@ -1,5 +1,4 @@
-import { Badge, Box, IconButton, Toolbar } from "@mui/material";
-
+import { Box, IconButton, Toolbar } from "@mui/material";
 import Logo from '../images/datamate-logo.png';
 import { Menu} from "@mui/icons-material";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';

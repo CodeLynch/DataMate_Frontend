@@ -1,5 +1,4 @@
-import { Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
-import { Logout, Person, Dashboard, Payment, Commute, People, Mail, DriveEta } from '@mui/icons-material';
+import { List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
 import { NavbarLink } from './NavbarLink';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,31 +34,35 @@ const NavbarList = ({ open }: NavbarListProps) => {
         </ListItem>   
       </List>
 
-
       {/* Log out option */}
+
       <List>
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '50vh' }}>
-            <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
-            <ListItem disablePadding>
-                <ListItemButton
+            <div style={{  marginRight: "auto",marginTop: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
+            <ListItem disablePadding >
+              <ListItemButton
                 onClick={handleLogout}
                 sx={{
+                  color: 'tertiary.contrastText',
+                  minHeight: 48,
+                  px: 2.5,
+                  '&:hover': { backgroundColor: 'secondary.main' },
+                  '&.Mui-selected': {
+                    backgroundColor: 'secondary.main',
                     color: 'tertiary.contrastText',
-                    minHeight: 48,
-                    px: 2.5,
-                    '&:hover': { backgroundColor: 'secondary.main' },
-                    '&.Mui-selected': { backgroundColor: 'secondary.main' },
-                    '& .MuiListItemText-root': {
-                    color: 'inherit',
-                    },
-                }}>
-                <ListItemText primary={<Typography variant="body1" sx={{ fontWeight: 'bold' }}>Log out</Typography>} />
-                </ListItemButton>
+                  },
+                }}
+              >
+                <ListItemText 
+                  primary={<Typography variant="body1" 
+                  sx={{ fontWeight: 'bold', paddingLeft: '0rem' , paddingRight: "10rem"}}>
+                  Log out
+                  </Typography>} />
+              </ListItemButton>
             </ListItem>
             </div>
         </div>
     </List>
-
     </>
   );
 }
