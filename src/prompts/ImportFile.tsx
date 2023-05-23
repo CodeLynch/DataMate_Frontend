@@ -44,10 +44,13 @@ const ImportFile = ({toggleImport}: ImportProps) => {
           return;
         }
         else{
-          console.log(file);
           FileService.uploadFile(file[0]).then((res)=>{
             toggleImport()
-            nav('/file');
+            nav('/file',{
+              state:{
+                fileid: res.fileId
+              }
+            });
           }).catch((err)=>{
             alert("Upload Error");
             console.log(err);

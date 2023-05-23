@@ -10,7 +10,17 @@ class FileService {
                 'Content-Type': 'multipart/form-data'
             }
         }).then((res) => {
-            console.log("uploaded file:", res.data);
+            if (res.data) {
+                return res.data;
+            }
+        }).catch(err => {
+            console.log(err);
+        });
+    }
+
+    async getFile(fileid:number) {
+        return axios.get(`http://localhost:8080/file?id=${fileid}`
+        ).then((res) => {
             if (res.data) {
                 return res.data;
             }
@@ -20,7 +30,7 @@ class FileService {
     }
 
     async getFiles() {
-        return axios.get('localhost:8080/files'
+        return axios.get('http://localhost:8080/files'
         ).then((res) => {
             console.log("All Files:", res.data);
             if (res.data) {
