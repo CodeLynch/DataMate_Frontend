@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import FileService from "../services/FileService"
 import { useLocation } from "react-router-dom";
 import * as XLSX from 'xlsx'
-import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs } from "@mui/material";
+import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs} from "@mui/material";
 import { start } from "repl";
+import styled from "@emotion/styled";
+import axios from "axios";
 
 // type FileResponseType = {
 //     fileId: number,
@@ -15,7 +17,12 @@ import { start } from "repl";
 //     data: Blob
 // }
 
-export default function Filepage() {
+type FilePageProps = {
+    stopLoading: () => void,
+  }
+
+
+export default function Filepage({stopLoading}:FilePageProps) {
     const loc = useLocation();
     const fileId = loc.state.fileid;
     const [tblCtr, setTblCtr] = useState<number>(0)
@@ -28,7 +35,7 @@ export default function Filepage() {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [HeaderArr, setHArr] = useState<[][] | undefined>(undefined)
     const [BodyArr, setBArr] = useState<[][] | undefined>(undefined)
-    
+    const [fileName, setFileName] = useState('')
 
 
 
@@ -57,10 +64,34 @@ export default function Filepage() {
     const fetchData = async () =>{
         FileService.getFile(fileId).then((res)=>{
             const wb = XLSX.read(res.data);
+            setFileName(res.fileName);
             setWB(wb);
         }).catch((err)=>{
             console.log(err);
         }) 
+    }
+
+    const downloadFile = async () =>{
+        axios({
+            url: "http://localhost:8080/downloadFile/" + fileId,
+            method: 'GET',
+            responseType: 'arraybuffer', 
+        }).then(async (response) => {
+            const blobData :Blob = new Blob([response.data], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml;charset=UTF-8"});
+            const href = URL.createObjectURL(blobData);
+        
+            // create "a" HTML element with href to file & click
+            const link = document.createElement('a');
+            link.href = href;
+            const name = JSON.stringify(fileName)
+            link.setAttribute('download', name); //or any other extension
+            document.body.appendChild(link);
+            link.click();
+        
+            // clean up "a" element & remove ObjectURL
+            document.body.removeChild(link);
+            URL.revokeObjectURL(href);
+        });
     }
 
     //fetch data on load
@@ -99,7 +130,7 @@ export default function Filepage() {
             }else{
             alert("DataMate has detected " + tblCtr + " table");
             }
-        console.log("Table Counter",tblCtr)
+            stopLoading();
         }
     },[tblCtr])
 
@@ -143,68 +174,78 @@ export default function Filepage() {
     return(
         <>
         {HeaderArr !== undefined && BodyArr !== undefined? <>
-            <div style={{marginTop:'100px', marginRight:'50px', marginLeft:'50px'}}>
-            <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-            <TableContainer sx={{ maxHeight: 440 }}>
-                <Table stickyHeader aria-label="sticky table">
-                <TableHead>
-                    <tr>
-                        {
-                        HeaderArr[0].map((col,i) => <TableCell
-                        key={i}
-                        align='left'
-                        style={{ minWidth: 170 }}><b>{col}</b></TableCell>)
-                        }
-                    </tr>
-                </TableHead>
-                <TableBody>
-                    {BodyArr
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row, i) => {
-                        return (
-                        <TableRow hover role="checkbox" tabIndex={-1} key={i}>
-                            {row.map((cell, j) => {
-                            return (
-                                <TableCell key={j} align='left'>
-                                {cell}
-                                </TableCell>
-                            );
+            <div style={{marginRight:'50px', marginLeft:'50px', height:'80vh'}}>
+            <h1>{fileName}</h1>
+                <div style={{marginTop:"1em"}}>
+                    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                    <TableContainer sx={{ maxHeight: 470, width: '90vw'}}>
+                        <Table stickyHeader aria-label="sticky table">
+                        <TableHead>
+                            <tr>
+                                {
+                                HeaderArr[0].map((col,i) => <TableCell
+                                key={i}
+                                align='left'
+                                style={{ minWidth: 100 }}><b>{col}</b></TableCell>)
+                                }
+                            </tr>
+                        </TableHead>
+                        <TableBody>
+                            {BodyArr
+                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .map((row, i) => {
+                                return (
+                                <TableRow hover role="checkbox" tabIndex={-1} key={i}>
+                                    {row.map((cell, j) => {
+                                    return (
+                                        <TableCell key={j} align='left'>
+                                        {cell}
+                                        </TableCell>
+                                    );
+                                    })}
+                                </TableRow>
+                                );
                             })}
-                        </TableRow>
-                        );
-                    })}
-                </TableBody>
-                </Table>
-            </TableContainer>
-            <TablePagination
-                rowsPerPageOptions={[10, 25, 100]}
-                component="div"
-                count={BodyArr.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-                </Paper>
-                <Box sx={{ width: '100%' }}>
-                <Tabs
-                value = {currentSheet}
-                onChange={changeSheet}
-                textColor="secondary"
-                indicatorColor="secondary"
-                aria-label="secondary tabs example"
-                >
-                {sheetNames.length > 0? sheetNames.map((sheet,i) =>{
-                    return(
-                        <Tab value={sheet} label={sheet} />
-                    )
-                }):<></>}
-            </Tabs>
-            </Box>            
+                        </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <TablePagination
+                        rowsPerPageOptions={[10, 25, 100]}
+                        component="div"
+                        count={BodyArr.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                        </Paper>
+                        <Box sx={{ width: '100%', marginBottom:'1em', marginTop:'1px' }}>
+                        <Tabs
+                        value = {currentSheet}
+                        onChange={changeSheet}
+                        TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
+                        sx={{
+                        "& button":{borderRadius: 2, color: 'black', backgroundColor: 'white'},
+                        "& button.Mui-selected":{backgroundColor: '#D9D9D9', color: 'black'},
+                        }}
+                        aria-label="secondary tabs example"
+                        >
+                        {sheetNames.length > 0? sheetNames.map((sheet,i) =>{
+                            return(
+                                <Tab sx={{backgroundColor:"#D9D9D9"}}value={sheet} label={sheet} />
+                            )
+                        }):<></>}
+                    </Tabs>
+                    </Box>
+                        <div style={{display:"flex", flexDirection:'row'}}>
+                            <Button variant="contained" sx={{fontWeight: 'bold', backgroundColor: '#347845', color:'white', paddingInline: 4, margin:'5px'}}>Convert to Database</Button>
+                            <Button
+                            onClick={downloadFile} 
+                            sx={{fontWeight: 'bold', color:'black', paddingInline: 4, margin:'5px'}}>Download</Button>
+                        </div>            
+                </div>
             </div>
-
-        </>:<>
-        <h1>Sheet Data Error</h1></>}
+        </>:<></>}
         </> 
     )
 }

@@ -4,7 +4,7 @@ import SnackbarContextProvider from './helpers/SnackbarContext';
 import Topbar from './components/Topbar';
 import { ThemeProvider } from '@mui/material/styles';
 import { PaletteColorOptions, createTheme } from '@mui/material/styles';
-import { Box, Button, Modal, Typography } from '@mui/material';
+import { Backdrop, Box, Button, CircularProgress, Modal, Typography } from '@mui/material';
 import './App.css';
 import Home from './components/Home';
 import ImportFile from './prompts/ImportFile';
@@ -15,12 +15,13 @@ import Navbar from './components/Navbar';
 
 
 /* Customize default MUI theme */
-declare module '@mui/material/styles' {
+declare module '@mui/material/styles'{
   interface PaletteOptions {
     tertiary?: PaletteColorOptions;
 
   }
 }
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -48,10 +49,11 @@ const theme = createTheme({
 function App() {
   const [open, setOpen] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
+  // const handleDrawerOpen = () => {
+  //   setOpen(true);
+  // };
 
   const toggleDrawerOpen = () => {
     setOpen(!open);
@@ -61,30 +63,42 @@ function App() {
     setShowUpload(!showUpload);
   };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+  const StartLoading = () => {
+    setLoading(true)
+  }
+
+  const StopLoading = () => {
+    setLoading(false)
+  }
+  // const handleDrawerClose = () => {
+  //   setOpen(false);
+  // };
   return (
 
     <ThemeProvider theme={theme}>
       <SnackbarContextProvider>
+        <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.modal + 1 }}
+        open={isLoading}
+        >
+          <CircularProgress color="success" />
+        </Backdrop>
         <Router>
-          <Modal open={open} onClose={handleDrawerClose}>
-           <Navbar open={open} handleDrawerClose={handleDrawerClose} />
+          <Modal open={open} onClose={toggleDrawerOpen}>
+           <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
           </Modal>
-          <Topbar open={open} handleDrawerOpen={handleDrawerOpen} />
+          <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
             <Box sx={{ display: 'flex', marginTop: '50px' }}>
-                <Navbar open={open} handleDrawerClose={handleDrawerClose} />
               <Box sx={{ flexGrow: 1 }}>
                 <Routes>
                   {/* Add your routes here */}
-                  <Route path="/home">
+                  <Route path="/">
                     <Route
                       index
                       element={<>
                         <Modal open={showUpload} onClose={toggleUpload}>
                         <div>
-                          <ImportFile toggleImport={toggleUpload}/>
+                          <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} />
                         </div>  
                         </Modal>
                         <Box>
@@ -110,7 +124,7 @@ function App() {
                   </Route>
                   <Route path="/file" element={
                     <>
-                    <Filepage/>
+                    <Filepage stopLoading={StopLoading}/>
                     </>
                   }/>
                   {/* Add your other routes here */}

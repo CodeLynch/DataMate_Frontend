@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 type ImportProps = {
   toggleImport: () => void,
+  startLoading: () => void,
 }
 
 
@@ -24,7 +25,7 @@ const styles = {
 };
 
 
-const ImportFile = ({toggleImport}: ImportProps) => {
+const ImportFile = ({toggleImport, startLoading}: ImportProps) => {
     const drop = useRef<HTMLDivElement>(null);
     const [hover, setHover] = useState(false);
     const nav = useNavigate();
@@ -32,7 +33,7 @@ const ImportFile = ({toggleImport}: ImportProps) => {
     const formats = ['xlsx', 'csv']
     
     const onUpload = (file: FileList) => {
-
+      
       if (file && file.length) {
 
         if (count < file.length) {
@@ -44,6 +45,7 @@ const ImportFile = ({toggleImport}: ImportProps) => {
           return;
         }
         else{
+          startLoading()
           FileService.uploadFile(file[0]).then((res)=>{
             toggleImport()
             nav('/file',{
@@ -53,6 +55,7 @@ const ImportFile = ({toggleImport}: ImportProps) => {
             });
           }).catch((err)=>{
             alert("Upload Error");
+            toggleImport()
             console.log(err);
           })
         }

@@ -14,7 +14,7 @@ export const DrawerHeader = styled('div')(({ theme }) => ({
 export const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerWidth,
   transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
+    easing: theme.transitions.easing.easeIn,
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
@@ -45,5 +45,5 @@ export const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 
   ...(!open && {
     ...closedMixin(theme),
     '& .MuiDrawer-paper': closedMixin(theme),
-  }),
+  })
 }));

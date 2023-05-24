@@ -41,6 +41,17 @@ class FileService {
         });
     }
 
+    async downloadFile(fileid:number){
+        return axios.get("http://localhost:8080/downloadFile/" + fileid
+        ).then((res)=>{
+            if(res.data){
+                return res.data;
+            }
+        }).catch(err => {
+            console.log(err);
+        })
+    }
+
     // async deletePost(postId:number){
     //     return axios.delete("http://localhost:8080/post/deletePost/"+postId
     //     ).then((res) => {

@@ -17,7 +17,7 @@ type HomeProps = {
 export default function Home({toggleImport}:HomeProps){
     const [importFile, setImportFile] = React.useState(false);
   
-    const helpSectionRef = React.useRef<HTMLDivElement | null>(null);
+    // const helpSectionRef = React.useRef<HTMLDivElement | null>(null);
     const handleGetStartedClick = () => {
         const yOffset = -70; 
         const element = document.getElementById('helpstart');
@@ -48,16 +48,16 @@ export default function Home({toggleImport}:HomeProps){
                     </Box>
                 </Box>
             </section>
-            <section ref={helpSectionRef}>
-                <h2 style={{paddingLeft: '8rem'}}>How can we help you?</h2>
-                <p style={{paddingLeft: '8rem'}}>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
+            <section id="helpstart" style={{paddingLeft:'5em', paddingRight:'6em'}}>
+                <h2 style={{paddingLeft: '4rem'}}>How can we help you?</h2>
+                <p style={{paddingLeft: '4rem'}}>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
                 <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Stack direction="row" sx={{paddingBottom: '6rem', paddingTop: '2rem'}}>
-                        <img src={TemplatesScreen} style={{width: 605, height: 393}}/>
-                        <h3 className='g1' style={{paddingLeft: '15rem', paddingTop: '2rem'}}>Select a <span style={{ color: '#71C887' }}>template <br/> provided</span> by <br/>our app</h3>
+                        <img src={TemplatesScreen} style={{width: 505, height: 293}}/>
+                        <h3 className='g1' style={{paddingLeft: '10rem', paddingTop: '2rem'}}>Select a <span style={{ color: '#71C887' }}>template <br/> provided</span> by <br/>our app</h3>
                     </Stack>
                     <Stack direction="row" sx={{paddingBottom: '6rem', paddingTop: '2rem'}}>
-                        <h3 className='g1' style={{ paddingRight: '21rem', paddingTop: '6rem' }}><span style={{ color: '#71C887' }}>Download</span> the <br/> template</h3>
+                        <h3 className='g1' style={{ paddingRight: '11rem', paddingTop: '6rem' }}><span style={{ color: '#71C887' }}>Download</span> the <br/> template</h3>
                         <img src={SpecificTemplateScreen} style={{width: 603, height: 391}}/>
                     </Stack>
 
@@ -66,7 +66,7 @@ export default function Home({toggleImport}:HomeProps){
                             <span style={{ color: '#71C887' }}>Use</span> the template in <span style={{ color: '#71C887' }}>creating</span> your data
                         </h3>
                         <img src={TemplateSample} style={{ width: 758, height: 321, marginBottom: '1rem', marginTop: '3rem' }} />
-                        <Button variant="contained" sx={{ fontWeight: 'bold', backgroundColor: '#71C887', color: 'white', borderRadius: 50, paddingInline: 4, marginTop: '5rem' }}>
+                        <Button variant="contained" sx={{ fontWeight: 'bold', backgroundColor: '#71C887', color: 'white', borderRadius: 50, paddingInline: 4, marginTop: '2rem' }}>
                             GO TO TEMPLATES
                         </Button>
                     </Box>

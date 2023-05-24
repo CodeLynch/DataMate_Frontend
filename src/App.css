@@ -72,3 +72,19 @@
   padding: 4,
 };
 
+
+.toolBarStyleWhite {
+  background-color: white;
+}
+
+.toolBarStyleGreen {
+  background-color: #71C887;
+}
+
+.itemsStyleBlack {
+  color: #282c34;
+}
+
+.itemsStyleWhite {
+  color: white;
+}

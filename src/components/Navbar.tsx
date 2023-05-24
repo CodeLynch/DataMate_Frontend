@@ -14,15 +14,14 @@ type NavbarProps = {
         <Drawer variant="permanent" open={open} sx={{ "& .MuiPaper-root": { backgroundColor: "tertiary.main" } }}>
         <DrawerHeader onClick={handleDrawerClose} sx={{ display: 'flex', alignItems: 'center' }}>
           <Box sx={{ display: 'flex'}}>
-            <img src={Logo} alt="datamate logo" style={{ width: '120px', height: '35px', marginRight: '58px'}} />
-            <IconButton sx={{ color: "tertiary.contrastText" }}>
+            <img src={Logo} alt="datamate logo" style={{ width: '120px', height: '35px', marginRight: '58px', marginTop: '10px'}} />
+            <IconButton sx={{ color: "tertiary.contrastText", width:'20%'}}>
               <Menu />
             </IconButton>
           </Box>
         </DrawerHeader>
         <NavbarList open={open} />
       </Drawer>
-      
     );
   }
   
