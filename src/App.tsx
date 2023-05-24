@@ -10,6 +10,8 @@ import Home from './components/Home';
 import ImportFile from './prompts/ImportFile';
 import './styles/SupportStyles.css'
 import Filepage from './pages/Filepage';
+import SpecificTemplatePage from './pages/SpecificTemplatePage';
+import Navbar from './components/Navbar';
 
 
 /* Customize default MUI theme */
@@ -47,9 +49,9 @@ function App() {
   const [open, setOpen] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
 
-  // const handleDrawerOpen = () => {
-  //   setOpen(true);
-  // };
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
 
   const toggleDrawerOpen = () => {
     setOpen(!open);
@@ -59,41 +61,62 @@ function App() {
     setShowUpload(!showUpload);
   };
 
-  // const handleDrawerClose = () => {
-  //   setOpen(false);
-  // };
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
   return (
 
     <ThemeProvider theme={theme}>
       <SnackbarContextProvider>
         <Router>
-          {/* <Modal open={open} onClose={handleDrawerClose}>
-            <Navbar open={open} handleDrawerClose={handleDrawerClose} />
-          </Modal> */}
-          <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
-          <Routes>
-            {/* Add your routes here */}
-            <Route index path="/" element={
-            <div style={{marginTop:"50px"}}>
-            <Modal open={showUpload} onClose={toggleUpload}>
-              <div>
-                <ImportFile toggleImport={toggleUpload}/>
-              </div>  
-            </Modal>
-            <Box>
-                <div>
-                  <div>
-                      <Home toggleImport={toggleUpload}/>
-                  </div>
-                </div>
-            </Box>          
-            </div>}/>
-            <Route path="/file" element={
-              <>
-              <Filepage/>
-              </>
-            }/>
-          </Routes>
+          <Modal open={open} onClose={handleDrawerClose}>
+           <Navbar open={open} handleDrawerClose={handleDrawerClose} />
+          </Modal>
+          <Topbar open={open} handleDrawerOpen={handleDrawerOpen} />
+            <Box sx={{ display: 'flex', marginTop: '50px' }}>
+                <Navbar open={open} handleDrawerClose={handleDrawerClose} />
+              <Box sx={{ flexGrow: 1 }}>
+                <Routes>
+                  {/* Add your routes here */}
+                  <Route path="/home">
+                    <Route
+                      index
+                      element={<>
+                        <Modal open={showUpload} onClose={toggleUpload}>
+                        <div>
+                          <ImportFile toggleImport={toggleUpload}/>
+                        </div>  
+                        </Modal>
+                        <Box>
+                          <div>
+                            <div>
+                                <Home toggleImport={toggleUpload}/>
+                            </div>
+                          </div>
+                      </Box>
+                      </>
+                      }
+                    />
+                  </Route>
+                  <Route path="/template-one">
+                    <Route
+                      index
+                      element={
+                        <Box sx={{ padding: '1px' }}>
+                          <SpecificTemplatePage/>
+                        </Box>
+                      }
+                    />
+                  </Route>
+                  <Route path="/file" element={
+                    <>
+                    <Filepage/>
+                    </>
+                  }/>
+                  {/* Add your other routes here */}
+                </Routes>
+              </Box>
+            </Box>
         </Router>
       </SnackbarContextProvider>
     </ThemeProvider>

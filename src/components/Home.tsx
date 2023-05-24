@@ -48,10 +48,9 @@ export default function Home({toggleImport}:HomeProps){
                     </Box>
                 </Box>
             </section>
-            <div style={{padding: "50px"}}>
-            <section id="helpstart" ref={helpSectionRef}>
-                <h2>How can we help you?</h2>
-                <p>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
+            <section ref={helpSectionRef}>
+                <h2 style={{paddingLeft: '8rem'}}>How can we help you?</h2>
+                <p style={{paddingLeft: '8rem'}}>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
                 <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Stack direction="row" sx={{paddingBottom: '6rem', paddingTop: '2rem'}}>
                         <img src={TemplatesScreen} style={{width: 605, height: 393}}/>
@@ -86,21 +85,19 @@ export default function Home({toggleImport}:HomeProps){
                         <img src={Restructure} style={{width: 595, height: 372}}/>
                         <h3 className='g1' style={{paddingLeft: '18rem', paddingTop: '2rem'}}>Our app <span style={{ color: '#71C887' }}>will <br/> restructure</span> your <br/> spreadsheet</h3>
                     </Stack>
-                    <Stack direction="row" sx={{paddingBottom: '6rem', paddingTop: '2rem'}}>
+                    <Stack direction="row" sx={{paddingBottom: '8rem', paddingTop: '2rem'}}>
                         <h3 className='g1' style={{ paddingRight: '8rem' , paddingTop: '3rem'}}>Convert your <br/> spreadsheet into a <br/> <span style={{ color: '#71C887' }}>database</span> or <span style={{ color: '#71C887' }}>download</span> it</h3>
                         <img src={ConvertDownload} style={{width: 605, height: 380}}/>
                     </Stack>
                     <Button  onClick={toggleImport} variant="contained" sx={{fontWeight: 'bold', backgroundColor: '#71C887', color:'white',  borderRadius: 50, paddingInline: 4, marginBottom: '10rem'}}>IMPORT SPREADSHEET</Button>
                 </Stack>
             </section>
-            </div>
 
             <section className='footer'>
-            <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <p style={{ fontSize: 15, color: 'white', paddingTop: '1rem'}}>© 2023  All Rights Reserved, DataMate</p>
-                <p style={{ fontSize: 15, color: 'white', marginTop: '-0.5rem', paddingBottom: '1rem'}}>Privacy Policy  |   Terms</p>
-            </Stack>
-
+                <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <p style={{ fontSize: 15, color: 'white', paddingTop: '1rem'}}>© 2023  All Rights Reserved, DataMate</p>
+                    <p style={{ fontSize: 15, color: 'white', marginTop: '-0.5rem', paddingBottom: '1rem'}}>Privacy Policy  |   Terms</p>
+                </Stack>
             </section>
         </Box> 
     )
