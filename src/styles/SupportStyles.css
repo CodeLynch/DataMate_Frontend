@@ -43,6 +43,11 @@
     color: #374248;
   }
 
+  h3{
+    color: #374248;
+  }
+  
+
   .g1 {
     font-size: 50px;
   }
@@ -131,3 +136,39 @@
     font-size: 21px;
   }
   
+  .search{
+    box-sizing: border-box;
+
+    position: absolute;
+    width: 581px;
+    height: 49px;
+    left: 550px;
+    top: 10px;
+
+    background: #FFFFFF;
+    border: 1px solid #FFFFFF;
+    border-radius: 30px;
+  }
+
+  .boxx{
+    position: absolute;
+    width: 320px;
+    height: 210px;
+    left: 200px;
+    top: 825px;
+    
+
+    background: #71C887;
+    border-radius: 10px;
+  }
+
+  .boxxx{
+    position: absolute;
+    width: 250px;
+    height: 130px;
+    left: 35px;
+    top: 30px;
+    
+    background: #ffffff;
+    
+  }
