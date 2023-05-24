@@ -28,6 +28,7 @@ export default function Filepage({stopLoading}:FilePageProps) {
     const [tblCtr, setTblCtr] = useState<number>(0)
     const [workbook, setWB] = useState<XLSX.WorkBook | null>()
     const [sheetNames, setSheetNames] = useState<string[]>([]);
+    const [visibleSheetNames, setVSheets] = useState<string[]>([]);
     const [sheetData, setSData] = useState<Object>({});
     const [currentSheet, setCurrentSheet] = useState("");
     const [startCount, setStart] = useState(false);
@@ -37,27 +38,47 @@ export default function Filepage({stopLoading}:FilePageProps) {
     const [BodyArr, setBArr] = useState<[][] | undefined>(undefined)
     const [fileName, setFileName] = useState('')
 
-
+    //function to remove empty rows in Sheet Object Data
+    function sheetjs_cleanEmptyRows(sd:XLSX.SheetType) {
+        const data = []
+            for (var row = 0; row < sd.length; row++) {
+                  var i = sd[row].length;
+                  var j = 0;
+                for ( var cell = 0; cell < sd[row].length; cell++){
+    
+                    if (sd[row][cell].length == 0 ) { j++}
+                }
+              if (j < i) {
+                data.push(sd[row]);
+              }
+            }
+            return data;
+     }
 
     const readData = (wb: XLSX.WorkBook) => {
-        setSheetNames(wb.SheetNames);
+        setSheetNames(wb.SheetNames)
         let sheetdata:Object = {}
-        sheetNames.map((sheet, i) => {
+        sheetNames.map((sheet, i) => 
+        {
             const worksheet = wb.Sheets[sheet];
             const jsondata = XLSX.utils.sheet_to_json(worksheet,{
-                header: 1
-            });
-            const js = jsondata as Object
+                header: 1,
+                raw: false,
+                defval: "",
+            }) as unknown;
+            const sd = sheetjs_cleanEmptyRows(jsondata as XLSX.SheetType)
+            const js = sd as Object
             sheetdata = {...sheetdata, [sheet]: js}            
         })
         setSData(sheetdata)
-        setCurrentSheet(sheetNames[0]);
          //typing currentSheet as key of sheetData
          const currSheet = currentSheet as keyof typeof sheetData
          //typing object value as unknown before converting to row
          const row =  sheetData[currSheet] as unknown
          let rowArr = row as [][]
          setHArr(rowArr)
+         console.log(sheetNames);
+         console.log(visibleSheetNames);
     }
 
     //call backend for xlsx data
@@ -96,8 +117,11 @@ export default function Filepage({stopLoading}:FilePageProps) {
 
     //fetch data on load
     useEffect(()=>{
+        setVSheets([]);
         fetchData();
     },[])
+
+    
 
     //read workbook and toggle start count if workbook state and sheetnames state is changed
     //only start count if sheetname is more than 0 
@@ -116,9 +140,23 @@ export default function Filepage({stopLoading}:FilePageProps) {
         if(startCount){
             let ctr = 0
             sheetNames.map((sheet, i) => {
-                ctr++;
+                const sheetAttr = sheet as keyof typeof sheetData
+                const row =  sheetData[sheetAttr] as unknown
+                let rowArr = row as [][]
+                if(rowArr[0].length > 2){
+                   ctr++; 
+                }
             })
             setTblCtr(ctr)
+            sheetNames.map((name) => {
+                const sheetAttr = name as keyof typeof sheetData
+                    const sheetrow =  sheetData[sheetAttr] as unknown
+                    let sheetrowArr = sheetrow as [][]
+                    if(sheetrowArr[0].length > 2){
+                       visibleSheetNames.push(name);
+                    }
+            })
+            setCurrentSheet(visibleSheetNames[0]);
         }
     }, [startCount])
 
@@ -198,9 +236,14 @@ export default function Filepage({stopLoading}:FilePageProps) {
                                 <TableRow hover role="checkbox" tabIndex={-1} key={i}>
                                     {row.map((cell, j) => {
                                     return (
+                                        <>
+                                        {cell !== ""?
                                         <TableCell key={j} align='left'>
-                                        {cell}
-                                        </TableCell>
+                                        {cell === true? "TRUE": cell === false? "FALSE":cell}
+                                        </TableCell>:
+                                        <></>
+                                        }
+                                        </>
                                     );
                                     })}
                                 </TableRow>
@@ -230,8 +273,8 @@ export default function Filepage({stopLoading}:FilePageProps) {
                         }}
                         aria-label="secondary tabs example"
                         >
-                        {sheetNames.length > 0? sheetNames.map((sheet,i) =>{
-                            return(
+                        {visibleSheetNames.length > 0? visibleSheetNames.map((sheet,i) =>{
+                            return(                                
                                 <Tab sx={{backgroundColor:"#D9D9D9"}}value={sheet} label={sheet} />
                             )
                         }):<></>}

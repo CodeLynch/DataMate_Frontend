@@ -26,7 +26,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
     <AppBar position="fixed" /*open={open}*/ sx={{ backgroundColor: "primary.contrastText", alignItem: "center" }}>
       
       <Toolbar sx={{backgroundColor: location.pathname === '/file'? '#71C887':'#FFFFFF'}}>
-        <IconButton  aria-label="open drawer" onClick={handleDrawerOpen} edge="start" sx={{ width:"4.5%" ,color: location.pathname === '/file'? '#FFFFFF':'#000000' , marginRight: 1/*, ...(open && { display: 'none' }),*/ }}>
+        <IconButton  aria-label="open drawer" onClick={handleDrawerOpen} edge="start" sx={{ width:"4%" ,color: location.pathname === '/file'? '#FFFFFF':'#000000' , marginRight: 1/*, ...(open && { display: 'none' }),*/ }}>
           <Menu />
         </IconButton>
         <Box sx={{ width: "100%" }}>

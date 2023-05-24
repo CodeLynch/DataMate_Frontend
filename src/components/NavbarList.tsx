@@ -47,7 +47,9 @@ const NavbarList = ({ open }: NavbarListProps) => {
                     "&.Mui-selected": { backgroundColor: "secondary.main" },
                     "&.Mui-selected:hover": { backgroundColor: "secondary.main" },
                 }}>
-                <ListItemText primary={<Typography variant="body1" sx={{ fontWeight: 'bold' }}>Log out</Typography>} />
+                  <div style={{display:"flex", justifyContent:"left"}}>
+                    <ListItemText primary={<Typography variant="body1" sx={{ padding:0, fontWeight: 'bold'}}>Log out</Typography>} />
+                  </div>
                 </ListItemButton>
             </ListItem>
             </div>

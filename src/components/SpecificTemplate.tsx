@@ -23,6 +23,7 @@ import UnitGuideInvalid from '../images/unitinvalid.png';
 import UnitGuideValid from '../images/unitcheck.png';
 import TotalSalesGuide from '../images/totalsales.png';
 import StatusGuide from '../images/status.png';
+import axios from 'axios';
 
 
 export default function SpecificTemplate(){
@@ -37,13 +38,35 @@ export default function SpecificTemplate(){
       setOpen(false);
     };
 
+    const downloadFile = async () =>{
+      axios({
+          url: "http://localhost:8080/downloadTemplate/1",
+          method: 'GET',
+          responseType: 'arraybuffer', 
+      }).then(async (response) => {
+          const blobData :Blob = new Blob([response.data], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml;charset=UTF-8"});
+          const href = URL.createObjectURL(blobData);
+      
+          // create "a" HTML element with href to file & click
+          const link = document.createElement('a');
+          link.href = href;
+          link.setAttribute('download', 'SalesReportTemplate.xltx'); //or any other extension
+          document.body.appendChild(link);
+          link.click();
+      
+          // clean up "a" element & remove ObjectURL
+          document.body.removeChild(link);
+          URL.revokeObjectURL(href);
+      });
+    }
+
     return(
-    <div>
+<div>
       <Stack direction="row" className="gradientbg" alignItems="center" sx={{paddingBottom: '10px'}}>
         <Typography variant="h1" sx={{ marginTop: '2rem', color: 'white', padding: '1rem', marginLeft: '4rem', fontWeight: 'bold', fontSize: '35px' }}>
           Sales Report Template
         </Typography>
-        <IconButton sx={{ marginTop: '1.7rem', marginLeft: '55rem' }}>
+        <IconButton onClick={downloadFile} sx={{ marginTop: '1.7rem', marginLeft: '55rem' }}>
           <DownloadForOfflineIcon sx={{ color: 'white', width: '40px', height: '40px' }} />
         </IconButton>
       </Stack>
@@ -242,7 +265,8 @@ export default function SpecificTemplate(){
       </Accordion>
 
       <Box sx={{display: 'flex', alignItems: 'end', justifyContent: 'end', margin: '4rem'}}>
-        <Button variant="contained" sx={{fontWeight: 'bold', backgroundColor: '#71C887', color:'white',  borderRadius: 50, paddingInline: 4}}>DOWNLOAD</Button>
+        <Button onClick={downloadFile} 
+        variant="contained" sx={{fontWeight: 'bold', backgroundColor: '#71C887', color:'white',  borderRadius: 50, paddingInline: 4}}>DOWNLOAD</Button>
       </Box>
 
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>

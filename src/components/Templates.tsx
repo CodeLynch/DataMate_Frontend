@@ -36,8 +36,10 @@ export default function Templates(){
           <TextField className='search'
           hiddenLabel
           size="medium"  
-          defaultValue="Search"
-          InputProps={{ startAdornment: (<InputAdornment position="start"> <SearchOutlinedIcon /> </InputAdornment>) }} 
+          placeholder="Search"
+          sx={{border: 'none', "& fieldset": { border: 'none' },}}
+          InputProps={{ startAdornment: (<InputAdornment position="start"> <SearchOutlinedIcon /> </InputAdornment>),
+          disableUnderline: true, }} 
         /><br></br><br></br><br></br>
           </Stack>
 
@@ -64,11 +66,10 @@ export default function Templates(){
           <img src={spreadsheet} style={{width: 50, height: 50, paddingTop: 40}}/>
           </Box>
           <p style={{color: 'white', fontSize: 16.5, paddingLeft: 100, paddingTop: 159, textAlign:'center'}}> 
-              Template1.xlsx</p>
+            SalesReportTemplate.xlsx</p>
           </Box>
           <br></br>
-          
-        
+                  
         </div>
         )
     

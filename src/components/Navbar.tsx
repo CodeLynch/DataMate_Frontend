@@ -14,7 +14,7 @@ type NavbarProps = {
         <Drawer variant="permanent" open={open} sx={{ "& .MuiPaper-root": { backgroundColor: "tertiary.main" } }}>
         <DrawerHeader onClick={handleDrawerClose} sx={{ display: 'flex', alignItems: 'center' }}>
           <Box sx={{ display: 'flex'}}>
-            <img src={Logo} alt="datamate logo" style={{ width: '120px', height: '35px', marginRight: '58px', marginTop: '10px'}} />
+            <img src={Logo} alt="datamate logo" style={{ width: '120px', height: '32px', marginRight: '58px', marginTop: '10px'}} />
             <IconButton sx={{ color: "tertiary.contrastText", width:'20%'}}>
               <Menu />
             </IconButton>
