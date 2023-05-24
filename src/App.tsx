@@ -12,6 +12,7 @@ import './styles/SupportStyles.css'
 import Filepage from './pages/Filepage';
 import SpecificTemplatePage from './pages/SpecificTemplatePage';
 import Navbar from './components/Navbar';
+import TemplatesPage from './pages/TemplatesPage';
 
 
 /* Customize default MUI theme */
@@ -127,6 +128,16 @@ function App() {
                     <Filepage stopLoading={StopLoading}/>
                     </>
                   }/>
+                  <Route path="/templates">
+                    <Route
+                      index
+                      element={
+                        <Box sx={{ padding: '1px' }}>
+                          <TemplatesPage/>
+                        </Box>
+                      }
+                    />
+                  </Route>
                   {/* Add your other routes here */}
                 </Routes>
               </Box>
