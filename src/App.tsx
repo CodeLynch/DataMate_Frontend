@@ -113,7 +113,7 @@ function App() {
                       }
                     />
                   </Route>
-                  <Route path="/template-one">
+                  <Route path="/template/1">
                     <Route
                       index
                       element={
