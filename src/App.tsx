@@ -13,6 +13,7 @@ import Filepage from './pages/Filepage';
 import SpecificTemplatePage from './pages/SpecificTemplatePage';
 import Navbar from './components/Navbar';
 import TemplatesPage from './pages/TemplatesPage';
+import FileScreen from './pages/FileScreen';
 
 
 /* Customize default MUI theme */
@@ -134,6 +135,16 @@ function App() {
                       element={
                         <Box sx={{ padding: '1px' }}>
                           <TemplatesPage/>
+                        </Box>
+                      }
+                    />
+                  </Route>
+                  <Route path="/files">
+                    <Route
+                      index
+                      element={
+                        <Box sx={{ padding: '1px' }}>
+                          <FileScreen/>
                         </Box>
                       }
                     />
