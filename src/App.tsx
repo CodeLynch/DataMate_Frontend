@@ -13,6 +13,9 @@ import Filepage from './pages/Filepage';
 import SpecificTemplatePage from './pages/SpecificTemplatePage';
 import Navbar from './components/Navbar';
 import TemplatesPage from './pages/TemplatesPage';
+import ProcessingPage from './pages/ProcessingPage';
+import TableDetectPrompt from './prompts/TableDetectPrompt';
+import * as XLSX from 'xlsx'
 
 
 /* Customize default MUI theme */
@@ -48,9 +51,31 @@ const theme = createTheme({
 });
 
 function App() {
+  //boolean state for sidebar
   const [open, setOpen] = useState(false);
+  //boolean state for upload prompt
   const [showUpload, setShowUpload] = useState(false);
+  //boolean state for page loading
   const [isLoading, setLoading] = useState(false);
+  //boolean state for processing files
+  const [isProcessing, setProcessing] = useState(false);
+  //boolean state for tables detected prompt
+  const [TableDetect, setTableDetect] = useState(false);
+  //boolean state for no tables detected prompt
+  const [NoTableDetect, setNoTableDetect] = useState(false);
+  //number state for the numbers of table found in an uploaded file
+  const [tableCount, setTableCount] = useState(0);
+  //number state for the id of the current file uploaded
+  const [uploadedFileId, setUploadedFileId] = useState(0);
+  //workbook state for the current uploaded file
+  const [workbook, setWB] = useState<XLSX.WorkBook | null>()
+  //string array state for the sheetnames of the current uploaded file
+  const [sheetNames, setSheetNames] = useState<string[]>([]);
+  //string array for the sheetnames of the sheets that are valid tables of the uploaded file
+  const [visibleSheetNames, setVSheets] = useState<string[]>([]);
+  //object state for the sheet data of the uploaded file
+  const [sheetData, setSData] = useState<Object>({});
+
 
   // const handleDrawerOpen = () => {
   //   setOpen(true);
@@ -64,6 +89,15 @@ function App() {
     setShowUpload(!showUpload);
   };
 
+  const toggleTableDetect = () =>{
+    setTableDetect(!TableDetect);
+  }
+
+  const toggleNoTableDetect = () =>{
+    setNoTableDetect(!NoTableDetect);
+  }
+
+
   const StartLoading = () => {
     setLoading(true)
   }
@@ -71,9 +105,34 @@ function App() {
   const StopLoading = () => {
     setLoading(false)
   }
+
   // const handleDrawerClose = () => {
   //   setOpen(false);
   // };
+
+  const StartProcessing = () => {
+    setProcessing(true);
+  }
+
+  const StopProcessing = () => {
+    setProcessing(false);
+  }
+
+  const setTblCount = (count:number) =>{
+    setTableCount(count);
+  }
+
+  const setFileId = (id:number) => {
+    setUploadedFileId(id);
+  }
+
+  const setFileData = (wb: XLSX.WorkBook | null, sheets:string[], vsheets:string[] ,sheetdata: object ) =>{
+    setWB(wb);
+    setSheetNames(sheets);
+    setVSheets(vsheets);
+    setSData(sheetdata);
+  }
+
   return (
 
     <ThemeProvider theme={theme}>
@@ -99,7 +158,7 @@ function App() {
                       element={<>
                         <Modal open={showUpload} onClose={toggleUpload}>
                         <div>
-                          <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} />
+                          <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} setFileId={setFileId} />
                         </div>  
                         </Modal>
                         <Box>
@@ -123,6 +182,61 @@ function App() {
                       }
                     />
                   </Route>
+                  <Route path="/processing" element={
+                    <>
+                    <Backdrop
+                    sx={{ color: '#FFFFFF', zIndex: (theme) => theme.zIndex.modal - 1,
+                    marginTop:"4rem",
+                    position: 'fixed',
+                    width: '100%',
+                    height:'100%',}}
+                    open={isProcessing}
+                    >
+                      <div style={{display: 'flex', flexDirection:"column", justifyContent:"center", alignItems:"center"}}>
+                        <CircularProgress size="10rem" 
+                          color="success" />
+                        <h1>Processing data...</h1>
+                      </div>
+                    </Backdrop>
+
+                    {//modal for detect tables here
+                    //pls re-add onClose={toggleTableDetect} if table prompts should be closed when clicking outside
+                    } 
+                    <Modal open={TableDetect} >
+                    <div>
+                      <TableDetectPrompt 
+                      toggleTableDetect={toggleTableDetect} 
+                      tblCount={tableCount} 
+                      fileId={uploadedFileId}
+                      workbook={workbook}
+                      sheets={sheetNames}
+                      vsheets={visibleSheetNames}
+                      sheetdata={sheetData}
+                      />
+                    </div>  
+                    </Modal>
+
+                    {/* modal for no tables detected here 
+                    <Modal open={showUpload} onClose={toggleUpload}>
+                    <div>
+                      <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} />
+                    </div>  
+                    </Modal> */}
+
+                    {/* modal for split tables detected here 
+                    <Modal open={showUpload} onClose={toggleUpload}>
+                    <div>
+                      <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} />
+                    </div>  
+                    </Modal> */}
+                    <ProcessingPage stopLoading={StopLoading} startProcessing={StartProcessing}
+                    toggleTable={toggleTableDetect}
+                    toggleNoTable={toggleNoTableDetect}
+                    setTblCount={setTblCount}
+                    setFileData={setFileData}/>
+                    </>
+                  }
+                  />
                   <Route path="/file" element={
                     <>
                     <Filepage stopLoading={StopLoading}/>

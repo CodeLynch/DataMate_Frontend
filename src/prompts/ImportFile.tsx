@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 type ImportProps = {
   toggleImport: () => void,
   startLoading: () => void,
+  setFileId: (num:number) => void,
 }
 
 
@@ -25,7 +26,7 @@ const styles = {
 };
 
 
-const ImportFile = ({toggleImport, startLoading}: ImportProps) => {
+const ImportFile = ({toggleImport, startLoading, setFileId}: ImportProps) => {
     const drop = useRef<HTMLDivElement>(null);
     const [hover, setHover] = useState(false);
     const nav = useNavigate();
@@ -48,11 +49,17 @@ const ImportFile = ({toggleImport, startLoading}: ImportProps) => {
           startLoading()
           FileService.uploadFile(file[0]).then((res)=>{
             toggleImport()
-            nav('/file',{
-              state:{
-                fileid: res.fileId
-              }
-            });
+            // nav('/file',{
+            //   state:{
+            //     fileid: res.fileId
+            //   }
+            // });
+            setFileId(res.fileId);
+            nav('/processing',{
+                state:{
+                  fileid: res.fileId
+                }
+              });
           }).catch((err)=>{
             alert("Upload Error");
             toggleImport()
