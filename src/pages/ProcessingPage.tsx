@@ -7,7 +7,7 @@ import FileService from "../services/FileService";
 type ProcessingPageProps = {
     stopLoading: () => void,
     startProcessing: () => void,
-    toggleTable: () => void,
+    toggleTable: (status:boolean) => void,
     toggleNoTable: () => void,
     setTblCount: (num:number) => void;
     setFileData: (wb: XLSX.WorkBook | null, sheets:string[], vsheets:string[] ,sheetdata: object ) => void,
@@ -29,6 +29,7 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
     const [HeaderArr, setHArr] = useState<[][] | undefined>(undefined)
     const [BodyArr, setBArr] = useState<[][] | undefined>(undefined)
     const [fileName, setFileName] = useState('')
+    const [isProcessing, setProcessing] = useState(true);
 
     //function to remove empty rows in Sheet Object Data
     function sheetjs_cleanEmptyRows(sd:XLSX.SheetType) {
@@ -136,7 +137,7 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
             if(tblCtr > 0){
                 //open table prompt here
                 setTblCount(tblCtr);
-                toggleTable();
+                toggleTable(true);
             }else{
                 //open no table prompt here
             }
@@ -201,8 +202,8 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
 
     return(
         <>
-        {HeaderArr !== undefined && BodyArr !== undefined? <>
-            <div className="gradientbg" style={{paddingTop:"50px", paddingRight:"50px", width:'100vw',height:'100vh'}}>
+            <div className="gradientbg" style={{paddingTop:"50px", paddingRight:"50px", width:'95vw',height:'100vh'}}>
+                {HeaderArr !== undefined && BodyArr !== undefined && !isProcessing ? <>
                 <div style={{marginRight:'70px', marginLeft:'50px', padding:'15px', height:'80vh', opacity:.8}}>
                     <div style={{marginTop:"1em"}}>
                         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -272,8 +273,9 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
                         </Box>         */}
                     </div>
                 </div>
+                </>:<></>}
             </div>
-        </>:<></>}
+        
         </> 
     )
 }

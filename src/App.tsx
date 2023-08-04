@@ -89,8 +89,8 @@ function App() {
     setShowUpload(!showUpload);
   };
 
-  const toggleTableDetect = () =>{
-    setTableDetect(!TableDetect);
+  const toggleTableDetect = (status:boolean) =>{
+    setTableDetect(status);
   }
 
   const toggleNoTableDetect = () =>{
@@ -202,7 +202,7 @@ function App() {
                     {//modal for detect tables here
                     //pls re-add onClose={toggleTableDetect} if table prompts should be closed when clicking outside
                     } 
-                    <Modal open={TableDetect} >
+                    <Modal open={TableDetect} onClose={()=>{toggleTableDetect(false)}}>
                     <div>
                       <TableDetectPrompt 
                       toggleTableDetect={toggleTableDetect} 

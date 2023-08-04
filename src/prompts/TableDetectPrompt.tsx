@@ -21,7 +21,7 @@ const styles = {
 };
 
 type DetectProps = {
-    toggleTableDetect: () => void,
+    toggleTableDetect: (status:boolean) => void,
     tblCount: number,
     fileId: number,
     workbook: XLSX.WorkBook | null | undefined, 
@@ -96,20 +96,20 @@ useEffect(()=>{
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: 798,
-        height: 494,
+        maxHeight: 594,
         bgcolor: '#71C887',
         boxShadow: 24,
         p: 2,
     }}>
-        <div style={{marginTop:"1em", padding:"2em", backgroundColor:"#DCF1EC", height:"83.7%"}}>
-          {tblCount > 1? <h1>DataMate has detected <b>{tblCount}</b> possible tables</h1>:
+        <div style={{marginTop:"3%", padding:"2em", backgroundColor:"#DCF1EC"}}>
+          {tblCount > 1?  <p style={{fontSize:"32px", padding:0, margin:0}}> DataMate has detected <b>{tblCount}</b> possible tables</p>:
           <p style={{fontSize:"32px", padding:0, margin:0}}>DataMate has detected <b>{tblCount}</b> possible table</p>}
           <p style={{fontSize:"16px", paddingTop:'1em', paddingLeft:0, paddingBottom:'1em', margin:0}}>Please check the tables you want to include for processing.</p>
           <div style={{display:'flex', flexDirection:'row'}}>
             <div style={{width: '85%'}}>
               {/* for table preview */}
               {HeaderArr !== undefined && BodyArr !== undefined? <>
-                          <Paper elevation={0} sx={{ height:'270px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
+                          <Paper elevation={0} sx={{ maxHeight:'270px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
                           <TableContainer>
                               <Table stickyHeader aria-label="sticky table">
                               <TableHead >
@@ -165,20 +165,21 @@ useEffect(()=>{
             <div style={{width: '15%'}}>
               {/* for table tabs */}
               <Tabs
-                              value= {currentSheet}
-                              onChange={changeSheet}
-                              TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
-                              sx={{
-                              "& button":{borderRadius: 0, color: 'black', backgroundColor: 'white'},
-                              "& button.Mui-selected":{backgroundColor: '#71C887', color: 'white'},
-                              }}
-                              aria-label="secondary tabs example"
-                              >
-                              {vsheets.length > 0? vsheets.map((sheet,i) =>{
-                                  return(                                
-                                      <Tab sx={{backgroundColor:"#D9D9D9"}}value={sheet} label={sheet} />
-                                  )
-                              }):<></>}
+                orientation="vertical"
+                value= {currentSheet}
+                onChange={changeSheet}
+                TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
+                sx={{
+                "& button":{borderRadius: 0, color: 'black', backgroundColor: '#DCF1EC'},
+                "& button.Mui-selected":{backgroundColor: '#71C887', color: 'white'},
+                }}
+                aria-label="secondary tabs example"
+                >
+                {vsheets.length > 0? vsheets.map((sheet,i) =>{
+                    return(                                
+                        <Tab sx={{backgroundColor:"#D9D9D9"}}value={sheet} label={sheet} />
+                    )
+                }):<></>}
               </Tabs>
             </div>
           </div> 
