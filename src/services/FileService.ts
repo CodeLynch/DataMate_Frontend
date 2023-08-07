@@ -52,6 +52,18 @@ class FileService {
         })
     }
 
+    async deleteFile(fileId:number){
+        return axios.delete("http://localhost:8080/deleteFile/" + fileId
+        ).then((res) => {
+            console.log(res.data);
+            if (res.data) {
+                return res.data;
+            }
+        }).catch(err => {
+            console.log(err);
+        });
+    }
+
     // async deletePost(postId:number){
     //     return axios.delete("http://localhost:8080/post/deletePost/"+postId
     //     ).then((res) => {

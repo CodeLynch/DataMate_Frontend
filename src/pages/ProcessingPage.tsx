@@ -8,7 +8,7 @@ type ProcessingPageProps = {
     stopLoading: () => void,
     startProcessing: () => void,
     toggleTable: (status:boolean) => void,
-    toggleNoTable: () => void,
+    toggleNoTable: (status:boolean) => void,
     setTblCount: (num:number) => void;
     setFileData: (wb: XLSX.WorkBook | null, sheets:string[], vsheets:string[] ,sheetdata: object ) => void,
   }

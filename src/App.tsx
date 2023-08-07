@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import SnackbarContextProvider from './helpers/SnackbarContext';
 import Topbar from './components/Topbar';
@@ -16,6 +16,7 @@ import TemplatesPage from './pages/TemplatesPage';
 import ProcessingPage from './pages/ProcessingPage';
 import TableDetectPrompt from './prompts/TableDetectPrompt';
 import * as XLSX from 'xlsx'
+import EmptyDetectPrompt from './prompts/EmptyDetectPrompt';
 
 
 /* Customize default MUI theme */
@@ -63,6 +64,12 @@ function App() {
   const [TableDetect, setTableDetect] = useState(false);
   //boolean state for no tables detected prompt
   const [NoTableDetect, setNoTableDetect] = useState(false);
+  //boolean state for empty values in tables prompt
+  const [EmptyDetect, setEmptyDetect] = useState(false);
+  //boolean state for empty values in tables prompt
+  const [InconsistentDetect, setIncDetect] = useState(false);
+  //boolean state for import success prompt
+  const [ImportSuccess, setSuccess] = useState(false);
   //number state for the numbers of table found in an uploaded file
   const [tableCount, setTableCount] = useState(0);
   //number state for the id of the current file uploaded
@@ -73,8 +80,13 @@ function App() {
   const [sheetNames, setSheetNames] = useState<string[]>([]);
   //string array for the sheetnames of the sheets that are valid tables of the uploaded file
   const [visibleSheetNames, setVSheets] = useState<string[]>([]);
+  //string array for the sheetnames of the sheets that have empty values
+  const [SheetsWithEmpty, setSWE] = useState<string[]>([])
+  //string array for the sheetnames of the sheets that have inconsistent values
+  const [IncSheets, setIS] = useState<string[]>([])
   //object state for the sheet data of the uploaded file
   const [sheetData, setSData] = useState<Object>({});
+  
 
 
   // const handleDrawerOpen = () => {
@@ -93,8 +105,20 @@ function App() {
     setTableDetect(status);
   }
 
-  const toggleNoTableDetect = () =>{
-    setNoTableDetect(!NoTableDetect);
+  const toggleNoTableDetect = (status:boolean) =>{
+    setNoTableDetect(status);
+  }
+
+  const toggleEmptyDetect = (status:boolean) =>{
+    setEmptyDetect(status);
+  }
+
+  const toggleInconsistent = (status:boolean) =>{
+    setIncDetect(status);
+  }
+
+  const toggleImportSuccess = (status:boolean) =>{
+    setSuccess(status);
   }
 
 
@@ -132,6 +156,26 @@ function App() {
     setVSheets(vsheets);
     setSData(sheetdata);
   }
+
+  const updateEmptyList = (sheet:string) => {
+    SheetsWithEmpty.push(sheet)
+  }
+
+  const updateIncList = (sheet:string) => {
+    IncSheets.push(sheet)
+  }
+
+  const resetVariables = () => {
+    setSWE([]);
+    setIS([]);
+    setTableDetect(false);
+    setIncDetect(false);
+    setNoTableDetect(false);
+  }
+
+  useEffect(()=>{
+    resetVariables();
+  },[])
 
   return (
 
@@ -206,12 +250,18 @@ function App() {
                     <div>
                       <TableDetectPrompt 
                       toggleTableDetect={toggleTableDetect} 
+                      toggleEmptyDetect={toggleEmptyDetect}
+                      toggleInconsistentDetect={toggleInconsistent}
+                      toggleImportSuccess={toggleImportSuccess}
                       tblCount={tableCount} 
                       fileId={uploadedFileId}
-                      workbook={workbook}
-                      sheets={sheetNames}
                       vsheets={visibleSheetNames}
                       sheetdata={sheetData}
+                      updateEmpty={updateEmptyList}
+                      updateInc={updateIncList}
+                      emptySheets={SheetsWithEmpty}
+                      incSheets={IncSheets}
+                      reset={resetVariables}
                       />
                     </div>  
                     </Modal>
@@ -229,6 +279,26 @@ function App() {
                       <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} />
                     </div>  
                     </Modal> */}
+
+                    <Modal open={EmptyDetect} onClose={()=>{toggleEmptyDetect(false)}}>
+                    <div>
+                      <EmptyDetectPrompt 
+                      toggleEmptyDetect={toggleEmptyDetect}
+                      toggleInconsistentDetect={toggleInconsistent}
+                      toggleImportSuccess={toggleImportSuccess}
+                      fileId={uploadedFileId}
+                      workbook={workbook}
+                      sheets={sheetNames}
+                      vsheets={visibleSheetNames}
+                      sheetdata={sheetData}
+                      emptylist={SheetsWithEmpty}
+                      reset={resetVariables}
+                      // updateEmpty={updateEmptyList}
+                      // updateInc={updateIncList}
+                      />
+                    </div>  
+                    </Modal>
+
                     <ProcessingPage stopLoading={StopLoading} startProcessing={StartProcessing}
                     toggleTable={toggleTableDetect}
                     toggleNoTable={toggleNoTableDetect}
