@@ -32,6 +32,7 @@ type EmptyProps = {
     inclist:string[],
     sheetdata: object,
     reset: () => void,
+    updateSData: (data:Object) => void,
   }
 
 interface WorkbookData {
@@ -42,7 +43,7 @@ interface TableRow {
     [key: string]: string | number;
 }
 
-const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, workbook, sheets, vsheets, emptylist, sheetdata, reset, inclist}: EmptyProps) => {  
+const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, toggleInconsistentDetect, workbook, sheets, vsheets, emptylist, sheetdata, reset, inclist, updateSData}: EmptyProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -155,16 +156,21 @@ useEffect(()=>{
     for (const sheet in emptylist){
         sd[emptylist[sheet]] = replaceEmptyWithNull(sd[emptylist[sheet]] as TableRow[]); 
     }
-    console.log("updated",sd);
+    console.log("Updated",sd);
+    updateSData(sd as Object);
     //clean empty list
-    //while(emptylist.length > 0){
-    //  emptylist.pop();
-    //}
-    
+    while(emptylist.length > 0){
+     emptylist.pop();
+    }
+    toggleEmptyDetect(false)
     //check if inconsistency list has values
-    //open inconsistency prompt
-
-    //else open success prompt
+    if(inclist.length > 0){
+      //open inconsistency prompt
+      toggleInconsistentDetect(true);
+    }else{
+      //else open success prompt
+      toggleImportSuccess(true);
+    }
   }
   
 

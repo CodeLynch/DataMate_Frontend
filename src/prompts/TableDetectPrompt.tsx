@@ -113,6 +113,7 @@ useEffect(()=>{
           console.log("Inconsistency triggered");
         }else{
           toggleTableDetect(false);
+          toggleImportSuccess(true);
           console.log("Success Triggered")
         }
   }

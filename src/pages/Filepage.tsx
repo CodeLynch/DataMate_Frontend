@@ -163,11 +163,6 @@ export default function Filepage({stopLoading}:FilePageProps) {
     //alert once table counter is changed and start count is true
     useEffect(()=>{
         if(startCount){
-            if(tblCtr > 1){
-            alert("DataMate has detected " + tblCtr + " tables");
-            }else{
-            alert("DataMate has detected " + tblCtr + " table");
-            }
             stopLoading();
         }
     },[tblCtr])

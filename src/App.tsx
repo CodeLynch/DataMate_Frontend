@@ -17,6 +17,7 @@ import ProcessingPage from './pages/ProcessingPage';
 import TableDetectPrompt from './prompts/TableDetectPrompt';
 import * as XLSX from 'xlsx'
 import EmptyDetectPrompt from './prompts/EmptyDetectPrompt';
+import SuccessPrompt from './prompts/SuccessPrompt';
 
 
 /* Customize default MUI theme */
@@ -165,6 +166,10 @@ function App() {
     IncSheets.push(sheet)
   }
 
+  const updateSheetData = (sheet:Object) => {
+    setSData(sheet)
+  }
+
   const resetVariables = () => {
     setSWE([]);
     setIS([]);
@@ -294,11 +299,21 @@ function App() {
                       emptylist={SheetsWithEmpty}
                       reset={resetVariables}
                       inclist={IncSheets}
-                      // updateEmpty={updateEmptyList}
-                      // updateInc={updateIncList}
+                      updateSData = {updateSheetData}
                       />
                     </div>  
                     </Modal>
+
+                    <Modal open={ImportSuccess} onClose={()=>{toggleImportSuccess(false)}}>
+                    <div>
+                      <SuccessPrompt 
+                      toggleImportSuccess={toggleImportSuccess}
+                      fileId={uploadedFileId}
+                      reset={resetVariables}
+                      />
+                    </div>  
+                    </Modal>
+
 
                     <ProcessingPage stopLoading={StopLoading} startProcessing={StartProcessing}
                     toggleTable={toggleTableDetect}
