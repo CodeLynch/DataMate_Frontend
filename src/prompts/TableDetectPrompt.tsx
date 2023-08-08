@@ -97,21 +97,26 @@ useEffect(()=>{
 
 //useEffect for detecting hasEmpty, isInconsistent changes
 useEffect(()=>{
+  console.log(hasEmpty);
+  if(isCheckDone){
     //Check hasEmpty
-    //open empty value will be replaced with "NULL" prompt
-    if(hasEmpty){
-      toggleTableDetect(false);
-      toggleEmptyDetect(true);
-      console.log("Empty triggered");
-    }else if(isInconsistent && !hasEmpty){
-    //else if when hasEmpty is false but isInconsistent is true 
-    //open fixing inconsistency prompts
-      toggleTableDetect(false);
-      toggleInconsistentDetect(true);
-      console.log("Inconsistency triggered");
-    }else{
-      console.log("Success Triggered")
-    }
+        //open empty value will be replaced with "NULL" prompt
+        if(hasEmpty){
+          toggleTableDetect(false);
+          toggleEmptyDetect(true);
+          console.log("Empty triggered");
+        }else if(isInconsistent && !hasEmpty){
+        //else if when hasEmpty is false but isInconsistent is true 
+        //open fixing inconsistency prompts
+          toggleTableDetect(false);
+          toggleInconsistentDetect(true);
+          console.log("Inconsistency triggered");
+        }else{
+          toggleTableDetect(false);
+          console.log("Success Triggered")
+        }
+  }
+    
 },[isCheckDone])
 
   //pagination functions ------------------------------------------

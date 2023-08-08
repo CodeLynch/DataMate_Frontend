@@ -293,6 +293,7 @@ function App() {
                       sheetdata={sheetData}
                       emptylist={SheetsWithEmpty}
                       reset={resetVariables}
+                      inclist={IncSheets}
                       // updateEmpty={updateEmptyList}
                       // updateInc={updateIncList}
                       />

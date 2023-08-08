@@ -29,6 +29,7 @@ type EmptyProps = {
     sheets:string[], 
     vsheets:string[],
     emptylist:string[],
+    inclist:string[],
     sheetdata: object,
     reset: () => void,
   }
@@ -41,7 +42,7 @@ interface TableRow {
     [key: string]: string | number;
 }
 
-const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, workbook, sheets, vsheets, emptylist, sheetdata, reset}: EmptyProps) => {  
+const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, workbook, sheets, vsheets, emptylist, sheetdata, reset, inclist}: EmptyProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -49,11 +50,20 @@ const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, workbook, sheets, vsheets
   const [BodyArr, setBArr] = useState<[][] | undefined>(undefined)
   const [IncSheets, setIS] = useState<string[]>([])
   const [isInconsistent, SetInconsistent] = useState(false);
+  const [filteredData, setFData] = useState<Object>({});
 
   const nav = useNavigate();
+  useEffect(()=>{
+    //create copy of sheetdata
+    const fdata = JSON.parse(JSON.stringify(sheetdata))
+    for(const s in emptylist){
+      fdata[emptylist[s]] = filterRowsWithNullValues(fdata[emptylist[s]] as TableRow[]); 
+    }
+    setFData(fdata);
+  },[])
 
   //set currentSheet and header array on load based from props
-  useEffect(()=>{
+  useEffect(()=>{ 
     setCurrentSheet(emptylist[0]);
     //typing currentSheet as key of sheetData
     const currSheet = currentSheet as keyof typeof sheetdata
@@ -61,7 +71,9 @@ const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, workbook, sheets, vsheets
     const row =  sheetdata[currSheet] as unknown
     let rowArr = row as [][]
     setHArr(rowArr)
-  },[])
+
+    
+  },[filteredData])
 
   //useEffect for re-assigning the header array for the table when currentSheet state has changed
   useEffect(()=>{
@@ -75,17 +87,14 @@ const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, workbook, sheets, vsheets
 
 //useEffect for re-assigning the body array for the table when Header array state has changed
 useEffect(()=>{
-    if(HeaderArr !== undefined){
-        let rowsArr = []
-        //copy rowArr
-        rowsArr = HeaderArr.slice(0); 
-        console.log("Before", rowsArr)
-        //remove header values
-        rowsArr.splice(1 - 1, 1);
-        console.log("After", rowsArr)
-        setBArr(rowsArr)
+    if(filteredData !== undefined){
+        //typing currentSheet as key of sheetData
+        const currSheet = currentSheet as keyof typeof filteredData
+        //typing object value as unknown before converting to row
+        const row =  filteredData[currSheet] as unknown
+        let rowArr = row as [][]
+        setBArr(rowArr)
     }
-    console.log("BArr",BodyArr)
   },[HeaderArr])
 
   //pagination functions ------------------------------------------
@@ -99,10 +108,37 @@ useEffect(()=>{
   };
   //---------------------------------------------------------------
 
+  function filterRowsWithNullValues(table: TableRow[]): TableRow[] {
+    return table.filter((row) => {
+      for (const key in row) {
+        if (row.hasOwnProperty(key) && row[key] === null || row[key] === "" || row[key] === undefined ) {
+          return true; // Include rows with at least one null value
+        }
+      }
+      return false; // Exclude rows with all non-null values
+    });
+  }
+  
+
   const changeSheet = (stringevent: React.SyntheticEvent, newValue: string) =>{
       setCurrentSheet(newValue);
   }
 
+  function replaceEmptyWithNull(table: TableRow[]): TableRow[] {
+    for (const row of table) {
+      for (const key in row) {
+        if (row.hasOwnProperty(key)) {
+          const value = row[key];
+          if (value === null || value === undefined || value === "") {
+            // Empty value found in the row, replace with "NULL"
+            row[key] = "NULL";
+          }
+        }
+      }
+    }
+    return table;
+  }
+  
   const cancelProcess = () => {
       FileService.deleteFile(fileId).then((res)=>{
         toggleEmptyDetect(false);
@@ -113,26 +149,23 @@ useEffect(()=>{
       })
       
   }
-//   function nextFunc(){
-//     const sd = sheetdata as WorkbookData;
-//     for(const s in vsheets){
-//       //check for empty values in tables
-//       if(hasEmptyValues(sd[vsheets[s]] as TableRow[])){
-//         //insert table names to SheetsWithEmpty Array 
-//         setSWE([...SheetsWithEmpty, s]);
-//       }
-//       //check for inconsistent values in tables
-//       //if condition with function here
-//     }
-//     //Check hasEmpty
-//     //open empty value will be replaced with "NULL" prompt
+  function nextFunc(){
+    const sd = sheetdata as WorkbookData;
+    //use algorithm for replacing empty values with NULL
+    for (const sheet in emptylist){
+        sd[emptylist[sheet]] = replaceEmptyWithNull(sd[emptylist[sheet]] as TableRow[]); 
+    }
+    console.log("updated",sd);
+    //clean empty list
+    //while(emptylist.length > 0){
+    //  emptylist.pop();
+    //}
+    
+    //check if inconsistency list has values
+    //open inconsistency prompt
 
-//     //else if when hasEmpty is false but isInconsistent is true
-//     //open fixing inconsistency prompts
-
-//     //else when both are false directly to successful prompt
-//     //open success prompt    
-//   }
+    //else open success prompt
+  }
   
 
 
@@ -232,7 +265,7 @@ useEffect(()=>{
           </div> 
           <div style={{display:"flex", justifyContent:"space-between"}}>
           <Button disableElevation onClick={cancelProcess} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: 'white', color:'black', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Cancel</Button>
-          <Button disableElevation variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Next</Button>
+          <Button disableElevation onClick={nextFunc} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Next</Button>
 
           </div>
         </div>
