@@ -310,6 +310,8 @@ function App() {
                       toggleImportSuccess={toggleImportSuccess}
                       fileId={uploadedFileId}
                       reset={resetVariables}
+                      workbook={workbook}
+                      sdata={sheetData}
                       />
                     </div>  
                     </Modal>

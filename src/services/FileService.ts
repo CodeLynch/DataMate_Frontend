@@ -18,6 +18,24 @@ class FileService {
         });
     }
 
+    async putFile(fileid:number, file:File, filename:string){
+        let fd = new FormData();
+        fd.append('file',file, filename)
+        return axios.put(`http://localhost:8080/updateFile/${fileid}`, fd,{
+            headers:{
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then((res)=>{
+            if (res.data) {
+                return res.data;
+            }
+        })
+        .catch(err => {
+            console.log(err);
+        })
+    }
+
     async getFile(fileid:number) {
         return axios.get(`http://localhost:8080/file?id=${fileid}`
         ).then((res) => {

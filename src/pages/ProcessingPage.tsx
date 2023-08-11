@@ -78,6 +78,7 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
     //call backend for xlsx data
     const fetchData = async () =>{
         FileService.getFile(fileId).then((res)=>{
+            console.log("response data", res.data)
             const wb = XLSX.read(res.data);
             setFileName(res.fileName);
             setWB(wb);

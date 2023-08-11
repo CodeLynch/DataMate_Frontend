@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import FileService from "../services/FileService";
 import { Box, Button, styled } from "@mui/material";
+import * as XLSX from 'xlsx';
+import { useEffect, useState } from "react";
 
 const styles = {
     dialogPaper: {
@@ -19,6 +21,8 @@ type SuccessProps = {
     toggleImportSuccess: (status:boolean) => void,
     fileId: number,
     reset: () => void,
+    workbook: XLSX.WorkBook | null | undefined,
+    sdata: Object,
   }
 
 interface WorkbookData {
@@ -29,17 +33,58 @@ interface TableRow {
     [key: string]: string | number;
 }
 
-const SuccessPrompt = ({fileId, toggleImportSuccess, reset}: SuccessProps) => {  
+const SuccessPrompt = ({fileId, toggleImportSuccess, reset, workbook, sdata}: SuccessProps) => {  
   const nav = useNavigate();
+  const [fileName, setFName] = useState("");
+
+  useEffect(()=>{
+    FileService.getFile(fileId)
+    .then((res)=>{
+      setFName(res.fileName);
+    })
+    .catch(err =>{
+      console.log(err);
+    })
+  },[])
+
+  function getFileType(filename:string){
+    var re = /(?:\.([^.]+))?$/;
+    var res = re.exec(filename) as unknown;
+    return res as String;
+  }
+
+//workbook to Array Buffer method
+function s2ab(s:String) { 
+                var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
+                var view = new Uint8Array(buf);  //create uint8array as viewer
+                for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; //convert to octet
+                return buf;    
+}
 
   function okFunction(){
-    reset();
-    toggleImportSuccess(false);
-    nav('/file',{
-              state:{
-                fileid: fileId
-              }
-            });
+    console.log(workbook);
+    if(workbook !== undefined && workbook !== null){
+      var wopts:XLSX.WritingOptions = { bookType:getFileType(fileName)? 'xlsx': getFileType(fileName) as XLSX.BookType, type:'binary' };
+      const wbString = XLSX.write(workbook, wopts);
+      console.log(wbString)
+      var blob = new Blob([s2ab(wbString)],{type:"application/octet-stream"});
+      FileService.putFile(fileId, blob as File, fileName)
+    .then((res)=>{
+      reset();
+      toggleImportSuccess(false);
+      nav('/file',{
+                state:{
+                  fileid: fileId
+                }
+              });
+    }).catch(err =>{
+      console.log(err);
+    })
+    }else{
+      alert("ERROR: Workbook is NULL or undefined");
+    }
+    
+
   }
   
 
