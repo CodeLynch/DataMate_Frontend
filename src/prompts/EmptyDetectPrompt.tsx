@@ -155,8 +155,8 @@ useEffect(()=>{
     //use algorithm for replacing empty values with NULL
     for (const sheet in emptylist){
         sd[emptylist[sheet]] = replaceEmptyWithNull(sd[emptylist[sheet]] as TableRow[]); 
-    }
-    console.log("Updated",sd);
+        workbook!.Sheets[emptylist[sheet]] = XLSX.utils.json_to_sheet(sd[emptylist[sheet]], {skipHeader:true});
+      }
     updateSData(sd as Object);
     //clean empty list
     while(emptylist.length > 0){
@@ -173,8 +173,6 @@ useEffect(()=>{
     }
   }
   
-
-
   return (
     <Box sx={{
         position: "absolute",
