@@ -96,6 +96,12 @@
   overflow: hidden;
 }
 
+.edit-spacing {
+  padding-top: 1rem;
+  /* padding-bottom: 8rem; */
+  overflow: hidden;
+}
+
 .h1-container {
   color: white;
   text-align: left;
@@ -319,6 +325,43 @@ h3{
   height: 20px; 
   margin-left: 12px;
 }
+
+.resetBtn .MuiButton-root {
+  font-weight: bold; 
+  background-color: #71C887;
+  color: white;
+  border-radius: 50px;
+  margin-top: 2.2rem;
+  padding: 10px 20px 10px 20px;
+}
+
+.cancelResetBtn .MuiButton-root {
+  font-weight: bold; 
+  background-color: #C0C0C0;
+  color: white;
+  border-radius: 50px;
+  margin-top: 2.2rem;
+  padding: 10px 50px 10px 50px;
+}
+
+.saveBtn .MuiButton-root {
+  font-weight: bold; 
+  background-color: #71C887;
+  color: white;
+  border-radius: 50px;
+  margin-top: 2.2rem;
+  padding: 10px 43px 10px 43px;
+}
+
+.cancelBtn .MuiButton-root {
+  font-weight: bold; 
+  background-color: #C0C0C0;
+  color: white;
+  border-radius: 50px;
+  margin-top: 2.2rem;
+  padding: 10px 35px 10px 35px;
+}
+
 
 .btnstyle .MuiButton-root {
   height: 55px;
