@@ -104,8 +104,8 @@ export default function Filepage({stopLoading}:FilePageProps) {
             // create "a" HTML element with href to file & click
             const link = document.createElement('a');
             link.href = href;
-            const name = JSON.stringify(fileName)
-            link.setAttribute('download', name); //or any other extension
+            // const name = JSON.stringify(fileName)
+            link.setAttribute('download', "file.xlsx"); //or any other extension
             document.body.appendChild(link);
             link.click();
         

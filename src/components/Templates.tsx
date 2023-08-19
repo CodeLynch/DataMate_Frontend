@@ -86,7 +86,7 @@ export default function Templates(){
           <Box className='boxxx' sx={{ justifyContent: 'center', display: 'flex'}}>
           <img src={spreadsheet} style={{width: 50, height: 50, paddingTop: 40}}/>
           </Box>
-          <p style={{color: 'white', fontSize: 16.5, paddingLeft: 100, paddingTop: 159, textAlign:'center'}}> 
+          <p style={{color: 'white', fontSize: 16.5, paddingLeft: '3.5rem', paddingTop: 159, textAlign:'center'}}> 
             SalesReportTemplate.xlsx</p>
           </Box> */}
           <br></br>
