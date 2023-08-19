@@ -18,6 +18,7 @@ import TableDetectPrompt from './prompts/TableDetectPrompt';
 import * as XLSX from 'xlsx'
 import EmptyDetectPrompt from './prompts/EmptyDetectPrompt';
 import SuccessPrompt from './prompts/SuccessPrompt';
+import InconsistentDetectPrompt from './prompts/InconsistentDetectPrompt';
 
 
 /* Customize default MUI theme */
@@ -304,6 +305,23 @@ function App() {
                     </div>  
                     </Modal>
 
+                    <Modal open={InconsistentDetect} onClose={()=>{toggleInconsistent(false)}}>
+                    <div>
+                      <InconsistentDetectPrompt 
+                      toggleInconsistentDetect={toggleInconsistent}
+                      toggleImportSuccess={toggleImportSuccess}
+                      fileId={uploadedFileId}
+                      workbook={workbook}
+                      sheets={sheetNames}
+                      vsheets={visibleSheetNames}
+                      sheetdata={sheetData}
+                      reset={resetVariables}
+                      inclist={IncSheets}
+                      updateSData = {updateSheetData}
+                      />
+                    </div>  
+                    </Modal>
+
                     <Modal open={ImportSuccess} onClose={()=>{toggleImportSuccess(false)}}>
                     <div>
                       <SuccessPrompt 
@@ -315,6 +333,8 @@ function App() {
                       />
                     </div>  
                     </Modal>
+
+                    
 
 
                     <ProcessingPage stopLoading={StopLoading} startProcessing={StartProcessing}

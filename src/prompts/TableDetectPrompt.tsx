@@ -146,6 +146,7 @@ useEffect(()=>{
       
   }
 
+  //function for detecting empty values
   function hasEmptyValues(table: TableRow[]): boolean {
     for (const row of table) {
       for (const key in row) {
@@ -161,6 +162,30 @@ useEffect(()=>{
     return false;
   }
 
+  //function for detecting inconsistencies
+  function hasInconsistentValues(table: TableRow[]): boolean {
+    const columnDataTypes: { [key: string]: Set<string> } = {};
+  
+    for (const row of table) {
+      for (const column in row) {
+        if (row.hasOwnProperty(column)) {
+          const valueType = typeof row[column];
+          console.log("type of ", column, " = ", valueType);
+          if (!columnDataTypes[column]) {
+            columnDataTypes[column] = new Set();
+          }
+          columnDataTypes[column].add(valueType);
+  
+          if (columnDataTypes[column].size > 1) {
+            return true; // Inconsistent values found in this column
+          }
+        }
+      }
+    }
+  
+    return false; // No inconsistent values found in any column
+  }
+
   function nextFunction(){
     const sd = sheetdata as WorkbookData;
     for(const s in vsheets){
@@ -171,6 +196,13 @@ useEffect(()=>{
           updateEmpty(vsheets[s]);
           SetEmpty(true);
         }          
+      }
+      //if block for inconsistent values
+      if(hasInconsistentValues(sd[vsheets[s]] as TableRow[])){
+        if(!incSheets.includes(vsheets[s])){
+          updateInc(vsheets[s]);
+          SetInconsistent(true);
+        }
       }
     }
     setCheckDone(true);    

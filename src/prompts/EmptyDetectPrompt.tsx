@@ -112,7 +112,7 @@ useEffect(()=>{
   function filterRowsWithNullValues(table: TableRow[]): TableRow[] {
     return table.filter((row) => {
       for (const key in row) {
-        if (row.hasOwnProperty(key) && row[key] === null || row[key] === "" || row[key] === undefined ) {
+        if (row.hasOwnProperty(key) && (row[key] === null || row[key] === "" || row[key] === undefined) ) {
           return true; // Include rows with at least one null value
         }
       }

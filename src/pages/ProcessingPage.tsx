@@ -57,7 +57,7 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
             const worksheet = wb.Sheets[sheet];
             const jsondata = XLSX.utils.sheet_to_json(worksheet,{
                 header: 1,
-                raw: false,
+                raw: true,
                 defval: "",
             }) as unknown;
             const sd = sheetjs_cleanEmptyRows(jsondata as XLSX.SheetType)
