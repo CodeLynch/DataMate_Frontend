@@ -13,6 +13,14 @@ type ProcessingPageProps = {
     setFileData: (wb: XLSX.WorkBook | null, sheets:string[], vsheets:string[] ,sheetdata: object ) => void,
   }
 
+  interface TableRow {
+    [columnName: string]: string | number | boolean;
+  }
+  
+  interface SheetData {
+    [sheetName: string]: TableRow[];
+  }
+
 
 export default function ProcessingPage ({stopLoading, startProcessing, toggleTable, toggleNoTable, setTblCount, setFileData}:ProcessingPageProps) {
     const loc = useLocation();
@@ -49,6 +57,28 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
             return data;
      }
 
+     //function to check if sheet containts table
+     function isValidTable(sheetData: SheetData, sheetName: string): boolean {
+        const tableData = sheetData[sheetName];
+
+        console.log("Table Data is: ", tableData);
+        if(!tableData || !Array.isArray(tableData) || tableData.length < 2) {
+            console.log("and that's not a table");  
+            return false;
+          }
+        
+        // Checking if all rows have the same number of columns as the first row
+        const numColumns = Object.keys(tableData[0]).length;
+        for (let i = 1; i < tableData.length; i++) {
+        if (Object.keys(tableData[i]).length !== numColumns) {
+            console.log("and that's not a table");  
+            return false;
+        }
+        }
+        console.log("so it is a table");
+        return true;
+      }
+
     const readData = (wb: XLSX.WorkBook) => {
         setSheetNames(wb.SheetNames)
         let sheetdata:Object = {}
@@ -71,14 +101,12 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
          const row =  sheetData[currSheet] as unknown
          let rowArr = row as [][]
          setHArr(rowArr)
-         console.log(sheetNames);
-         console.log(visibleSheetNames);
+         console.log("Sheet Data: ",sheetData);
     }
 
     //call backend for xlsx data
     const fetchData = async () =>{
         FileService.getFile(fileId).then((res)=>{
-            console.log("response data", res.data)
             const wb = XLSX.read(res.data);
             setFileName(res.fileName);
             setWB(wb);
@@ -96,11 +124,11 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
     
     //useEffect triggers when workbook or sheetNames state is changed
     //read workbook and toggle start count if workbook state and sheetnames state is changed
-    //only start count if sheetname is more than 0 
     useEffect(()=>{
         if(workbook !== undefined){
            readData(workbook!) 
         }
+        //only start count if sheetname is more than 0 
         if(sheetNames.length > 0){
             setStart(true);
         }
@@ -113,22 +141,32 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
             let ctr = 0
             sheetNames.map((sheet, i) => {
                 const sheetAttr = sheet as keyof typeof sheetData
-                const row =  sheetData[sheetAttr] as unknown
-                let rowArr = row as [][]
-                if(rowArr[0].length > 2){
-                   ctr++; 
-                }
+                if(isValidTable(sheetData as SheetData, sheetAttr)){
+                    // const row =  sheetData[sheetAttr] as unknown
+                    // let rowArr = row as [][]
+                    visibleSheetNames.push(sheet);
+                    ctr++; 
+                }                
             })
-            setTblCtr(ctr)
-            sheetNames.map((name) => {
-                const sheetAttr = name as keyof typeof sheetData
-                    const sheetrow =  sheetData[sheetAttr] as unknown
-                    let sheetrowArr = sheetrow as [][]
-                    if(sheetrowArr[0].length > 2){
-                       visibleSheetNames.push(name);
-                    }
-            })
-            setCurrentSheet(visibleSheetNames[0]);
+            if(ctr != 0){
+                setTblCtr(ctr)
+                setCurrentSheet(visibleSheetNames[0]);
+            }else{
+                //open no table prompt here
+                toggleNoTable(true);
+                stopLoading();
+                startProcessing();
+            }
+            
+            // sheetNames.map((name) => {
+            //     const sheetAttr = name as keyof typeof sheetData
+            //         const sheetrow =  sheetData[sheetAttr] as unknown
+            //         let sheetrowArr = sheetrow as [][]
+            //         if(sheetrowArr[0].length > 2){
+            //            visibleSheetNames.push(name);
+            //         }
+            // })
+            
         }
     }, [startCount])
 
@@ -139,8 +177,6 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
                 //open table prompt here
                 setTblCount(tblCtr);
                 toggleTable(true);
-            }else{
-                //open no table prompt here
             }
             stopLoading();
             startProcessing();

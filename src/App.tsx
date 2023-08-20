@@ -19,6 +19,7 @@ import * as XLSX from 'xlsx'
 import EmptyDetectPrompt from './prompts/EmptyDetectPrompt';
 import SuccessPrompt from './prompts/SuccessPrompt';
 import InconsistentDetectPrompt from './prompts/InconsistentDetectPrompt';
+import NoTablesDetectPrompt from './prompts/NoTablesDetectPrompt';
 
 
 /* Customize default MUI theme */
@@ -250,7 +251,6 @@ function App() {
                     </Backdrop>
 
                     {//modal for detect tables here
-                    //pls re-add onClose={toggleTableDetect} if table prompts should be closed when clicking outside
                     } 
                     <Modal open={TableDetect} onClose={()=>{toggleTableDetect(false)}}>
                     <div>
@@ -272,12 +272,12 @@ function App() {
                     </div>  
                     </Modal>
 
-                    {/* modal for no tables detected here 
-                    <Modal open={showUpload} onClose={toggleUpload}>
+                    {/* modal for no tables detected here  */}
+                    <Modal open={NoTableDetect} onClose={toggleNoTableDetect}>
                     <div>
-                      <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} />
+                      <NoTablesDetectPrompt toggleNoTable={toggleUpload} fileId={uploadedFileId} reset={resetVariables} />
                     </div>  
-                    </Modal> */}
+                    </Modal>
 
                     {/* modal for split tables detected here 
                     <Modal open={showUpload} onClose={toggleUpload}>

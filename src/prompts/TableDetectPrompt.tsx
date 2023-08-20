@@ -44,22 +44,50 @@ interface TableRow {
     [key: string]: string | number;
 }
 
+interface ListItem {
+  label: string;
+  checked: boolean;
+}
+
 const TableDetectPrompt = ({toggleTableDetect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
 toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset}: DetectProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
-  const [HeaderArr, setHArr] = useState<[][] | undefined>(undefined)
-  const [BodyArr, setBArr] = useState<[][] | undefined>(undefined)
+  const [HeaderArr, setHArr] = useState<[][] | undefined>(undefined);
+  const [BodyArr, setBArr] = useState<[][] | undefined>(undefined);
   // const [SheetsWithEmpty, setSWE] = useState<string[]>([])
   // const [IncSheets, setIS] = useState<string[]>([])
+  const [CheckboxList, setCBList] = useState<ListItem[]>([]);
   const [hasEmpty, SetEmpty] = useState(false);
   const [isInconsistent, SetInconsistent] = useState(false);
   const [isCheckDone, setCheckDone] = useState(false);
 
   const nav = useNavigate();
 
+  function createListFromArray(): ListItem[] {
+    const list: ListItem[] = [];
+
+    vsheets.forEach(str => {
+      list.push({ label: str, checked: false });
+    });
+  
+    return list;
+  }
+
+  function toggleCheckbox(index: number): void {
+    if (index >= 0 && index < CheckboxList.length) {
+      CheckboxList[index].checked = !CheckboxList[index].checked;
+    }
+  }
+  
+  function getUncheckedItems(): ListItem[] {
+    return CheckboxList.filter(item => !item.checked);
+  }
+
+  
   //set currentSheet and header array on load based from props
+  //create a ListItem list from vsheets
   useEffect(()=>{
     setCurrentSheet(vsheets[0]);
     //typing currentSheet as key of sheetData
@@ -68,6 +96,7 @@ toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, u
     const row =  sheetdata[currSheet] as unknown
     let rowArr = row as [][]
     setHArr(rowArr)
+    setCBList(createListFromArray());
   },[])
 
   //useEffect for re-assigning the header array for the table when currentSheet state has changed
