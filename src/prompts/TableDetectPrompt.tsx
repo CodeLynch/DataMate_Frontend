@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import modalStyle from "../styles/ModalStyles";
 import * as XLSX from 'xlsx'
-import { Box, Button, CircularProgress, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, styled } from "@mui/material";
+import { Box, Button, Checkbox, CircularProgress, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, styled } from "@mui/material";
 import { useEffect, useState } from "react";
 import FileService from "../services/FileService";
 
@@ -34,6 +34,8 @@ type DetectProps = {
     emptySheets: string[],
     incSheets: string[],
     reset: () => void,
+    updateSData: (data:Object) => void,
+    wb: XLSX.WorkBook | null | undefined;
   }
 
 interface WorkbookData {
@@ -50,7 +52,7 @@ interface ListItem {
 }
 
 const TableDetectPrompt = ({toggleTableDetect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
-toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset}: DetectProps) => {  
+toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb}: DetectProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -65,24 +67,71 @@ toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, u
 
   const nav = useNavigate();
 
+
+  function delete_ws(wb:XLSX.WorkBook, wsname:string) {
+    const sidx = wb.SheetNames.indexOf(wsname);
+    if(sidx == -1) throw `cannot find ${wsname} in workbook`;
+    
+    // remove from workbook
+    wb.SheetNames.splice(sidx,1);
+    delete wb.Sheets[wsname];
+  
+    // // update other structures
+    // if(wb.Workbook) {
+    //   if(wb.Workbook.Views) wb.Workbook.Views.splice(sidx, 1);
+    //   if(wb.Workbook.Names) {
+    //     let names = wb.Workbook.Names;
+    //     for(let j = names.length - 1; j >= 0; --j) {
+    //       if(names[j]?.Sheet == sidx) names = names.splice(j,1);
+    //       else if(names[j]?.Sheet > sidx) --names[j]?.Sheet;
+    //     }
+    //   }
+    // }
+  }
+
   function createListFromArray(): ListItem[] {
     const list: ListItem[] = [];
 
     vsheets.forEach(str => {
-      list.push({ label: str, checked: false });
+      list.push({ label: str, checked: true });
     });
-  
+    console.log("method list is: ",list);
     return list;
   }
 
   function toggleCheckbox(index: number): void {
     if (index >= 0 && index < CheckboxList.length) {
-      CheckboxList[index].checked = !CheckboxList[index].checked;
+      let arr = [...CheckboxList]
+      arr[index].checked = !arr[index].checked;
+      setCBList(arr);
     }
   }
   
-  function getUncheckedItems(): ListItem[] {
-    return CheckboxList.filter(item => !item.checked);
+  function deleteUnchecked():boolean {
+    let arr = CheckboxList.filter(item => !item.checked);
+    let sd = sheetdata as WorkbookData;
+    console.log("cbl", arr.length, " vsl", vsheets.length)
+    if(arr.length === vsheets.length){
+      alert("Please leave at least one table checked");
+      return false;
+    }else{
+      if(window.confirm("Delete Unchecked Tables? This action cannot be undone.")){
+        for(const item in arr){
+          const name = arr[item].label;
+          const index = vsheets.indexOf(name);
+          delete sd[name];
+          if (index > -1) { 
+            vsheets.splice(index, 1);
+          }
+          delete_ws(wb as XLSX.WorkBook, name);
+        } 
+        updateSData(sd as Object);
+        console.log("sd new:",sd);
+        return true;
+      }
+      return false;
+    }
+
   }
 
   
@@ -97,6 +146,7 @@ toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, u
     let rowArr = row as [][]
     setHArr(rowArr)
     setCBList(createListFromArray());
+    console.log("checkbox list is: ", CheckboxList);
   },[])
 
   //useEffect for re-assigning the header array for the table when currentSheet state has changed
@@ -194,30 +244,37 @@ useEffect(()=>{
   //function for detecting inconsistencies
   function hasInconsistentValues(table: TableRow[]): boolean {
     const columnDataTypes: { [key: string]: Set<string> } = {};
-  
+
+    let isFirst = true;
     for (const row of table) {
-      for (const column in row) {
-        if (row.hasOwnProperty(column)) {
-          const valueType = typeof row[column];
-          console.log("type of ", column, " = ", valueType);
-          if (!columnDataTypes[column]) {
-            columnDataTypes[column] = new Set();
+      if(isFirst){
+        isFirst = false;
+      }
+      else{
+          for (const column in row) {
+            if (row.hasOwnProperty(column)) {
+              const valueType = typeof row[column];
+              console.log("type of ", column, " = ", valueType);
+              if (!columnDataTypes[column]) {
+                columnDataTypes[column] = new Set();
+              }
+              columnDataTypes[column].add(valueType);
+      
+              if (columnDataTypes[column].size > 1) {
+                return true; // Inconsistent values found in this column
+              }
+            }
           }
-          columnDataTypes[column].add(valueType);
-  
-          if (columnDataTypes[column].size > 1) {
-            return true; // Inconsistent values found in this column
-          }
-        }
       }
     }
   
     return false; // No inconsistent values found in any column
   }
 
-  function nextFunction(){
+  function togglePrompts(){
     const sd = sheetdata as WorkbookData;
     for(const s in vsheets){
+      console.log("remaining sheets", vsheets[s]);
       //check for empty values in tables
       if(hasEmptyValues(sd[vsheets[s]] as TableRow[])){
         //insert table names to SheetsWithEmpty Array 
@@ -234,7 +291,20 @@ useEffect(()=>{
         }
       }
     }
-    setCheckDone(true);    
+     setCheckDone(true);    
+  }
+
+  function nextFunction(){
+    let arr = CheckboxList.filter(item => !item.checked);
+
+    if(arr.length > 0){
+      if(deleteUnchecked()){
+        togglePrompts();
+      }
+    }else{
+      togglePrompts();
+    }
+
   }
   
 
@@ -312,7 +382,17 @@ useEffect(()=>{
               <><CircularProgress size="10rem" 
               color="success" /></>}
             </div>
-            <div style={{width: '15%'}}>
+            <div style={{width: '15%', display:"flex", flexDirection:"row"}} >
+              <div style={{display:"flex", flexDirection:"column", width:"25%"}}>
+              {/* for checkbox list*/ }{
+                CheckboxList.length !== 0 && vsheets.length > 0? vsheets.map((sheet,i) =>{
+                  return(
+                    <Checkbox sx={{paddingTop:"15px", paddingBottom:"16px", borderRadius:0 ,backgroundColor:currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC',
+                    "&:hover":{backgroundColor: currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC'}}} checked={CheckboxList[i].checked} onChange={()=>{toggleCheckbox(i);}} />                  
+                  )
+              }):<></>
+              }
+              </div>
               {/* for table tabs */}
               <Tabs
                 orientation="vertical"
@@ -326,8 +406,8 @@ useEffect(()=>{
                 aria-label="secondary tabs example"
                 >
                 {vsheets.length > 0? vsheets.map((sheet,i) =>{
-                    return(                                
-                        <Tab sx={{backgroundColor:"#D9D9D9"}}value={sheet} label={sheet} />
+                    return(
+                          <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left"}}  value={sheet} label={sheet} />                     
                     )
                 }):<></>}
               </Tabs>

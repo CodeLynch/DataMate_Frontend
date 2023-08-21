@@ -38,6 +38,7 @@ const SuccessPrompt = ({fileId, toggleImportSuccess, reset, workbook, sdata}: Su
   const [fileName, setFName] = useState("");
 
   useEffect(()=>{
+    console.log("Sheet Data Now: ",sdata)
     FileService.getFile(fileId)
     .then((res)=>{
       setFName(res.fileName);
@@ -66,7 +67,6 @@ function s2ab(s:String) {
     if(workbook !== undefined && workbook !== null){
       var wopts:XLSX.WritingOptions = { bookType:getFileType(fileName)? 'xlsx': getFileType(fileName) as XLSX.BookType, type:'binary' };
       const wbString = XLSX.write(workbook, wopts);
-      console.log(wbString)
       var blob = new Blob([s2ab(wbString)],{type:"application/octet-stream"});
       FileService.putFile(fileId, blob as File, fileName)
     .then((res)=>{

@@ -265,9 +265,11 @@ function App() {
                       sheetdata={sheetData}
                       updateEmpty={updateEmptyList}
                       updateInc={updateIncList}
+                      updateSData={updateSheetData}
                       emptySheets={SheetsWithEmpty}
                       incSheets={IncSheets}
                       reset={resetVariables}
+                      wb={workbook}
                       />
                     </div>  
                     </Modal>

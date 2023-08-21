@@ -70,6 +70,7 @@ const InconsistentDetectPrompt = ({fileId, toggleImportSuccess, toggleInconsiste
       if (!isFirst) {
         typeCounts[value.toString()] = (typeCounts[value.toString()] || 0) + 1;
       }
+      
       isFirst = false;
     });
   
