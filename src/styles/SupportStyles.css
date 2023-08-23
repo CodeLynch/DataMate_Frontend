@@ -335,6 +335,15 @@ h3{
   padding: 10px 20px 10px 20px;
 }
 
+.loginBtn .MuiButton-root {
+  font-weight: bold; 
+  background-color: #71C887;
+  color: white;
+  border-radius: 50px;
+  margin: 2rem 0rem 2rem 0rem;
+  padding: 10px 50px 10px 50px;
+}
+
 .cancelResetBtn .MuiButton-root {
   font-weight: bold; 
   background-color: #C0C0C0;
