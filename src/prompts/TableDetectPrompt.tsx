@@ -22,6 +22,7 @@ const styles = {
 
 type DetectProps = {
     toggleTableDetect: (status:boolean) => void,
+    toggleSelect: (status:boolean) => void,
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
     toggleImportSuccess: (status:boolean) => void,
@@ -51,7 +52,7 @@ interface ListItem {
   checked: boolean;
 }
 
-const TableDetectPrompt = ({toggleTableDetect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
+const TableDetectPrompt = ({toggleTableDetect, toggleSelect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
 toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb}: DetectProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
@@ -307,7 +308,10 @@ useEffect(()=>{
 
   }
   
-
+  function switchToManual(): void {
+    toggleTableDetect(false);
+    toggleSelect(true);
+  }
 
   return (
     <Box sx={{
@@ -352,13 +356,10 @@ useEffect(()=>{
                                           {row.map((cell, j) => {
                                           return (
                                               <>
-                                              {cell !== ""?
                                               <TableCell style={{padding:5, width: '1px', whiteSpace: 'nowrap', fontSize:'10px'}}
                                               key={j} align='left' width="100px">
                                               {cell === true? "TRUE": cell === false? "FALSE":cell}
-                                              </TableCell>:
-                                              <></>
-                                              }
+                                              </TableCell>
                                               </>
                                           );
                                           })}
@@ -387,7 +388,7 @@ useEffect(()=>{
               {/* for checkbox list*/ }{
                 CheckboxList.length !== 0 && vsheets.length > 0? vsheets.map((sheet,i) =>{
                   return(
-                    <Checkbox sx={{paddingTop:"15px", paddingBottom:"16px", borderRadius:0 ,backgroundColor:currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC',
+                    <Checkbox sx={{paddingTop:"15px", paddingBottom:"9px", borderRadius:0 ,backgroundColor:currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC',
                     "&:hover":{backgroundColor: currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC'}}} checked={CheckboxList[i].checked} onChange={()=>{toggleCheckbox(i);}} />                  
                   )
               }):<></>
@@ -413,6 +414,7 @@ useEffect(()=>{
               </Tabs>
             </div>
           </div> 
+          <Button disableElevation onClick={switchToManual} variant="text" sx={{fontSize:'8px', textTransform:'none', color:'black', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Highlight Tables Manually</Button> 
           <div style={{display:"flex", justifyContent:"space-between"}}>
           <Button disableElevation onClick={cancelProcess} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: 'white', color:'black', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Cancel</Button>
           <Button disableElevation onClick={nextFunction} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Next</Button>

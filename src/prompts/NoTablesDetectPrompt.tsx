@@ -1,21 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import FileService from "../services/FileService";
 import { Box, Button, styled } from "@mui/material";
-import * as XLSX from 'xlsx';
 import { useEffect, useState } from "react";
 
-const styles = {
-    dialogPaper: {
-      backgroundColor: '#DCF1EC',
-      padding: "25px",
-    },
-    uploadButton: {
-        marginTop: '5px',
-        borderRadius: '50px',
-        width: '250px',
-        background: '#71C887',
-      },
-};
 
 type NoTableProps = {
     toggleNoTable: (status:boolean) => void,
@@ -25,19 +12,7 @@ type NoTableProps = {
 
 const NoTablesDetectPrompt = ({fileId, toggleNoTable, reset}: NoTableProps) => {  
   const nav = useNavigate();
-  const [fileName, setFName] = useState("");
 
-  useEffect(()=>{
-    FileService.getFile(fileId)
-    .then((res)=>{
-      setFName(res.fileName);
-    })
-    .catch(err =>{
-      console.log(err);
-    })
-  },[])
-
-  
   function okFunction(){
       FileService.deleteFile(fileId).then((res)=>{
         reset();
@@ -48,8 +23,6 @@ const NoTablesDetectPrompt = ({fileId, toggleNoTable, reset}: NoTableProps) => {
       })
   }
   
-
-
   return (
     <Box sx={{
         position: "absolute",

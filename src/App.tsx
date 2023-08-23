@@ -20,6 +20,7 @@ import EmptyDetectPrompt from './prompts/EmptyDetectPrompt';
 import SuccessPrompt from './prompts/SuccessPrompt';
 import InconsistentDetectPrompt from './prompts/InconsistentDetectPrompt';
 import NoTablesDetectPrompt from './prompts/NoTablesDetectPrompt';
+import SelectTablePrompt from './prompts/SelectTablePrompt';
 
 
 /* Customize default MUI theme */
@@ -65,6 +66,8 @@ function App() {
   const [isProcessing, setProcessing] = useState(false);
   //boolean state for tables detected prompt
   const [TableDetect, setTableDetect] = useState(false);
+  //boolean state for select tables prompt
+  const [SelectTable, setSelect] = useState(false);
   //boolean state for no tables detected prompt
   const [NoTableDetect, setNoTableDetect] = useState(false);
   //boolean state for empty values in tables prompt
@@ -124,6 +127,9 @@ function App() {
     setSuccess(status);
   }
 
+  const toggleSelect = (status:boolean) =>{
+    setSelect(status);
+  }
 
   const StartLoading = () => {
     setLoading(true)
@@ -256,6 +262,31 @@ function App() {
                     <div>
                       <TableDetectPrompt 
                       toggleTableDetect={toggleTableDetect} 
+                      toggleSelect={toggleSelect}
+                      toggleEmptyDetect={toggleEmptyDetect}
+                      toggleInconsistentDetect={toggleInconsistent}
+                      toggleImportSuccess={toggleImportSuccess}
+                      tblCount={tableCount} 
+                      fileId={uploadedFileId}
+                      vsheets={visibleSheetNames}
+                      sheetdata={sheetData}
+                      updateEmpty={updateEmptyList}
+                      updateInc={updateIncList}
+                      updateSData={updateSheetData}
+                      emptySheets={SheetsWithEmpty}
+                      incSheets={IncSheets}
+                      reset={resetVariables}
+                      wb={workbook}
+                      />
+                    </div>  
+                    </Modal>
+
+                    {//modal for select tables here
+                    } 
+                    <Modal open={SelectTable} onClose={()=>{toggleSelect(false)}}>
+                    <div>
+                      <SelectTablePrompt 
+                      toggleSelect={toggleSelect}
                       toggleEmptyDetect={toggleEmptyDetect}
                       toggleInconsistentDetect={toggleInconsistent}
                       toggleImportSuccess={toggleImportSuccess}
