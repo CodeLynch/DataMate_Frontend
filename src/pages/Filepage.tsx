@@ -143,18 +143,11 @@ export default function Filepage({stopLoading}:FilePageProps) {
                 const sheetAttr = sheet as keyof typeof sheetData
                 const row =  sheetData[sheetAttr] as unknown
                 let rowArr = row as [][]
-                if(rowArr[0].length > 2){
-                   ctr++; 
-                }
+                ctr++;
             })
             setTblCtr(ctr)
             sheetNames.map((name) => {
-                const sheetAttr = name as keyof typeof sheetData
-                    const sheetrow =  sheetData[sheetAttr] as unknown
-                    let sheetrowArr = sheetrow as [][]
-                    if(sheetrowArr[0].length > 2){
-                       visibleSheetNames.push(name);
-                    }
+                visibleSheetNames.push(name);    
             })
             setCurrentSheet(visibleSheetNames[0]);
         }

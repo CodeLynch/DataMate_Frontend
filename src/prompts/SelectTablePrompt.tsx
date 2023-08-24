@@ -60,6 +60,9 @@ interface Table{
     name: string;
     values: Object;
 }
+type TableMapRow = Record<string, string>;
+type TableMap = TableMapRow[];
+type SelectedCell = Record<string, boolean>;
 
 const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
     toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb}: SelectProps) => {  
@@ -77,6 +80,7 @@ const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, v
     const [cellSelection, setCellSelection] = useState({});
     const [columns, setColumns] = useState<HeaderConfig[]>([]);
     const [dataSource, setDataSrc] = useState<Object[]>([]);
+    const [overwriteStatus, setOWStat] = useState(false);
   const nav = useNavigate();
   const gridstyle = {
     fontSize:"10px"
@@ -150,7 +154,6 @@ useEffect(()=>{
 },[createdTableCtr])
 
 useEffect(()=>{
-  console.log("selected cells: ",cellSelection);
   if(createdTableCtr > 0){
     let tablelist = [...createdSheets];
     const targetObject = tablelist.find(obj => obj.name === currentTab);
@@ -168,6 +171,37 @@ useEffect(()=>{
     setCellSelection(targetObj?.values);
   }
 },[currentTab])
+
+
+//useEffect for detecting hasEmpty, isInconsistent changes
+useEffect(()=>{
+  if(isCheckDone){
+    //Check hasEmpty
+        //open empty value will be replaced with "NULL" prompt
+        if(hasEmpty){
+          toggleSelect(false);
+          toggleEmptyDetect(true);
+          console.log("Empty triggered");
+        }else if(isInconsistent && !hasEmpty){
+        //else if when hasEmpty is false but isInconsistent is true 
+        //open fixing inconsistency prompts
+          toggleSelect(false);
+          toggleInconsistentDetect(true);
+          console.log("Inconsistency triggered");
+        }else{
+          toggleSelect(false);
+          toggleImportSuccess(true);
+          console.log("Success Triggered")
+        }
+  }
+    
+},[isCheckDone])
+
+useEffect(()=>{
+  if(overwriteStatus){
+    togglePrompts();
+  }
+},[overwriteStatus])
 
 function createColumns(strings: string[]): HeaderConfig[] {
   // let colctr = 0;  
@@ -203,7 +237,6 @@ function createColumns(strings: string[]): HeaderConfig[] {
       if (rowValues.length !== headers.length - 1) {
         throw new Error('Number of values does not match number of headers.');
       }
-
       const row: TableRow = {};
       
       headers.forEach((header, index) => {
@@ -240,7 +273,6 @@ function createColumns(strings: string[]): HeaderConfig[] {
 
   function newTable():void {
     let newval = createdTableCtr + 1;
-    console.log("selected cells", cellSelection)
     setCCtr(newval);
   }
 
@@ -306,6 +338,44 @@ function createColumns(strings: string[]): HeaderConfig[] {
     return false; // No inconsistent values found in any column
   }
 
+  //convert cellSelection Data to an array for extraction 
+  function getSelectionArray(selectedCell: SelectedCell): TableMapRow[] {
+    const rows: TableMapRow[] = [];
+  
+    Object.keys(selectedCell).forEach(key => {
+      const [rowIndexStr, columnName] = key.split(",");
+      const rowIndex = parseInt(rowIndexStr, 10);
+  
+      if (!rows[rowIndex]) {
+        rows[rowIndex] = {};
+      }
+      rows[rowIndex][columnName] = selectedCell[key] as unknown as string;
+      
+    });
+  
+    return rows;
+  }
+
+  //extract data values from data source with an array
+  function extractValues(selectedRows: TableMapRow[], tableMap: TableMap): Object[] {
+    const valuesArray:Object[] = [];
+
+  selectedRows.forEach(selectedRow => {
+    const rowValues:string[] = [];
+
+    Object.keys(selectedRow).forEach(columnName => {
+      const columnIndex = Object.keys(tableMap[0]).indexOf(columnName);
+      if (columnIndex !== -1) {
+        const value = tableMap[selectedRows.indexOf(selectedRow)][columnName];
+        rowValues.push(value);
+      }
+    });
+    valuesArray.push(rowValues);
+  })
+
+    return valuesArray;
+  }
+
   function togglePrompts(){
     const sd = sheetdata as WorkbookData;
     for(const s in vsheets){
@@ -326,15 +396,59 @@ function createColumns(strings: string[]): HeaderConfig[] {
         }
       }
     }
-    setCheckDone(true);    
+    setCheckDone(true);
   }
+  function delete_ws(wb:XLSX.WorkBook, wsname:string) {
+    const sidx = wb.SheetNames.indexOf(wsname);
+    if(sidx == -1) throw `cannot find ${wsname} in workbook`;
+    
+    // remove from workbook
+    wb.SheetNames.splice(sidx,1);
+    delete wb.Sheets[wsname];
 
+  }
   function nextFunction(){
-    // togglePrompts();
-    console.log("sheetdata: ", sheetdata[currentSheet as keyof typeof sheetdata]);
-    console.log("data source: ", dataSource);
-    console.log("selected cells: ", cellSelection);
+    if(createdSheets.length <= 0){
+      alert("Please create at least one table");
+    }else{
 
+      //deleting original data
+      for(const sheet in vsheets){
+        delete_ws(wb!, vsheets[sheet]);
+      }
+      while(vsheets.length > 0){
+        vsheets.pop();
+      }
+      //appending of data in createdSheets to workbook
+      for(const table in createdSheets){
+        let sheetName = createdSheets[table].name;
+        let cellValues = createdSheets[table].values;
+        let selectedData = extractValues(getSelectionArray(cellValues as SelectedCell), dataSource as TableMap);
+        let ws = XLSX.utils.aoa_to_sheet(selectedData as [][]);
+        XLSX.utils.book_append_sheet(wb!, ws, sheetName);
+        vsheets.push(sheetName);
+        console.log("new sd:",sheetdata)
+      }
+      if(wb !== undefined && wb !== null){
+      //update sheetdata
+      let sheetdata:Object = {}
+      vsheets.map((sheet, i) => 
+      {
+          const worksheet = wb.Sheets[sheet];
+          const jsondata = XLSX.utils.sheet_to_json(worksheet,{
+              header: 1,
+              raw: true,
+              defval: "",
+          }) as unknown;
+          const js = jsondata as Object
+          sheetdata = {...sheetdata, [sheet]: js}            
+      })
+      updateSData(sheetdata);
+      setOWStat(true);
+      }
+      
+    }
+    
   }
 
   function switchToAuto(): void {
