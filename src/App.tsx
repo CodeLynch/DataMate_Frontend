@@ -287,6 +287,7 @@ function App() {
                     <div>
                       <SelectTablePrompt 
                       toggleSelect={toggleSelect}
+                      toggleTableDetect={toggleTableDetect}
                       toggleEmptyDetect={toggleEmptyDetect}
                       toggleInconsistentDetect={toggleInconsistent}
                       toggleImportSuccess={toggleImportSuccess}

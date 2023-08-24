@@ -24,6 +24,7 @@ const styles = {
 
 type SelectProps = {
     toggleSelect: (status:boolean) => void,
+    toggleTableDetect: (status:boolean) => void,
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
     toggleImportSuccess: (status:boolean) => void,
@@ -57,10 +58,10 @@ interface HeaderConfig {
 
 interface Table{
     name: string;
-    values: TableRow[];
+    values: Object;
 }
 
-const SelectTablePrompt = ({toggleSelect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
+const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
     toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb}: SelectProps) => {  
     const [currentSheet, setCurrentSheet] = useState("");
     const [currentTab, setCurrentTab] = useState("");
@@ -127,7 +128,6 @@ useEffect(()=>{
         console.log("After", rowsArr)
         setBArr(rowsArr)
     }
-    console.log("BArr",BodyArr)
   },[HeaderArr])
 
 useEffect(()=>{
@@ -142,22 +142,48 @@ useEffect(()=>{
 useEffect(()=>{
     if(createdTableCtr > 0){
         let name = "Table " + createdTableCtr;
-        createdSheets.push({name: name, values:[]});
+        createdSheets.push({name: name, values:{}});
         setCurrentTab(name);
         console.log("current sd: ", sheetdata);
         console.log("current sheet: ", sheetdata[currentSheet as keyof typeof sheetdata]);
     }
 },[createdTableCtr])
 
+useEffect(()=>{
+  console.log("selected cells: ",cellSelection);
+  if(createdTableCtr > 0){
+    let tablelist = [...createdSheets];
+    const targetObject = tablelist.find(obj => obj.name === currentTab);
+    if (targetObject) {
+    targetObject.values = cellSelection;
+    setCSheets(tablelist)
+    }
+    
+  }
+}, [cellSelection])
+
+useEffect(()=>{
+  const targetObj = createdSheets.find(obj => obj.name === currentTab);
+  if(targetObj !== undefined){
+    setCellSelection(targetObj?.values);
+  }
+},[currentTab])
+
 function createColumns(strings: string[]): HeaderConfig[] {
-  let colctr = 0;  
+  // let colctr = 0;  
+  let strArr:HeaderConfig[] = [];
   //for each string in strings parameter, create an object with the name "COLUMN" + colctr and increment
   //colctr after each iteration
-  let strArr:HeaderConfig[] = strings.map(str => ({
-      name: str,
-      header: str,
-      defaultFlex: 1,
-    }));
+  strings.forEach((str, i)=>
+  {
+    strArr.push({name:`COLUMN ${i + 1}` , header:`COLUMN ${i + 1}`, defaultFlex:1});
+    // colctr += 1;
+  });
+  // let strArr:HeaderConfig[] = strings.map(str => ({
+  //     name: str,
+  //     header: str,
+  //     defaultFlex: 1,
+  //   }));
     strArr.push({
       name: "id",
       header: "ID",
@@ -181,12 +207,16 @@ function createColumns(strings: string[]): HeaderConfig[] {
       const row: TableRow = {};
       
       headers.forEach((header, index) => {
-        console.log("header value is ", header);
         if(header === 'id'){
           row[header] = idVal;
           idVal++;
         }else{
-          row[header] = rowValues[index];
+          if(typeof rowValues[index] === "boolean"){
+            let strval = rowValues[index] as string;
+            row[header] = strval.toString();
+          }else{
+            row[header] = rowValues[index]; 
+          }          
         }
       });
 
@@ -260,7 +290,6 @@ function createColumns(strings: string[]): HeaderConfig[] {
           for (const column in row) {
             if (row.hasOwnProperty(column)) {
               const valueType = typeof row[column];
-              console.log("type of ", column, " = ", valueType);
               if (!columnDataTypes[column]) {
                 columnDataTypes[column] = new Set();
               }
@@ -297,11 +326,22 @@ function createColumns(strings: string[]): HeaderConfig[] {
         }
       }
     }
-     setCheckDone(true);    
+    setCheckDone(true);    
   }
 
   function nextFunction(){
-    togglePrompts();
+    // togglePrompts();
+    console.log("sheetdata: ", sheetdata[currentSheet as keyof typeof sheetdata]);
+    console.log("data source: ", dataSource);
+    console.log("selected cells: ", cellSelection);
+
+  }
+
+  function switchToAuto(): void {
+    
+    toggleSelect(false);
+    toggleTableDetect(true);
+    
   }
   
   return (
@@ -317,12 +357,12 @@ function createColumns(strings: string[]): HeaderConfig[] {
         p: 2,
     }}>
         <div style={{marginTop:"3%", padding:"2em", backgroundColor:"#DCF1EC"}}>
-          <p style={{fontSize:"32px", padding:0, margin:0}}>Please highlight the tables in your file.</p>
+          <p style={{fontSize:"32px", padding:0, margin:0}}>Please highlight the tables in your file</p>
           <div style={{display:'flex', flexDirection:'row'}}>
             <div style={{width: '85%'}}>
               {/* for table preview */}
               {HeaderArr !== undefined && BodyArr !== undefined? <>
-                          <Paper elevation={0} sx={{ maxHeight:'270px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
+                        <Paper elevation={0} sx={{ maxHeight:'570px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
                           {/* //code for the table */}
                         <ReactDataGrid
                             idProperty="id"
@@ -336,7 +376,7 @@ function createColumns(strings: string[]): HeaderConfig[] {
               </>:
               <><CircularProgress size="10rem" 
               color="success" />
-              <h1>There's nothing man</h1></>}
+              </>}
             </div>
             <div style={{width: '15%'}}>
               <Button variant="text" onClick={newTable}>+ New Table</Button>
@@ -356,11 +396,13 @@ function createColumns(strings: string[]): HeaderConfig[] {
                     return(                                
                         <Tab sx={{backgroundColor:"#D9D9D9"}}value={sheet.name} label={sheet.name} />
                     )
-                }):<></>}
+                }):<p></p>}
               </Tabs>
             </div>
           </div> 
+          <p onClick={switchToAuto} style={{fontSize:"16px", paddingTop:'1em', paddingLeft:0, paddingBottom:'1em', margin:0, textDecoration:"underline", cursor:"pointer"}}>Return to automatic table detection</p>
           <div style={{display:"flex", justifyContent:"space-between"}}>
+          
           <Button disableElevation onClick={cancelProcess} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: 'white', color:'black', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Cancel</Button>
           <Button disableElevation onClick={nextFunction} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Next</Button>
           </div>

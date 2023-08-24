@@ -96,7 +96,6 @@ toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, u
     vsheets.forEach(str => {
       list.push({ label: str, checked: true });
     });
-    console.log("method list is: ",list);
     return list;
   }
 
@@ -111,7 +110,6 @@ toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, u
   function deleteUnchecked():boolean {
     let arr = CheckboxList.filter(item => !item.checked);
     let sd = sheetdata as WorkbookData;
-    console.log("cbl", arr.length, " vsl", vsheets.length)
     if(arr.length === vsheets.length){
       alert("Please leave at least one table checked");
       return false;
@@ -127,7 +125,6 @@ toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, u
           delete_ws(wb as XLSX.WorkBook, name);
         } 
         updateSData(sd as Object);
-        console.log("sd new:",sd);
         return true;
       }
       return false;
@@ -147,7 +144,6 @@ toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, u
     let rowArr = row as [][]
     setHArr(rowArr)
     setCBList(createListFromArray());
-    console.log("checkbox list is: ", CheckboxList);
   },[])
 
   //useEffect for re-assigning the header array for the table when currentSheet state has changed
@@ -166,18 +162,14 @@ useEffect(()=>{
         let rowsArr = []
         //copy rowArr
         rowsArr = HeaderArr.slice(0); 
-        console.log("Before", rowsArr)
         //remove header values
         rowsArr.splice(1 - 1, 1);
-        console.log("After", rowsArr)
         setBArr(rowsArr)
     }
-    console.log("BArr",BodyArr)
   },[HeaderArr])
 
 //useEffect for detecting hasEmpty, isInconsistent changes
 useEffect(()=>{
-  console.log(hasEmpty);
   if(isCheckDone){
     //Check hasEmpty
         //open empty value will be replaced with "NULL" prompt
@@ -255,7 +247,6 @@ useEffect(()=>{
           for (const column in row) {
             if (row.hasOwnProperty(column)) {
               const valueType = typeof row[column];
-              console.log("type of ", column, " = ", valueType);
               if (!columnDataTypes[column]) {
                 columnDataTypes[column] = new Set();
               }
@@ -275,7 +266,6 @@ useEffect(()=>{
   function togglePrompts(){
     const sd = sheetdata as WorkbookData;
     for(const s in vsheets){
-      console.log("remaining sheets", vsheets[s]);
       //check for empty values in tables
       if(hasEmptyValues(sd[vsheets[s]] as TableRow[])){
         //insert table names to SheetsWithEmpty Array 
@@ -414,11 +404,10 @@ useEffect(()=>{
               </Tabs>
             </div>
           </div> 
-          <Button disableElevation onClick={switchToManual} variant="text" sx={{fontSize:'8px', textTransform:'none', color:'black', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Highlight Tables Manually</Button> 
+          <p onClick={switchToManual} style={{cursor:"pointer", fontSize:"16px", paddingTop:'1em', paddingLeft:0, paddingBottom:'1em', margin:0, textDecoration:"underline"}}>Highlight tables manually</p>
           <div style={{display:"flex", justifyContent:"space-between"}}>
           <Button disableElevation onClick={cancelProcess} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: 'white', color:'black', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Cancel</Button>
           <Button disableElevation onClick={nextFunction} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Next</Button>
-
           </div>
         </div>
     </Box>
