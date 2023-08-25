@@ -57,6 +57,7 @@ interface HeaderConfig {
 }
 
 interface Table{
+    id: number;
     name: string;
     values: Object;
 }
@@ -68,6 +69,7 @@ const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, v
     toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb}: SelectProps) => {  
     const [currentSheet, setCurrentSheet] = useState("");
     const [currentTab, setCurrentTab] = useState("");
+    const [currentTabID, setTabID] = useState(-1);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(50);
     const [HeaderArr, setHArr] = useState<[][] | undefined>(undefined);
@@ -81,9 +83,12 @@ const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, v
     const [columns, setColumns] = useState<HeaderConfig[]>([]);
     const [dataSource, setDataSrc] = useState<Object[]>([]);
     const [overwriteStatus, setOWStat] = useState(false);
+    const dynamicHeight = Math.min(dataSource.length * 5.5, 80) + 'vh'
+
   const nav = useNavigate();
   const gridstyle = {
-    fontSize:"10px"
+    fontSize:"10px",
+    height:dynamicHeight,
   }
 
   //set currentSheet and header array on load based from props
@@ -146,31 +151,35 @@ useEffect(()=>{
 useEffect(()=>{
     if(createdTableCtr > 0){
         let name = "Table " + createdTableCtr;
-        createdSheets.push({name: name, values:{}});
-        setCurrentTab(name);
-        console.log("current sd: ", sheetdata);
-        console.log("current sheet: ", sheetdata[currentSheet as keyof typeof sheetdata]);
+        createdSheets.push({id: createdTableCtr, name: name, values:{}});
+        setTabID(createdTableCtr);
     }
 },[createdTableCtr])
 
+//update createdsheets object value when cellSelection is changed
 useEffect(()=>{
   if(createdTableCtr > 0){
+    console.log("ID: ",currentTabID);
     let tablelist = [...createdSheets];
-    const targetObject = tablelist.find(obj => obj.name === currentTab);
+    const targetObject = tablelist.find(obj => obj.id === currentTabID);
     if (targetObject) {
     targetObject.values = cellSelection;
+    console.log("Obj",targetObject);
     setCSheets(tablelist)
     }
     
   }
 }, [cellSelection])
 
+
 useEffect(()=>{
-  const targetObj = createdSheets.find(obj => obj.name === currentTab);
+  console.log("ID: ",currentTabID);
+  const targetObj = createdSheets.find(obj => obj.id === currentTabID);
   if(targetObj !== undefined){
+    console.log("Obj",targetObj);
     setCellSelection(targetObj?.values);
   }
-},[currentTab])
+},[currentTabID])
 
 
 //useEffect for detecting hasEmpty, isInconsistent changes
@@ -204,20 +213,12 @@ useEffect(()=>{
 },[overwriteStatus])
 
 function createColumns(strings: string[]): HeaderConfig[] {
-  // let colctr = 0;  
   let strArr:HeaderConfig[] = [];
-  //for each string in strings parameter, create an object with the name "COLUMN" + colctr and increment
-  //colctr after each iteration
+  //for each string in strings parameter, create an object with the name "COLUMN" + index
   strings.forEach((str, i)=>
   {
     strArr.push({name:`COLUMN ${i + 1}` , header:`COLUMN ${i + 1}`, defaultFlex:1});
-    // colctr += 1;
   });
-  // let strArr:HeaderConfig[] = strings.map(str => ({
-  //     name: str,
-  //     header: str,
-  //     defaultFlex: 1,
-  //   }));
     strArr.push({
       name: "id",
       header: "ID",
@@ -272,12 +273,31 @@ function createColumns(strings: string[]): HeaderConfig[] {
   //---------------------------------------------------------------
 
   function newTable():void {
-    let newval = createdTableCtr + 1;
-    setCCtr(newval);
+    if(createdTableCtr >= 10){
+      alert("Maximum number of tables reached");
+    }else{
+      let newval = createdTableCtr + 1;
+      setCCtr(newval);
+    }
+    
   }
 
-  const changeTab = (stringevent: React.SyntheticEvent, newValue: string) =>{
-      setCurrentTab(newValue);
+  function handleNameChange(name:string): void{
+    if(name !== null && name!== undefined){
+      if(createdTableCtr > 0){
+      let tablelist = [...createdSheets];
+      const targetObject = tablelist.find(obj => obj.id === currentTabID);
+      if (targetObject) {
+        targetObject.name = name;
+        setCSheets(tablelist)
+        }
+      }
+    }
+    
+  }
+
+  const changeTab = (event: React.SyntheticEvent, newValue: number) =>{
+      setTabID(newValue)
   }
 
 
@@ -465,7 +485,7 @@ function createColumns(strings: string[]): HeaderConfig[] {
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: 798,
-        maxHeight: 594,
+        maxHeight: 800,
         bgcolor: '#71C887',
         boxShadow: 24,
         p: 2,
@@ -476,7 +496,7 @@ function createColumns(strings: string[]): HeaderConfig[] {
             <div style={{width: '85%'}}>
               {/* for table preview */}
               {HeaderArr !== undefined && BodyArr !== undefined? <>
-                        <Paper elevation={0} sx={{ maxHeight:'570px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
+                        <Paper elevation={0} sx={{ maxHeight:'500px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
                           {/* //code for the table */}
                         <ReactDataGrid
                             idProperty="id"
@@ -492,12 +512,12 @@ function createColumns(strings: string[]): HeaderConfig[] {
               color="success" />
               </>}
             </div>
-            <div style={{width: '15%'}}>
+            <div style={{maxHeight:dynamicHeight ,width: '15%'}}>
               <Button variant="text" onClick={newTable}>+ New Table</Button>
               {/* for table tabs */}
               <Tabs
                 orientation="vertical"
-                value= {currentTab}
+                value= {currentTabID}
                 onChange={changeTab}
                 TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
                 sx={{
@@ -508,7 +528,7 @@ function createColumns(strings: string[]): HeaderConfig[] {
                 >
                 {createdSheets.length > 0? createdSheets.map((sheet,i) =>{
                     return(                                
-                        <Tab sx={{backgroundColor:"#D9D9D9"}}value={sheet.name} label={sheet.name} />
+                      <Tab contentEditable={i === currentTabID? "true": "false"} placeholder="Name" onInput={(e)=> {handleNameChange(e.currentTarget.textContent!)}} sx={{backgroundColor:"#D9D9D9"}} value={i + 1} label={sheet.name}/>
                     )
                 }):<p></p>}
               </Tabs>

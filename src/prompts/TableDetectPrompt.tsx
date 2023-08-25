@@ -238,6 +238,7 @@ useEffect(()=>{
   function hasInconsistentValues(table: TableRow[]): boolean {
     const columnDataTypes: { [key: string]: Set<string> } = {};
 
+    //for skipping headers
     let isFirst = true;
     for (const row of table) {
       if(isFirst){
