@@ -13,45 +13,35 @@ import Filepage from './pages/Filepage';
 import SpecificTemplatePage from './pages/SpecificTemplatePage';
 import Navbar from './components/Navbar';
 import TemplatesPage from './pages/TemplatesPage';
-import ProcessingPage from './pages/ProcessingPage';
-import TableDetectPrompt from './prompts/TableDetectPrompt';
-import * as XLSX from 'xlsx'
-import EmptyDetectPrompt from './prompts/EmptyDetectPrompt';
-import SuccessPrompt from './prompts/SuccessPrompt';
-import InconsistentDetectPrompt from './prompts/InconsistentDetectPrompt';
-import NoTablesDetectPrompt from './prompts/NoTablesDetectPrompt';
-import SelectTablePrompt from './prompts/SelectTablePrompt';
-
+import FileScreenPage from './pages/FileScreenPage';
+import * as XLSX from 'xlsx';
+import DatabaseScreenPage from './pages/DatabaseScreenPage';
 
 /* Customize default MUI theme */
-declare module '@mui/material/styles'{
+declare module "@mui/material/styles" {
   interface PaletteOptions {
     tertiary?: PaletteColorOptions;
-
   }
 }
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#0E9EA7',
-      contrastText: '#fff',
+      main: "#0E9EA7",
+      contrastText: "#fff",
     },
     secondary: {
       main: "#71C887",
-      contrastText: '#fff',
+      contrastText: "#fff",
     },
     tertiary: {
-      main: '#DCF1EC',
-      contrastText: '#374248',
+      main: "#DCF1EC",
+      contrastText: "#374248",
     },
   },
-  
+
   typography: {
-    fontFamily: [
-      'inter',
-      'sans-serif',
-    ].join(','),
+    fontFamily: ["inter", "sans-serif"].join(","),
   },
 });
 
@@ -132,12 +122,12 @@ function App() {
   }
 
   const StartLoading = () => {
-    setLoading(true)
-  }
+    setLoading(true);
+  };
 
   const StopLoading = () => {
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   // const handleDrawerClose = () => {
   //   setOpen(false);
@@ -191,28 +181,28 @@ function App() {
   },[])
 
   return (
-
     <ThemeProvider theme={theme}>
       <SnackbarContextProvider>
         <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.modal + 1 }}
-        open={isLoading}
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.modal + 1 }}
+          open={isLoading}
         >
           <CircularProgress color="success" />
         </Backdrop>
         <Router>
           <Modal open={open} onClose={toggleDrawerOpen}>
-           <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
+            <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
           </Modal>
           <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
-            <Box sx={{ display: 'flex', marginTop: '50px' }}>
-              <Box sx={{ flexGrow: 1 }}>
-                <Routes>
-                  {/* Add your routes here */}
-                  <Route path="/">
-                    <Route
-                      index
-                      element={<>
+          <Box sx={{ display: "flex", marginTop: "50px" }}>
+            <Box sx={{ flexGrow: 1 }}>
+              <Routes>
+                {/* Add your routes here */}
+                <Route path="/">
+                  <Route
+                    index
+                    element={
+                      <>
                         <Modal open={showUpload} onClose={toggleUpload}>
                         <div>
                           <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} setFileId={setFileId} />
@@ -221,10 +211,10 @@ function App() {
                         <Box>
                           <div>
                             <div>
-                                <Home toggleImport={toggleUpload}/>
+                              <Home toggleImport={toggleUpload} />
                             </div>
                           </div>
-                      </Box>
+                        </Box>
                       </>
                       }
                     />
@@ -239,165 +229,46 @@ function App() {
                       }
                     />
                   </Route>
-                  <Route path="/processing" element={
-                    <>
-                    <Backdrop
-                    sx={{ color: '#FFFFFF', zIndex: (theme) => theme.zIndex.modal - 1,
-                    marginTop:"4rem",
-                    position: 'fixed',
-                    width: '100%',
-                    height:'100%',}}
-                    open={isProcessing}
-                    >
-                      <div style={{display: 'flex', flexDirection:"column", justifyContent:"center", alignItems:"center"}}>
-                        <CircularProgress size="10rem" 
-                          color="success" />
-                        <h1>Processing data...</h1>
-                      </div>
-                    </Backdrop>
-
-                    {//modal for detect tables here
-                    } 
-                    <Modal open={TableDetect} onClose={()=>{toggleTableDetect(false)}}>
-                    <div>
-                      <TableDetectPrompt 
-                      toggleTableDetect={toggleTableDetect} 
-                      toggleSelect={toggleSelect}
-                      toggleEmptyDetect={toggleEmptyDetect}
-                      toggleInconsistentDetect={toggleInconsistent}
-                      toggleImportSuccess={toggleImportSuccess}
-                      tblCount={tableCount} 
-                      fileId={uploadedFileId}
-                      vsheets={visibleSheetNames}
-                      sheetdata={sheetData}
-                      updateEmpty={updateEmptyList}
-                      updateInc={updateIncList}
-                      updateSData={updateSheetData}
-                      emptySheets={SheetsWithEmpty}
-                      incSheets={IncSheets}
-                      reset={resetVariables}
-                      wb={workbook}
-                      />
-                    </div>  
-                    </Modal>
-
-                    {//modal for select tables here
-                    } 
-                    <Modal open={SelectTable} onClose={()=>{toggleSelect(false)}}>
-                    <div>
-                      <SelectTablePrompt 
-                      toggleSelect={toggleSelect}
-                      toggleTableDetect={toggleTableDetect}
-                      toggleEmptyDetect={toggleEmptyDetect}
-                      toggleInconsistentDetect={toggleInconsistent}
-                      toggleImportSuccess={toggleImportSuccess}
-                      tblCount={tableCount} 
-                      fileId={uploadedFileId}
-                      vsheets={visibleSheetNames}
-                      sheetdata={sheetData}
-                      updateEmpty={updateEmptyList}
-                      updateInc={updateIncList}
-                      updateSData={updateSheetData}
-                      emptySheets={SheetsWithEmpty}
-                      incSheets={IncSheets}
-                      reset={resetVariables}
-                      wb={workbook}
-                      />
-                    </div>  
-                    </Modal>
-
-                    {/* modal for no tables detected here  */}
-                    <Modal open={NoTableDetect} onClose={toggleNoTableDetect}>
-                    <div>
-                      <NoTablesDetectPrompt toggleNoTable={toggleUpload} fileId={uploadedFileId} reset={resetVariables} />
-                    </div>  
-                    </Modal>
-
-                    {/* modal for split tables detected here 
-                    <Modal open={showUpload} onClose={toggleUpload}>
-                    <div>
-                      <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} />
-                    </div>  
-                    </Modal> */}
-
-                    <Modal open={EmptyDetect} onClose={()=>{toggleEmptyDetect(false)}}>
-                    <div>
-                      <EmptyDetectPrompt 
-                      toggleEmptyDetect={toggleEmptyDetect}
-                      toggleInconsistentDetect={toggleInconsistent}
-                      toggleImportSuccess={toggleImportSuccess}
-                      fileId={uploadedFileId}
-                      workbook={workbook}
-                      sheets={sheetNames}
-                      vsheets={visibleSheetNames}
-                      sheetdata={sheetData}
-                      emptylist={SheetsWithEmpty}
-                      reset={resetVariables}
-                      inclist={IncSheets}
-                      updateSData = {updateSheetData}
-                      />
-                    </div>  
-                    </Modal>
-
-                    <Modal open={InconsistentDetect} onClose={()=>{toggleInconsistent(false)}}>
-                    <div>
-                      <InconsistentDetectPrompt 
-                      toggleInconsistentDetect={toggleInconsistent}
-                      toggleImportSuccess={toggleImportSuccess}
-                      fileId={uploadedFileId}
-                      workbook={workbook}
-                      sheets={sheetNames}
-                      vsheets={visibleSheetNames}
-                      sheetdata={sheetData}
-                      reset={resetVariables}
-                      inclist={IncSheets}
-                      updateSData = {updateSheetData}
-                      />
-                    </div>  
-                    </Modal>
-
-                    <Modal open={ImportSuccess} onClose={()=>{toggleImportSuccess(false)}}>
-                    <div>
-                      <SuccessPrompt 
-                      toggleImportSuccess={toggleImportSuccess}
-                      fileId={uploadedFileId}
-                      reset={resetVariables}
-                      workbook={workbook}
-                      sdata={sheetData}
-                      />
-                    </div>  
-                    </Modal>
-
-                    
-
-
-                    <ProcessingPage stopLoading={StopLoading} startProcessing={StartProcessing}
-                    toggleTable={toggleTableDetect}
-                    toggleNoTable={toggleNoTableDetect}
-                    setTblCount={setTblCount}
-                    setFileData={setFileData}/>
-                    </>
-                  }
-                  />
                   <Route path="/file" element={
                     <>
-                    <Filepage stopLoading={StopLoading}/>
+                      <Filepage stopLoading={StopLoading} />
                     </>
-                  }/>
-                  <Route path="/templates">
-                    <Route
-                      index
-                      element={
-                        <Box sx={{ padding: '1px' }}>
-                          <TemplatesPage/>
-                        </Box>
-                      }
-                    />
-                  </Route>
-                  {/* Add your other routes here */}
-                </Routes>
-              </Box>
+                  }
+                />
+                <Route path="/templates">
+                  <Route
+                    index
+                    element={
+                      <Box sx={{ padding: "1px" }}>
+                        <TemplatesPage />
+                      </Box>
+                    }
+                  />
+                </Route>
+                <Route path="/files">
+                  <Route
+                    index
+                    element={
+                      <Box sx={{ padding: "1px" }}>
+                        <FileScreenPage />
+                      </Box>
+                    }
+                  />
+                </Route>
+                <Route path="/databases">
+                  <Route
+                    index
+                    element={
+                      <Box sx={{ padding: "1px" }}>
+                        <DatabaseScreenPage />
+                      </Box>
+                    }
+                  />
+                </Route>
+                {/* Add your other routes here */}
+              </Routes>
             </Box>
+          </Box>
         </Router>
       </SnackbarContextProvider>
     </ThemeProvider>
