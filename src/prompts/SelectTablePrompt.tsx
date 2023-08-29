@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import modalStyle from "../styles/ModalStyles";
 import * as XLSX from 'xlsx'
 import { Box, Button, CircularProgress, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, styled } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import FileService from "../services/FileService";
 import ReactDataGrid from "@inovua/reactdatagrid-community";
 import '@inovua/reactdatagrid-community/index.css';
@@ -84,7 +84,7 @@ const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, v
     const [dataSource, setDataSrc] = useState<Object[]>([]);
     const [overwriteStatus, setOWStat] = useState(false);
     const dynamicHeight = Math.min(dataSource.length * 5.5, 80) + 'vh'
-
+    const tabsRef = useRef<HTMLDivElement[]>([]);
   const nav = useNavigate();
   const gridstyle = {
     fontSize:"10px",
@@ -282,17 +282,26 @@ function createColumns(strings: string[]): HeaderConfig[] {
     
   }
 
-  function handleNameChange(name:string): void{
+  function handleNameChange(event:React.FormEvent, name:string): void{
     if(name !== null && name!== undefined){
       if(createdTableCtr > 0){
       let tablelist = [...createdSheets];
       const targetObject = tablelist.find(obj => obj.id === currentTabID);
+      console.log("TargetObj ID is ", targetObject!.id - 1, "and the refs are", tabsRef);
       if (targetObject) {
+        if(name === "" || name === " "){
+          targetObject.name = "Table " + targetObject.id;
+          tabsRef.current[targetObject.id - 1].textContent = "Table " + targetObject.id;
+          setCSheets(tablelist);
+        }else{
         targetObject.name = name;
-        setCSheets(tablelist)
+        tabsRef.current[targetObject.id - 1].textContent = name;
+        setCSheets(tablelist);  
+        }
         }
       }
     }
+  
     
   }
 
@@ -381,13 +390,17 @@ function createColumns(strings: string[]): HeaderConfig[] {
     const valuesArray:Object[] = [];
 
   selectedRows.forEach(selectedRow => {
-    const rowValues:string[] = [];
+    const rowValues: (string | boolean)[] = [];
 
     Object.keys(selectedRow).forEach(columnName => {
       const columnIndex = Object.keys(tableMap[0]).indexOf(columnName);
       if (columnIndex !== -1) {
         const value = tableMap[selectedRows.indexOf(selectedRow)][columnName];
-        rowValues.push(value);
+        if (value === "true" || value === "false") {
+          rowValues.push(value === "true");
+        } else {
+          rowValues.push(value);
+        }
       }
     });
     valuesArray.push(rowValues);
@@ -512,15 +525,18 @@ function createColumns(strings: string[]): HeaderConfig[] {
               color="success" />
               </>}
             </div>
-            <div style={{maxHeight:dynamicHeight ,width: '15%'}}>
+            <div style={{width: '15%'}}>
               <Button variant="text" onClick={newTable}>+ New Table</Button>
               {/* for table tabs */}
               <Tabs
+                variant="scrollable"
+                scrollButtons="auto"
                 orientation="vertical"
                 value= {currentTabID}
                 onChange={changeTab}
                 TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
                 sx={{
+                maxHeight:dynamicHeight,
                 "& button":{borderRadius: 0, color: 'black', backgroundColor: '#DCF1EC'},
                 "& button.Mui-selected":{backgroundColor: '#71C887', color: 'white'},
                 }}
@@ -528,7 +544,7 @@ function createColumns(strings: string[]): HeaderConfig[] {
                 >
                 {createdSheets.length > 0? createdSheets.map((sheet,i) =>{
                     return(                                
-                      <Tab contentEditable={i === currentTabID? "true": "false"} placeholder="Name" onInput={(e)=> {handleNameChange(e.currentTarget.textContent!)}} sx={{backgroundColor:"#D9D9D9"}} value={i + 1} label={sheet.name}/>
+                      <Tab ref={(element) => {element? tabsRef.current[i] = element: <></>}} suppressContentEditableWarning={true} contentEditable={i+1 === currentTabID? true: false} placeholder="Name" onInput={(e)=> {handleNameChange(e,e.currentTarget.textContent!)}} sx={{backgroundColor:"#D9D9D9"}} value={i + 1} label={sheet.name}/>
                     )
                 }):<p></p>}
               </Tabs>
