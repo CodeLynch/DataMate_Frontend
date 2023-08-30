@@ -89,7 +89,8 @@ function App() {
   const [IncSheets, setIS] = useState<string[]>([])
   //object state for the sheet data of the uploaded file
   const [sheetData, setSData] = useState<Object>({});
-  
+  //number state for the index of the sheet to be displayed in select table
+  const [sheetIndex, setSIndex] = useState(0);
 
 
   // const handleDrawerOpen = () => {
@@ -124,7 +125,8 @@ function App() {
     setSuccess(status);
   }
 
-  const toggleSelect = (status:boolean) =>{
+  const toggleSelect = (status:boolean, sheetIndex:number) =>{
+    setSIndex(sheetIndex);
     setSelect(status);
   }
 
@@ -270,7 +272,7 @@ function App() {
 
                     {//modal for select tables here
                     } 
-                    <Modal open={SelectTable} onClose={()=>{toggleSelect(false)}}>
+                    <Modal open={SelectTable} onClose={()=>{toggleSelect(false,0)}}>
                     <div>
                       <SelectTablePrompt 
                       toggleSelect={toggleSelect}
@@ -289,6 +291,7 @@ function App() {
                       incSheets={IncSheets}
                       reset={resetVariables}
                       wb={workbook}
+                      sheetIndex={sheetIndex}
                       />
                     </div>  
                     </Modal>

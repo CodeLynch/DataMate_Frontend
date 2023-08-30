@@ -88,3 +88,7 @@
 .itemsStyleWhite {
   color: white;
 }
+
+.iconTab:hover {
+  color: lightgreen;
+}

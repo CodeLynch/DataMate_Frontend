@@ -512,7 +512,7 @@ const FileList: React.FC<{}> = () => {
                   alignItems: "flex-start",
                 }}
               >
-                <Link underline="none" href="/home" color={"black"}>
+                <Link underline="none" href="/" color={"black"}>
                   <IconButton
                     style={{
                       marginTop: "20px",

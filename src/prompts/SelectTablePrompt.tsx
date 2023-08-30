@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import modalStyle from "../styles/ModalStyles";
 import * as XLSX from 'xlsx'
-import { Box, Button, CircularProgress, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, styled } from "@mui/material";
+import { Box, Button, CircularProgress, IconButton, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, TextField, styled } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import FileService from "../services/FileService";
 import ReactDataGrid from "@inovua/reactdatagrid-community";
 import '@inovua/reactdatagrid-community/index.css';
+import { CheckIcon, CloseIcon, EditIcon } from "../components/icons";
 
 
 
@@ -23,7 +24,7 @@ const styles = {
 };
 
 type SelectProps = {
-    toggleSelect: (status:boolean) => void,
+    toggleSelect: (status:boolean, sheetIndex:number) => void,
     toggleTableDetect: (status:boolean) => void,
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
@@ -39,6 +40,7 @@ type SelectProps = {
     reset: () => void,
     updateSData: (data:Object) => void,
     wb: XLSX.WorkBook | null | undefined;
+    sheetIndex: number;
   }
 
 interface WorkbookData {
@@ -66,7 +68,8 @@ type TableMap = TableMapRow[];
 type SelectedCell = Record<string, boolean>;
 
 const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
-    toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb}: SelectProps) => {  
+    toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb,
+  sheetIndex}: SelectProps) => {  
     const [currentSheet, setCurrentSheet] = useState("");
     const [currentTab, setCurrentTab] = useState("");
     const [currentTabID, setTabID] = useState(-1);
@@ -85,6 +88,7 @@ const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, v
     const [overwriteStatus, setOWStat] = useState(false);
     const dynamicHeight = Math.min(dataSource.length * 5.5, 80) + 'vh'
     const tabsRef = useRef<HTMLDivElement[]>([]);
+    const [isEditing, setEditing] = useState(false);
   const nav = useNavigate();
   const gridstyle = {
     fontSize:"10px",
@@ -93,7 +97,7 @@ const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, v
 
   //set currentSheet and header array on load based from props
   useEffect(()=>{
-    setCurrentSheet(vsheets[0]);
+    setCurrentSheet(vsheets[sheetIndex]);
     //typing currentSheet as key of sheetData
     const currSheet = currentSheet as keyof typeof sheetdata
     //typing object value as unknown before converting to row
@@ -188,17 +192,17 @@ useEffect(()=>{
     //Check hasEmpty
         //open empty value will be replaced with "NULL" prompt
         if(hasEmpty){
-          toggleSelect(false);
+          toggleSelect(false,0);
           toggleEmptyDetect(true);
           console.log("Empty triggered");
         }else if(isInconsistent && !hasEmpty){
         //else if when hasEmpty is false but isInconsistent is true 
         //open fixing inconsistency prompts
-          toggleSelect(false);
+          toggleSelect(false,0);
           toggleInconsistentDetect(true);
           console.log("Inconsistency triggered");
         }else{
-          toggleSelect(false);
+          toggleSelect(false,0);
           toggleImportSuccess(true);
           console.log("Success Triggered")
         }
@@ -273,7 +277,7 @@ function createColumns(strings: string[]): HeaderConfig[] {
   //---------------------------------------------------------------
 
   function newTable():void {
-    if(createdTableCtr >= 10){
+    if(createdSheets.length >= 10){
       alert("Maximum number of tables reached");
     }else{
       let newval = createdTableCtr + 1;
@@ -291,11 +295,11 @@ function createColumns(strings: string[]): HeaderConfig[] {
       if (targetObject) {
         if(name === "" || name === " "){
           targetObject.name = "Table " + targetObject.id;
-          tabsRef.current[targetObject.id - 1].textContent = "Table " + targetObject.id;
+          // tabsRef.current[targetObject.id - 1].textContent = "Table " + targetObject.id;
           setCSheets(tablelist);
         }else{
         targetObject.name = name;
-        tabsRef.current[targetObject.id - 1].textContent = name;
+        // tabsRef.current[targetObject.id - 1].textContent = name;
         setCSheets(tablelist);  
         }
         }
@@ -303,6 +307,12 @@ function createColumns(strings: string[]): HeaderConfig[] {
     }
   
     
+  }
+
+  function hasEmptyTable(array: Table[]): boolean {
+    return array.some(table => {
+      return Object.keys(table.values).length === 0;
+    });
   }
 
   const changeTab = (event: React.SyntheticEvent, newValue: number) =>{
@@ -313,7 +323,7 @@ function createColumns(strings: string[]): HeaderConfig[] {
   
   const cancelProcess = () => {
       FileService.deleteFile(fileId).then((res)=>{
-        toggleSelect(false);
+        toggleSelect(false,0);
         setCSheets([]);
         reset();
         nav("/");
@@ -365,6 +375,22 @@ function createColumns(strings: string[]): HeaderConfig[] {
     }
   
     return false; // No inconsistent values found in any column
+  }
+
+  //function to detect duplicates for tables
+  function hasDuplicateNames(array:Table[]) {
+    const nameOccurrences: Record<string, number> = {};
+  
+    for (const table of array) {
+      const name = table.name.toLowerCase();
+      nameOccurrences[name] = (nameOccurrences[name] || 0) + 1;
+  
+      if (nameOccurrences[name] >= 2) {
+        return true;
+      }
+    }
+  
+    return false;
   }
 
   //convert cellSelection Data to an array for extraction 
@@ -440,10 +466,34 @@ function createColumns(strings: string[]): HeaderConfig[] {
     delete wb.Sheets[wsname];
 
   }
+
+  function deleteFromList(index:number){
+    let copyList = [...createdSheets];
+    if(index > -1){
+      copyList.splice(index, 1);
+    }
+    console.log("created Tables: ", createdSheets)
+    setCSheets(copyList);
+  }
+
+  function editName(id:number){
+    console.log(currentTabID, " and ", id);
+    if(isEditing && currentTabID === id){
+      setEditing(false);
+    }else{
+      setEditing(true);
+    }
+    
+  }
   function nextFunction(){
     if(createdSheets.length <= 0){
       alert("Please create at least one table");
-    }else{
+    }else if(hasEmptyTable(createdSheets)){
+      alert("One or more tables have no values highlighted")
+    }else if(hasDuplicateNames(createdSheets)){
+      alert("Two or more table names have the same name")
+    }
+    else{
 
       //deleting original data
       for(const sheet in vsheets){
@@ -486,7 +536,7 @@ function createColumns(strings: string[]): HeaderConfig[] {
 
   function switchToAuto(): void {
     
-    toggleSelect(false);
+    toggleSelect(false,0);
     toggleTableDetect(true);
     
   }
@@ -497,7 +547,7 @@ function createColumns(strings: string[]): HeaderConfig[] {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: 798,
+        width: 830,
         maxHeight: 800,
         bgcolor: '#71C887',
         boxShadow: 24,
@@ -506,7 +556,7 @@ function createColumns(strings: string[]): HeaderConfig[] {
         <div style={{marginTop:"3%", padding:"2em", backgroundColor:"#DCF1EC"}}>
           <p style={{fontSize:"32px", padding:0, margin:0}}>Please highlight the tables in your file</p>
           <div style={{display:'flex', flexDirection:'row'}}>
-            <div style={{width: '85%'}}>
+            <div style={{width: '80%'}}>
               {/* for table preview */}
               {HeaderArr !== undefined && BodyArr !== undefined? <>
                         <Paper elevation={0} sx={{ maxHeight:'500px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
@@ -525,37 +575,70 @@ function createColumns(strings: string[]): HeaderConfig[] {
               color="success" />
               </>}
             </div>
-            <div style={{width: '15%'}}>
+            <div style={{width: '20%'}}>
               <Button variant="text" onClick={newTable}>+ New Table</Button>
               {/* for table tabs */}
-              <Tabs
-                variant="scrollable"
-                scrollButtons="auto"
-                orientation="vertical"
-                value= {currentTabID}
-                onChange={changeTab}
-                TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
-                sx={{
-                maxHeight:dynamicHeight,
-                "& button":{borderRadius: 0, color: 'black', backgroundColor: '#DCF1EC'},
-                "& button.Mui-selected":{backgroundColor: '#71C887', color: 'white'},
-                }}
-                aria-label="secondary tabs example"
-                >
-                {createdSheets.length > 0? createdSheets.map((sheet,i) =>{
-                    return(                                
-                      <Tab ref={(element) => {element? tabsRef.current[i] = element: <></>}} suppressContentEditableWarning={true} contentEditable={i+1 === currentTabID? true: false} placeholder="Name" onInput={(e)=> {handleNameChange(e,e.currentTarget.textContent!)}} sx={{backgroundColor:"#D9D9D9"}} value={i + 1} label={sheet.name}/>
-                    )
-                }):<p></p>}
-              </Tabs>
-            </div>
-          </div> 
+              <div style={{display:"flex", flexDirection:"row", justifyContent:"space-between"}}>
+                  <Tabs
+                    orientation="vertical"
+                    variant="scrollable"
+                    scrollButtons={createdSheets.length < 4? false: "auto"}
+                    value= {currentTabID}
+                    onChange={changeTab}
+                    TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
+                    sx={{
+                    maxHeight:dynamicHeight,
+                    width:"100%",
+                    "& button":{borderRadius: 0, color: 'black', backgroundColor: '#DCF1EC'},
+                    "& button.Mui-selected":{backgroundColor: '#71C887', color: 'white'},
+                    }}
+                    aria-label="secondary tabs example"
+                    >
+                    {createdSheets.length > 0? createdSheets.map((sheet,i) =>{
+                        return(                                
+                          // <Tab ref={(element) => {element? tabsRef.current[i] = element: <></>}} 
+                          // suppressContentEditableWarning={true} 
+                          // contentEditable={i+1 === currentTabID? true: false} 
+                          // onInput={(e)=> {handleNameChange(e,e.currentTarget.textContent!)}} 
+                          // sx={{backgroundColor:"#D9D9D9"}} 
+                          // value={i + 1} 
+                          // label={sheet.name}/>
+                          <Tab ref={(element) => {element? tabsRef.current[i] = element: <></>}} 
+                          suppressContentEditableWarning={true}
+                          sx={{backgroundColor:"#D9D9D9", width:"100%", padding:"5px", maxHeight:"20px"}} 
+                          value={sheet.id} 
+                          label={
+                            <span style={{display:"flex", flexDirection:"row", maxHeight:"20px"}}>
+                              <div style={{fontSize:"16px", textAlign:"center",display:"flex", alignItems:"center", width:"70px"}}>
+                              {isEditing && currentTabID === sheet.id ? <TextField variant="standard" onChange={(e)=>{handleNameChange(e, e.target.value)}} placeholder="Table Name"></TextField>:sheet.name}
+                              </div>
+
+                              <div style={{display:"flex", flexDirection:"row", width:"40px", marginLeft:"5px"}}>                        
+                              <div className="iconTab" style={{width:"20px", height:"20px", margin:"2px"}}
+                               onClick={()=>{editName(sheet.id)}}>
+                                {isEditing && currentTabID === sheet.id ? <CheckIcon/>:<EditIcon/>}
+                              </div>
+                              <div className="iconTab" style={{width:"20px", height:"20px", margin:"2px"}}
+                              onClick={()=>{deleteFromList(i)}}>
+                                <CloseIcon/>
+                              </div>
+                              
+                              </div>
+                            </span> 
+                          }/>
+
+                        )
+                    }):<p></p>}
+                  </Tabs>
+              </div>
+            </div> 
+          </div>
           <p onClick={switchToAuto} style={{fontSize:"16px", paddingTop:'1em', paddingLeft:0, paddingBottom:'1em', margin:0, textDecoration:"underline", cursor:"pointer"}}>Return to automatic table detection</p>
-          <div style={{display:"flex", justifyContent:"space-between"}}>
-          
+          <div style={{display:"flex", justifyContent:"space-between"}}>         
           <Button disableElevation onClick={cancelProcess} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: 'white', color:'black', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Cancel</Button>
           <Button disableElevation onClick={nextFunction} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Next</Button>
           </div>
+          
         </div>
     </Box>
   );

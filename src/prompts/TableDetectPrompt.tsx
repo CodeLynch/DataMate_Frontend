@@ -22,7 +22,7 @@ const styles = {
 
 type DetectProps = {
     toggleTableDetect: (status:boolean) => void,
-    toggleSelect: (status:boolean) => void,
+    toggleSelect: (status:boolean, sheetIndex:number) => void,
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
     toggleImportSuccess: (status:boolean) => void,
@@ -300,8 +300,9 @@ useEffect(()=>{
   }
   
   function switchToManual(): void {
+    let index = vsheets.indexOf(currentSheet);
     toggleTableDetect(false);
-    toggleSelect(true);
+    toggleSelect(true, index);
   }
 
   return (
