@@ -100,10 +100,10 @@ export default function Registration() {
         UserService.postUser(formData)
         .then((res:any)=> {
             console.log('Posting Data')
+            navigate("/login")
         })
         .catch((err:string) => console.log(err))
 
-        navigate("/login")
     }
 
     const handleUsernameChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
