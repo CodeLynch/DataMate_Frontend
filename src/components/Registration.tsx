@@ -1,28 +1,135 @@
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Box, Button, Container, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography } from '@mui/material';
 import * as React from 'react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { ChangeEvent, useContext, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import TopbarInit from './TopbarInit';
+import UserService from '../api/UserService';
+import { SnackbarContext, SnackbarContextType } from '../helpers/SnackbarContext';
 
 export default function Registration() {
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    // const [businessType, setBusinessType] = React.useState('');
+    const [passwordMatchError, setPasswordMatchError] = useState(false);
+    const confirmPasswordRef = React.useRef<HTMLInputElement | null>(null);
+    const passwordRef = React.useRef<HTMLInputElement | null>(null);
+    const [usernameExists, setUsernameExists] = useState(false);
+    const navigate = useNavigate();
+    const { handleSetMessage } = useContext(SnackbarContext) as SnackbarContextType;
+
+    const [data, setData]= useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        address: "",
+        username: "",
+        password: "",
+        businessName: "",
+        businessType: "",
+    })
+
+    const [userImage, setUserImage] = useState<File | null>(null);
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setData({ ...data, [event.target.name]: event.target.value });
+        console.log(event.target.name)
+    };
 
     const handlePasswordShow = () => {
         setShowPassword(!showPassword);
     }
 
-    const [businessType, setBusinessType] = React.useState('');
+    const handleConfirmPasswordShow = () => {
+        setShowConfirmPassword(!showConfirmPassword);
+    }
 
-    const handleChange = (event: SelectChangeEvent) => {
-        setBusinessType(event.target.value);
+    const handleSelectChange = (event: SelectChangeEvent) => {
+        setData({ ...data, [event.target.name]: event.target.value });
+        console.log(event.target.name)
     };
 
+    const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const password = event.target.value;
+        const confirmPassword = confirmPasswordRef.current?.value;
+        setData({ ...data, [event.target.name]: event.target.value });
+        console.log(event.target.name)
+        
+        if (confirmPassword && password !== confirmPassword) {
+            setPasswordMatchError(true);
+        } else {
+            setPasswordMatchError(false);
+        }
+    };
+
+    const handleConfirmPasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const confirmPassword = event.target.value;
+        const password = passwordRef.current?.value;
+        
+        if (password !== confirmPassword) {
+            setPasswordMatchError(true);
+        } else {
+            setPasswordMatchError(false);
+        }
+    };
+
+    const handleFileChange = (e: any) => {
+        console.log(e.target.files[0])
+        setUserImage(e.target.files[0])
+    };
+
+    const postUser = async (event: { preventDefault: () => void; }) =>{
+        event.preventDefault();
+        
+        const formData = new FormData();
+        formData.append("user", new Blob([JSON.stringify({
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            address: data.address,
+            username: data.username,
+            password: data.password,
+            businessName: data.businessName,
+            businessType: data.businessType,
+        })], {type: 'application/json'}));
+        if(userImage){
+            formData.append("userImage", userImage);
+        }
+        console.log(formData)
+        console.log(formData.keys())
+        UserService.postUser(formData)
+        .then((res:any)=> {
+            console.log('Posting Data')
+        })
+        .catch((err:string) => console.log(err))
+
+        navigate("/login")
+    }
+
+    const handleUsernameChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = event.target;
+        setData({ ...data, [name]: value });
+        console.log(name);
+        
+        if (name === "username") {
+            checkUsernameAvailability(value);
+        }
+    };
+
+    const checkUsernameAvailability = (username: any) => {
+        UserService.getUserByUsername(username)
+            .then((response) => {
+                setUsernameExists(response.data.exists || response.data.userExists);
+            })
+            .catch((error) => {
+                console.error("Error checking username availability:", error);
+            });
+    };
 
     return (
         <div className='gradientbg edit-spacing' style={{ width: '100%', height: '100%'}}>
-            {/* <TopbarInit/> */}
-            <Grid component="form">
+            <TopbarInit/>
+            <Grid component="form" encType="multipart/form-data" onSubmit={postUser}>
                 <Grid container justifyContent="center" alignItems="center">
                     <Box sx={{ backgroundColor: 'white', margin: {xs: '30px'}, p: {xs: '35px', sm: '40px', md: '40px'}, borderRadius: '20px', boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)', opacity: 0.85 }}> 
                         <Container> 
@@ -36,7 +143,8 @@ export default function Registration() {
                                     name="firstName"
                                     label="First Name"
                                     variant="outlined"
-                                    // value="John"
+                                    value={data.firstName}
+                                    onChange={handleChange}
                                     sx={{ marginBottom: { xs: 2, sm: 2, md: 2 }, marginRight: { sm: 2, md: 2 }, width: '100%' }}
                                 />
                                 <TextField
@@ -45,7 +153,8 @@ export default function Registration() {
                                     name="lastName"
                                     label="Last Name"
                                     variant="outlined"
-                                    // value="Doe"
+                                    value={data.lastName}
+                                    onChange={handleChange}
                                     sx={{ marginBottom: { xs: 2, sm: 2, md: 2 }, width: '100%' }}
                                 />
                             </Stack>
@@ -56,7 +165,8 @@ export default function Registration() {
                                     name="email"
                                     label="Email"
                                     variant="outlined"
-                                    // value="johndoe@gmail.com"
+                                    value={data.email}
+                                    onChange={handleChange}
                                     fullWidth
                                     sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
                                 />
@@ -66,7 +176,8 @@ export default function Registration() {
                                     name="address"
                                     label="Address"
                                     variant="outlined"
-                                    // value="Cebu City"
+                                    value={data.address}
+                                    onChange={handleChange}
                                     fullWidth
                                     sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
                                 />
@@ -76,17 +187,25 @@ export default function Registration() {
                                     name="username"
                                     label="Username"
                                     variant="outlined"
-                                    // value="john123"
+                                    value={data.username}
+                                    onChange={handleUsernameChange}
                                     fullWidth
                                     sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
                                 />
+                                 {usernameExists && (
+                                    <Typography variant="caption" color="error" sx={{mb: 1, mt: -1}}>
+                                        Username is already taken.
+                                    </Typography>
+                                )}
                                 <Stack direction={{ xs: 'column', sm: 'row', md: 'row' }} justifyContent="center" alignItems="center" sx={{ width: '100%' }}>
                                     <TextField
                                         required
                                         name="password"
                                         type={showPassword ? "text" : "password"}
-                                        // value="asdf"
+                                        value={data.password}
                                         label="Password"
+                                        onChange={handlePasswordChange}
+                                        inputRef={passwordRef}
                                         size="small"
                                         fullWidth
                                         sx={{ marginBottom: { xs: 2, sm: 2, md: 2 }, marginRight: { sm: 2, md: 2 } }}
@@ -103,30 +222,37 @@ export default function Registration() {
                                     <TextField
                                         required
                                         name="confirmpassword"
-                                        type={showPassword ? "text" : "password"}
-                                        // value="asdf"
+                                        type={showConfirmPassword ? "text" : "password"}
                                         label="Confirm Password"
+                                        onChange={handleConfirmPasswordChange}
+                                        inputRef={confirmPasswordRef}
                                         size="small"
                                         fullWidth
                                         sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
                                         InputProps={{
                                             endAdornment: (
                                                 <InputAdornment position="end">
-                                                    <IconButton onClick={handlePasswordShow}>
-                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                    <IconButton onClick={handleConfirmPasswordShow}>
+                                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                                                     </IconButton>
                                                 </InputAdornment>
                                             )
                                         }}
                                     />
                                 </Stack>
+                                {passwordMatchError && (
+                                    <Typography variant="caption" color="error" sx={{mb: 1, mt: -1}}>
+                                        Passwords do not match.
+                                    </Typography>
+                                )}
                                 <TextField
                                     size="small"
                                     required 
-                                    name="businessname"
+                                    name="businessName"
                                     label="Business Name"
                                     variant="outlined"
-                                    // value="Aparri Furnitures"
+                                    value={data.businessName}
+                                    onChange={handleChange}
                                     fullWidth
                                     sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
                                 />
@@ -135,16 +261,18 @@ export default function Registration() {
                                     <Select
                                     labelId="demo-simple-select-label"
                                     id="demo-simple-select"
-                                    value={businessType}
+                                    name='businessType'
+                                    value={data.businessType}
                                     label="Business Type"
-                                    onChange={handleChange}
+                                    onChange={handleSelectChange}
                                     size='small'
+                                    required
                                     >
-                                    <MenuItem value='Food & Beverage'>Food & Beverages</MenuItem>
-                                    <MenuItem value='Retail'>Retail</MenuItem>
-                                    <MenuItem value='Manufacturing'>Manufacturing</MenuItem>
-                                    <MenuItem value='Service-based'>Service-based</MenuItem>
-                                    <MenuItem value='Others'>Others</MenuItem>
+                                        <MenuItem value={'Food & Beverages'}>Food & Beverages</MenuItem>
+                                        <MenuItem value={'Retail'}>Retail</MenuItem>
+                                        <MenuItem value={'Manufacturing'}>Manufacturing</MenuItem>
+                                        <MenuItem value={'Service-based'}>Service-based</MenuItem>
+                                        <MenuItem value='Others'>Others</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -157,6 +285,8 @@ export default function Registration() {
                                     type="file"
                                     variant="outlined"
                                     size='small'
+                                    required
+                                    onChange={handleFileChange}
                                     fullWidth
                                     InputLabelProps={{ shrink: true }}
                                     sx={{ backgroundColor: 'transparent' }}
@@ -165,7 +295,7 @@ export default function Registration() {
                         
                             <Grid container direction="row" alignItems='center' justifyContent='center'>
                                 <Box className='saveBtn'>
-                                    <Button variant="contained">
+                                    <Button variant="contained" type="submit">
                                         Register
                                     </Button>
                                 </Box>
