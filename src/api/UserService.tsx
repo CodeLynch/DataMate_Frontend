@@ -18,6 +18,14 @@ class UserService {
         return axios.get(USER_BASE_URL + "/getByUsername?username=" + username);
     }
 
+    getUserByUsernameDetails(username: string) {
+        return axios.get(USER_BASE_URL + "/getByUsernameDetails?username=" + username);
+    }
+
+    getUserById(id: string) {
+        return axios.get(USER_BASE_URL + "/getUserById/" + id);
+    }
+
 }
 
 export default new UserService();
