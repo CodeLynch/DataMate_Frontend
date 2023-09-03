@@ -22,6 +22,7 @@ import Navbar from "./components/Navbar";
 import TemplatesPage from "./pages/TemplatesPage";
 import FileScreenPage from "./pages/FileScreenPage";
 import DatabaseScreenPage from "./pages/DatabaseScreenPage";
+import DeleteProfile from "./components/DeleteProfile";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -164,6 +165,16 @@ function App() {
                     element={
                       <Box sx={{ padding: "1px" }}>
                         <DatabaseScreenPage />
+                      </Box>
+                    }
+                  />
+                </Route>
+                <Route path="/delete-profile">
+                  <Route
+                    index
+                    element={
+                      <Box sx={{ padding: "1px" }}>
+                        <DeleteProfile />
                       </Box>
                     }
                   />
