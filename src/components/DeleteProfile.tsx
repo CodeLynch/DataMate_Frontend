@@ -26,12 +26,18 @@ const DeleteProfile = () => {
       height={{ xl: 500, sm: 550, xs: 650, lg: 500 }}
       marginBottom={{ sm: "40px", xs: "50px" }}
       marginX={{ xs: "50px" }}
+      borderRadius={{
+        xs: "32px",
+        sm: "40px",
+        md: "50px",
+        lg: "50px",
+        xl: "50px",
+      }}
       sx={{
         backgroundColor: "#71C887",
         marginTop: "120px",
 
         marginX: "auto",
-        borderRadius: "16px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -52,7 +58,7 @@ const DeleteProfile = () => {
         }}
       />
 
-      <Stack marginTop={{ xs: 0, sm: 5, md: 5, lg: 5, xl: 5 }}>
+      <Stack marginTop={{ xs: 0, sm: 4, md: 5, lg: 5, xl: 5 }}>
         <Typography
           variant="h4"
           color="white"
