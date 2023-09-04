@@ -20,11 +20,10 @@ const styles = {
       },
 };
 
-type EmptyProps = {
+type NormalizeProps = {
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
     toggleImportSuccess: (status:boolean) => void,
-    toggleNormalized: (status:boolean) => void,
     fileId: number,
     workbook: XLSX.WorkBook | null | undefined, 
     sheets:string[], 
@@ -44,7 +43,7 @@ interface TableRow {
     [key: string]: string | number;
 }
 
-const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, toggleInconsistentDetect, workbook, toggleNormalized, sheets, vsheets, emptylist, sheetdata, reset, inclist, updateSData}: EmptyProps) => {  
+const NormalizePrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, toggleInconsistentDetect, workbook, sheets, vsheets, emptylist, sheetdata, reset, inclist, updateSData}: NormalizeProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -278,6 +277,6 @@ useEffect(()=>{
   );
 };
 
-export default styled(EmptyDetectPrompt)({});
+export default styled(NormalizePrompt)({});
 
 export {}; // Add this empty export statement

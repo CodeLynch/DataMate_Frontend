@@ -25,6 +25,7 @@ type DetectProps = {
     toggleSelect: (status:boolean, sheetIndex:number) => void,
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
+    toggleNormalized:(status:boolean) => void,
     toggleImportSuccess: (status:boolean) => void,
     tblCount: number,
     fileId: number,
@@ -53,7 +54,7 @@ interface ListItem {
 }
 
 const TableDetectPrompt = ({toggleTableDetect, toggleSelect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
-toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb}: DetectProps) => {  
+toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb, toggleNormalized}: DetectProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -64,6 +65,7 @@ toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, u
   const [CheckboxList, setCBList] = useState<ListItem[]>([]);
   const [hasEmpty, SetEmpty] = useState(false);
   const [isInconsistent, SetInconsistent] = useState(false);
+  const [isNotNormalized, setNotNormalized] = useState(false);
   const [isCheckDone, setCheckDone] = useState(false);
 
   const nav = useNavigate();
@@ -183,9 +185,12 @@ useEffect(()=>{
           toggleTableDetect(false);
           toggleInconsistentDetect(true);
           console.log("Inconsistency triggered");
-        }else{
-          toggleTableDetect(false);
-          toggleImportSuccess(true);
+        }else if(isNotNormalized){
+          console.log("Normalized Prompt triggered");
+        }
+        else{
+          // toggleTableDetect(false);
+          // toggleImportSuccess(true);
           console.log("Success Triggered")
         }
   }
@@ -264,6 +269,111 @@ useEffect(()=>{
     return false; // No inconsistent values found in any column
   }
 
+  //function for checking if a table has a primary key
+  function hasPossiblePrimaryKey(table: TableRow[]): boolean {
+    if (table.length === 0) {
+      return false; // The table is empty
+    }
+  
+    // Initialize an object to store unique values for each column
+    const uniqueValues: { [key: string]: Set<string | number> } = {};
+  
+    for (const row of table) {
+      for (const columnName in row) {
+        if (row.hasOwnProperty(columnName)) {
+          const cellValue = row[columnName];
+  
+          // Initialize a set for each column if it doesn't exist
+          if (!uniqueValues[columnName]) {
+            uniqueValues[columnName] = new Set();
+          }
+  
+          // Check for null values in the column
+          if (cellValue === null || cellValue === "NULL") {
+            console.log(cellValue, "will return false");
+            return false; // Found a null value, not a possible primary key
+          }
+  
+          // Check for uniqueness within the column
+          if (uniqueValues[columnName].has(cellValue)) {
+            console.log(cellValue, "will return false");
+            return false; // Found a duplicate value, not a possible primary key
+          }
+  
+          // Add the value to the set
+          uniqueValues[columnName].add(cellValue);
+        }
+      }
+    }
+  
+    // Check if there is at least one column with all unique values and no nulls
+    for (const columnName in uniqueValues) {
+      if (uniqueValues.hasOwnProperty(columnName)) {
+        if (uniqueValues[columnName].size === table.length) {
+          console.log(uniqueValues[columnName]," will return true")
+          return true; // Found a possible primary key column
+        }
+      }
+    }
+    console.log("There are no columns with unique values so I return false");
+    return false; // No possible primary key column found
+  }
+
+  function isNormalized(table: TableRow[]): boolean {
+    // Check for 1NF (No repeating groups)
+    for (const row of table) {
+      for (const columnName in row) {
+        if (row.hasOwnProperty(columnName)) {
+          const cellValue = row[columnName];
+  
+          // Check if the cell value is an array or object (repeating group)
+          if (Array.isArray(cellValue) || typeof cellValue === 'object') {
+            console.log("not even in 1NF");
+            return false; // Not in 1NF
+          }
+        }
+      }
+    }
+  
+    // Check for 2NF (Partial dependency)
+    const candidateKeys: string[][] = [];
+  
+    for (const row of table) {
+      const candidateKey: string[] = [];
+      for (const columnName in row) {
+        if (row.hasOwnProperty(columnName)) {
+          const cellValue = row[columnName];
+  
+          // Check if the cell value is a primitive type (string or number)
+          if (typeof cellValue === 'string' || typeof cellValue === 'number') {
+            candidateKey.push(columnName);
+          }
+        }
+      }
+      candidateKeys.push(candidateKey);
+    }
+  
+    // Check if any candidate key is a subset of another candidate key
+    for (let i = 0; i < candidateKeys.length; i++) {
+      for (let j = i + 1; j < candidateKeys.length; j++) {
+        if (
+          isSubset(candidateKeys[i], candidateKeys[j]) ||
+          isSubset(candidateKeys[j], candidateKeys[i])
+        ) {
+          console.log("is in 1NF but not in 2NF");
+          return false; // Not in 2NF (Partial dependency)
+        }
+      }
+    }
+  
+    return true; // The table is in 1NF and 2NF
+  }
+  
+  // Helper function to check if arr1 is a subset of arr2
+  function isSubset(arr1: string[], arr2: string[]): boolean {
+    return arr1.every((item) => arr2.includes(item));
+  }
+
   function togglePrompts(){
     const sd = sheetdata as WorkbookData;
     for(const s in vsheets){
@@ -281,6 +391,12 @@ useEffect(()=>{
           updateInc(vsheets[s]);
           SetInconsistent(true);
         }
+      }
+      console.log("result: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && isNormalized(sd[vsheets[s]] as TableRow[]));
+      //if block for normalized prompt
+      if(!( hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && isNormalized(sd[vsheets[s]] as TableRow[]) )){
+        console.log("has possible pk: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]), "is normalized: ", isNormalized(sd[vsheets[s]] as TableRow[]));
+        setNotNormalized(true);
       }
     }
      setCheckDone(true);    

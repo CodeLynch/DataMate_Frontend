@@ -239,7 +239,7 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
 
     return(
         <>
-            <div className="gradientbg" style={{paddingTop:"50px", paddingRight:"50px", width:'95vw',height:'100vh'}}>
+            <div className="gradientbg" style={{paddingTop:"50px", paddingRight:"50px", width:'100%',height:'100vh'}}>
                 {HeaderArr !== undefined && BodyArr !== undefined && !isProcessing ? <>
                 <div style={{marginRight:'70px', marginLeft:'50px', padding:'15px', height:'80vh', opacity:.8}}>
                     <div style={{marginTop:"1em"}}>

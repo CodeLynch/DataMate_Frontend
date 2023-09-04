@@ -23,6 +23,7 @@ import EmptyDetectPrompt from './prompts/EmptyDetectPrompt';
 import InconsistentDetectPrompt from './prompts/InconsistentDetectPrompt';
 import SuccessPrompt from './prompts/SuccessPrompt';
 import ProcessingPage from './pages/ProcessingPage';
+import NormalizePrompt from './prompts/NormalizePrompt';
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -71,6 +72,8 @@ function App() {
   const [EmptyDetect, setEmptyDetect] = useState(false);
   //boolean state for empty values in tables prompt
   const [InconsistentDetect, setIncDetect] = useState(false);
+  //boolean state for normalized prompt
+  const [NormalizeTable, setNormTable] = useState(false);
   //boolean state for import success prompt
   const [ImportSuccess, setSuccess] = useState(false);
   //number state for the numbers of table found in an uploaded file
@@ -128,6 +131,10 @@ function App() {
   const toggleSelect = (status:boolean, sheetIndex:number) =>{
     setSIndex(sheetIndex);
     setSelect(status);
+  }
+
+  const toggleNormalized = (status:boolean) =>{
+    setNormTable(status);
   }
 
   const StartLoading = () => {
@@ -250,6 +257,7 @@ function App() {
                     <Modal open={TableDetect} onClose={()=>{toggleTableDetect(false)}}>
                     <div>
                       <TableDetectPrompt 
+                      toggleNormalized={toggleNormalized}
                       toggleTableDetect={toggleTableDetect} 
                       toggleSelect={toggleSelect}
                       toggleEmptyDetect={toggleEmptyDetect}
@@ -275,6 +283,7 @@ function App() {
                     <Modal open={SelectTable} onClose={()=>{toggleSelect(false,0)}}>
                     <div>
                       <SelectTablePrompt 
+                      toggleNormalized={toggleNormalized}
                       toggleSelect={toggleSelect}
                       toggleTableDetect={toggleTableDetect}
                       toggleEmptyDetect={toggleEmptyDetect}
@@ -303,16 +312,30 @@ function App() {
                     </div>  
                     </Modal>
 
-                    {/* modal for split tables detected here 
+                    {/* modal for normalize tables here  */}
                     <Modal open={showUpload} onClose={toggleUpload}>
                     <div>
-                      <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} />
+                      <NormalizePrompt
+                      toggleEmptyDetect={toggleEmptyDetect}
+                      toggleInconsistentDetect={toggleInconsistent}
+                      toggleImportSuccess={toggleImportSuccess}                     
+                      fileId={uploadedFileId}
+                      vsheets={visibleSheetNames}
+                      sheetdata={sheetData}
+                      updateSData={updateSheetData}
+                      reset={resetVariables}
+                      workbook={workbook}
+                      emptylist={SheetsWithEmpty}
+                      inclist={IncSheets}
+                      sheets={sheetNames}
+                      />
                     </div>  
-                    </Modal> */}
+                    </Modal>
 
                     <Modal open={EmptyDetect} onClose={()=>{toggleEmptyDetect(false)}}>
                     <div>
                       <EmptyDetectPrompt 
+                      toggleNormalized={toggleNormalized}
                       toggleEmptyDetect={toggleEmptyDetect}
                       toggleInconsistentDetect={toggleInconsistent}
                       toggleImportSuccess={toggleImportSuccess}
@@ -331,7 +354,8 @@ function App() {
 
                     <Modal open={InconsistentDetect} onClose={()=>{toggleInconsistent(false)}}>
                     <div>
-                      <InconsistentDetectPrompt 
+                      <InconsistentDetectPrompt
+                      toggleNormalized={toggleNormalized} 
                       toggleInconsistentDetect={toggleInconsistent}
                       toggleImportSuccess={toggleImportSuccess}
                       fileId={uploadedFileId}

@@ -29,6 +29,7 @@ type SelectProps = {
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
     toggleImportSuccess: (status:boolean) => void,
+    toggleNormalized: (status:boolean) => void,
     tblCount: number,
     fileId: number,
     vsheets:string[],
@@ -67,7 +68,7 @@ type TableMapRow = Record<string, string>;
 type TableMap = TableMapRow[];
 type SelectedCell = Record<string, boolean>;
 
-const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
+const SelectTablePrompt = ({toggleSelect, toggleTableDetect, toggleNormalized, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
     toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb,
   sheetIndex}: SelectProps) => {  
     const [currentSheet, setCurrentSheet] = useState("");

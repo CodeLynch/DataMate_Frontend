@@ -1,4 +1,4 @@
-import { AppBar, Badge, Box, Drawer, IconButton, Toolbar } from "@mui/material";
+import { Badge, Box, Drawer, IconButton, Toolbar } from "@mui/material";
 import Logo from '../images/datamate-logo.png';
 import WLogo from '../images/DMLogoWhiteNoBG.png';
 import { Menu} from "@mui/icons-material";
@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { DrawerHeader } from "../styles/NavbarStyles";
 import NavbarList from "./NavbarList";
 import { useEffect } from "react";
+import { AppBar } from "../styles/TopbarSytles";
 
 
 type TopbarProps = {
@@ -23,10 +24,10 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
   };
 
   return (
-    <AppBar position="fixed" /*open={open}*/ sx={{ backgroundColor: "primary.contrastText", alignItem: "center" }}>
+    <AppBar position="fixed" open={open} sx={{ backgroundColor: "primary.contrastText", alignItem: "center" }}>
       
       <Toolbar sx={{backgroundColor: location.pathname === '/file'? '#71C887':'#FFFFFF'}}>
-        <IconButton  aria-label="open drawer" onClick={handleDrawerOpen} edge="start" sx={{ width:"4%" ,color: location.pathname === '/file'? '#FFFFFF':'#000000' , marginRight: 1/*, ...(open && { display: 'none' }),*/ }}>
+        <IconButton  aria-label="open drawer" onClick={handleDrawerOpen} edge="start" sx={{ width:"4%" ,color: location.pathname === '/file'? '#FFFFFF':'#000000' , marginRight: 1, ...(open && { display: 'none' }), }}>
           <Menu />
         </IconButton>
         <Box sx={{ width: "100%" }}>
@@ -36,7 +37,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
             <AccountCircleIcon />
         </IconButton>
       </Toolbar>
-
+   
 
       {/* <Drawer open={open} sx={{ "& .MuiPaper-root": { backgroundColor: "tertiary.main" } }} onClose={handleDrawerOpen}>
         <DrawerHeader onClick={handleDrawerOpen} sx={{ display: 'flex', alignItems: 'center' }}>
