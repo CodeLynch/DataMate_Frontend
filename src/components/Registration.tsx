@@ -80,6 +80,10 @@ export default function Registration() {
 
     const postUser = async (event: { preventDefault: () => void; }) =>{
         event.preventDefault();
+
+        if (passwordMatchError) {  // passwords do not match, do not post data
+            return;
+        }
         
         const formData = new FormData();
         formData.append("user", new Blob([JSON.stringify({
