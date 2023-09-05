@@ -12,6 +12,7 @@ export default function Registration() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     // const [businessType, setBusinessType] = React.useState('');
     const [passwordMatchError, setPasswordMatchError] = useState(false);
+    const [passwordLengthError, setPasswordLengthError] = useState(false);
     const confirmPasswordRef = React.useRef<HTMLInputElement | null>(null);
     const passwordRef = React.useRef<HTMLInputElement | null>(null);
     const [usernameExists, setUsernameExists] = useState(false);
@@ -54,7 +55,15 @@ export default function Registration() {
         const confirmPassword = confirmPasswordRef.current?.value;
         setData({ ...data, [event.target.name]: event.target.value });
         console.log(event.target.name)
+
+        // check password length
+        if (password.length < 8) {
+            setPasswordLengthError(true);
+        } else {
+            setPasswordLengthError(false);
+        }
         
+        // check if passwords match
         if (confirmPassword && password !== confirmPassword) {
             setPasswordMatchError(true);
         } else {
@@ -81,7 +90,7 @@ export default function Registration() {
     const postUser = async (event: { preventDefault: () => void; }) =>{
         event.preventDefault();
 
-        if (passwordMatchError) {  // passwords do not match, do not post data
+        if (passwordMatchError || passwordLengthError) { 
             return;
         }
         
@@ -247,6 +256,11 @@ export default function Registration() {
                                 {passwordMatchError && (
                                     <Typography variant="caption" color="error" sx={{mb: 1, mt: -1}}>
                                         Passwords do not match.
+                                    </Typography>
+                                )}
+                                {passwordLengthError && (
+                                    <Typography variant="caption" color="error" sx={{mb: 1, mt: -1}}>
+                                        Your password should not be less than 8 characters.
                                     </Typography>
                                 )}
                                 <TextField
