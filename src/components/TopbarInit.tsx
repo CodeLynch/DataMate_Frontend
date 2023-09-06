@@ -1,21 +1,17 @@
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
+import {Box, Toolbar, Button, Stack} from '@mui/material';
 import Logo from '../images/datamate-logo.png';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Grid } from '@mui/material';
 
 export default function TopbarInit() {
-
+  const location = useLocation();
   const navItems: { text: string, link: string }[] = [
     { text: "About Us", link: "/about-us" },
     { text: "Contact Us", link: "/contact-us" },
-    { text: "Login", link: "/login" },
     { text: "Register", link: "/registration" },
+    { text: "Login", link: "/login" },
   ];
 
   return (
@@ -26,15 +22,22 @@ export default function TopbarInit() {
             <img src={Logo} alt={"datamate-logo"} style={{ width: '150px', height: 'auto', paddingTop: "4px" }} />
             <Stack direction="row" spacing={2}>
               {navItems.map((listItem, index) => (
-                <Button
+                <NavLink
                   key={index}
-                  color="inherit"
-                  component={NavLink}
                   to={listItem.link}
-                  sx={{ color: '#374248', whiteSpace: 'nowrap' }}
                 >
-                  {listItem.text}
-                </Button>
+                  <Button
+                    color="inherit"
+                    sx={{
+                      color: location.pathname === listItem.link ? '#17A2A6' : '#374248',
+                      whiteSpace: 'nowrap',
+                      textTransform: 'none',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {listItem.text}
+                  </Button>
+                </NavLink>
               ))}
             </Stack>
           </Grid>
