@@ -72,6 +72,7 @@ const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, togg
     //typing object value as unknown before converting to row
     const row =  sheetdata[currSheet] as unknown
     let rowArr = row as [][]
+    
     setHArr(rowArr)
 
     

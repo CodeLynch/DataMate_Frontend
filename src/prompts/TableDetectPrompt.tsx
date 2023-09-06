@@ -33,8 +33,10 @@ type DetectProps = {
     sheetdata: object,
     updateEmpty: (sheet:string) => void,
     updateInc: (sheet:string) => void,
+    updateNorm: (sheet:string) => void,
     emptySheets: string[],
     incSheets: string[],
+    normSheets: string[],
     reset: () => void,
     updateSData: (data:Object) => void,
     wb: XLSX.WorkBook | null | undefined;
@@ -54,7 +56,8 @@ interface ListItem {
 }
 
 const TableDetectPrompt = ({toggleTableDetect, toggleSelect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
-toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb, toggleNormalized}: DetectProps) => {  
+toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb, toggleNormalized,
+normSheets, updateNorm}: DetectProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -186,12 +189,15 @@ useEffect(()=>{
           toggleInconsistentDetect(true);
           console.log("Inconsistency triggered");
         }else if(isNotNormalized){
+          toggleTableDetect(false);
+          toggleNormalized(true);
           console.log("Normalized Prompt triggered");
         }
         else{
-          // toggleTableDetect(false);
-          // toggleImportSuccess(true);
+          toggleTableDetect(false);
+          toggleImportSuccess(true);
           console.log("Success Triggered")
+          console.log("Cause isNotNormalized:", isNotNormalized)
         }
   }
     
@@ -319,60 +325,58 @@ useEffect(()=>{
     return false; // No possible primary key column found
   }
 
-  function isNormalized(table: TableRow[]): boolean {
-    // Check for 1NF (No repeating groups)
-    for (const row of table) {
-      for (const columnName in row) {
-        if (row.hasOwnProperty(columnName)) {
-          const cellValue = row[columnName];
-  
-          // Check if the cell value is an array or object (repeating group)
-          if (Array.isArray(cellValue) || typeof cellValue === 'object') {
-            console.log("not even in 1NF");
-            return false; // Not in 1NF
-          }
+  function canBeNormalized(rows: TableRow[]): boolean {
+    const valueToColumnsMap: { [key: string]: string[] } = {};
+    const dependencies: { [key: string]: Set<string> } = {};
+
+    // Populate the valueToColumnsMap with values as keys and an array of columns that have that value
+    for (const row of rows) {
+        for (const key in row) {
+            const value = row[key].toString();
+            if (!valueToColumnsMap[value]) {
+                valueToColumnsMap[value] = [];
+            }
+            valueToColumnsMap[value].push(key);
         }
-      }
     }
-  
-    // Check for 2NF (Partial dependency)
-    const candidateKeys: string[][] = [];
-  
-    for (const row of table) {
-      const candidateKey: string[] = [];
-      for (const columnName in row) {
-        if (row.hasOwnProperty(columnName)) {
-          const cellValue = row[columnName];
-  
-          // Check if the cell value is a primitive type (string or number)
-          if (typeof cellValue === 'string' || typeof cellValue === 'number') {
-            candidateKey.push(columnName);
-          }
+
+    // Build dependencies between columns based on values in each row
+    for (const value in valueToColumnsMap) {
+        const columns = valueToColumnsMap[value];
+        if (columns.length > 1) {
+            for (let i = 0; i < columns.length; i++) {
+                const columnA = columns[i];
+                if (!dependencies[columnA]) {
+                    dependencies[columnA] = new Set();
+                }
+                for (let j = 0; j < columns.length; j++) {
+                    const columnB = columns[j];
+                    if (i !== j) {
+                        if (dependsOn(rows, columnA, columnB)) {
+                            dependencies[columnA].add(columnB);
+                        }
+                    }
+                }
+            }
         }
-      }
-      candidateKeys.push(candidateKey);
     }
-  
-    // Check if any candidate key is a subset of another candidate key
-    for (let i = 0; i < candidateKeys.length; i++) {
-      for (let j = i + 1; j < candidateKeys.length; j++) {
-        if (
-          isSubset(candidateKeys[i], candidateKeys[j]) ||
-          isSubset(candidateKeys[j], candidateKeys[i])
-        ) {
-          console.log("is in 1NF but not in 2NF");
-          return false; // Not in 2NF (Partial dependency)
+
+    // Check if any column has dependencies
+    for (const column in dependencies) {
+        if (dependencies[column].size > 0) {
+            console.log(dependencies[column], "will return true");
+            return true;
         }
-      }
     }
-  
-    return true; // The table is in 1NF and 2NF
-  }
-  
-  // Helper function to check if arr1 is a subset of arr2
-  function isSubset(arr1: string[], arr2: string[]): boolean {
-    return arr1.every((item) => arr2.includes(item));
-  }
+
+    console.log("none returned true");
+    return false;
+}
+
+function dependsOn(rows: TableRow[], columnA: string, columnB: string): boolean {
+    // Check if columnA depends on columnB by checking if there is any row where columnA equals columnB
+    return rows.some((row) => row[columnA] === row[columnB]);
+}
 
   function togglePrompts(){
     const sd = sheetdata as WorkbookData;
@@ -392,11 +396,16 @@ useEffect(()=>{
           SetInconsistent(true);
         }
       }
-      console.log("result: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && isNormalized(sd[vsheets[s]] as TableRow[]));
+      console.log("result: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as TableRow[]));
+      console.log("has possible pk: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]), "can be normalized: ", canBeNormalized(sd[vsheets[s]] as TableRow[]));
       //if block for normalized prompt
-      if(!( hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && isNormalized(sd[vsheets[s]] as TableRow[]) )){
-        console.log("has possible pk: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]), "is normalized: ", isNormalized(sd[vsheets[s]] as TableRow[]));
-        setNotNormalized(true);
+      if(!(hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as TableRow[]) )){
+        console.log("this happened");
+        if(!normSheets.includes(vsheets[s])){
+          updateNorm(vsheets[s]);
+          setNotNormalized(true);
+        }
+        
       }
     }
      setCheckDone(true);    

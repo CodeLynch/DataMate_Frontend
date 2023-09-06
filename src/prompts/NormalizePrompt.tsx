@@ -21,6 +21,7 @@ const styles = {
 };
 
 type NormalizeProps = {
+    toggleNormalized: (status:boolean) => void,
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
     toggleImportSuccess: (status:boolean) => void,
@@ -28,7 +29,7 @@ type NormalizeProps = {
     workbook: XLSX.WorkBook | null | undefined, 
     sheets:string[], 
     vsheets:string[],
-    emptylist:string[],
+    normList:string[],
     inclist:string[],
     sheetdata: object,
     reset: () => void,
@@ -43,38 +44,126 @@ interface TableRow {
     [key: string]: string | number;
 }
 
-const NormalizePrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, toggleInconsistentDetect, workbook, sheets, vsheets, emptylist, sheetdata, reset, inclist, updateSData}: NormalizeProps) => {  
+interface NewTable {
+    tableName: string,
+    tableValues: TableRow[],
+}
+
+const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImportSuccess, toggleInconsistentDetect, workbook, sheets, vsheets, normList, sheetdata, reset, inclist, updateSData}: NormalizeProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
   const [HeaderArr, setHArr] = useState<[][] | undefined>(undefined)
   const [BodyArr, setBArr] = useState<[][] | undefined>(undefined)
-  const [IncSheets, setIS] = useState<string[]>([])
-  const [isInconsistent, SetInconsistent] = useState(false);
-  const [filteredData, setFData] = useState<Object>({});
-
+  const [newTablesArr, setTablesArr] = useState<NewTable[]>([])
+  const [doneNormalizing, setNormDone] = useState(false);
   const nav = useNavigate();
-  useEffect(()=>{
-    //create copy of sheetdata
-    const fdata = JSON.parse(JSON.stringify(sheetdata))
-    for(const s in emptylist){
-      fdata[emptylist[s]] = filterRowsWithNullValues(fdata[emptylist[s]] as TableRow[]); 
+
+
+  //add primary key function
+  function addPrimaryKey(table: (string | number)[][]): (string | number)[][] {
+    // Determine candidate primary key columns with unique values
+    const headerRow = table[0];
+    const uniqueColumns: string[] = [];
+    const nonUniqueColumns: string[] = [];
+    
+    for (let i = 0; i < headerRow.length; i++) {
+        const columnName = headerRow[i];
+        const values = new Set(table.slice(1).map((row) => row[i]));
+        if (values.size === table.length - 1) {
+            uniqueColumns.push(columnName.toString());
+        } else {
+            nonUniqueColumns.push(columnName.toString());
+        }
     }
-    setFData(fdata);
+    
+    // If there are unique columns, consider the first one as the primary key
+    if (uniqueColumns.length > 0) {
+        const primaryKeyColumn = uniqueColumns[0];
+        
+        // Add the primary key column to the header row
+        headerRow.unshift('id');
+        
+        // Add the primary key values to each data row
+        let idCounter = 1;
+        for (let i = 1; i < table.length; i++) {
+            table[i].unshift(idCounter++);
+        }
+        
+        return table;
+    }
+    
+    // If no unique column is found, add an auto-incrementing 'id' column
+    headerRow.unshift('id');
+    let idCounter = 1;
+    for (let i = 1; i < table.length; i++) {
+        table[i].unshift(idCounter++);
+    }
+    
+    return table;
+}
+
+  //pagination functions ------------------------------------------
+    const handleChangePage = (event: unknown, newPage: number) => {
+      setPage(newPage);
+  };
+  
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  setRowsPerPage(+event.target.value);
+  setPage(0);
+  };
+  //---------------------------------------------------------------
+
+  function delete_ws(wb:XLSX.WorkBook, wsname:string) {
+    const sidx = wb.SheetNames.indexOf(wsname);
+    if(sidx == -1) throw `cannot find ${wsname} in workbook`;
+    
+    // remove from workbook
+    wb.SheetNames.splice(sidx,1);
+    delete wb.Sheets[wsname];
+    // // update other structures
+    // if(wb.Workbook) {
+    //   if(wb.Workbook.Views) wb.Workbook.Views.splice(sidx, 1);
+    //   if(wb.Workbook.Names) {
+    //     let names = wb.Workbook.Names;
+    //     for(let j = names.length - 1; j >= 0; --j) {
+    //       if(names[j]?.Sheet == sidx) names = names.splice(j,1);
+    //       else if(names[j]?.Sheet > sidx) --names[j]?.Sheet;
+    //     }
+    //   }
+    // }
+  }
+
+  //useEffect for normalizing table on load;
+  useEffect(()=>{
+    console.log("Norm Sheets: ", normList);
+    let sd = sheetdata as WorkbookData;
+    for(const sheet in normList){
+        console.log("Before: ", sd[normList[sheet]]);
+        sd[normList[sheet]] = addPrimaryKey(sd[normList[sheet]] as [][]); 
+        console.log("After: ", sd[normList[sheet]]);
+        workbook!.Sheets[normList[sheet]] = XLSX.utils.aoa_to_sheet(sd[normList[sheet]] as [][]);
+    }
+    updateSData(sd as Object);
+    console.log("Current Workbook: ",workbook);
+    setCurrentSheet(vsheets[0])
+    setNormDone(true);
   },[])
 
   //set currentSheet and header array on load based from props
-  useEffect(()=>{ 
-    setCurrentSheet(emptylist[0]);
-    //typing currentSheet as key of sheetData
-    const currSheet = currentSheet as keyof typeof sheetdata
-    //typing object value as unknown before converting to row
-    const row =  sheetdata[currSheet] as unknown
-    let rowArr = row as [][]
-    setHArr(rowArr)
-
+  useEffect(()=>{
+    if(doneNormalizing){
+      //typing currentSheet as key of sheetData
+      const currSheet = currentSheet as keyof typeof sheetdata
+      //typing object value as unknown before converting to row
+      const row =  sheetdata[currSheet] as unknown
+      console.log("urow: ", row);
+      let rowArr = row as [][]
+      console.log("RowArr: ", rowArr);
+      setHArr(rowArr)
+    }
     
-  },[filteredData])
+  },[doneNormalizing])
 
   //useEffect for re-assigning the header array for the table when currentSheet state has changed
   useEffect(()=>{
@@ -88,89 +177,33 @@ const NormalizePrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, toggle
 
 //useEffect for re-assigning the body array for the table when Header array state has changed
 useEffect(()=>{
-    if(filteredData !== undefined){
-        //typing currentSheet as key of sheetData
-        const currSheet = currentSheet as keyof typeof filteredData
-        //typing object value as unknown before converting to row
-        const row =  filteredData[currSheet] as unknown
-        let rowArr = row as [][]
-        setBArr(rowArr)
+    if(HeaderArr !== undefined){
+        let rowsArr = []
+        //copy rowArr
+        rowsArr = HeaderArr.slice(0); 
+        //remove header values
+        rowsArr.splice(1 - 1, 1);
+        setBArr(rowsArr)
     }
   },[HeaderArr])
-
-  //pagination functions ------------------------------------------
-    const handleChangePage = (event: unknown, newPage: number) => {
-      setPage(newPage);
-  };
-  
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  setRowsPerPage(+event.target.value);
-  setPage(0);
-  };
-  //---------------------------------------------------------------
-
-  function filterRowsWithNullValues(table: TableRow[]): TableRow[] {
-    return table.filter((row) => {
-      for (const key in row) {
-        if (row.hasOwnProperty(key) && (row[key] === null || row[key] === "" || row[key] === undefined) ) {
-          return true; // Include rows with at least one null value
-        }
-      }
-      return false; // Exclude rows with all non-null values
-    });
-  }
-  
 
   const changeSheet = (stringevent: React.SyntheticEvent, newValue: string) =>{
       setCurrentSheet(newValue);
   }
-
-  function replaceEmptyWithNull(table: TableRow[]): TableRow[] {
-    for (const row of table) {
-      for (const key in row) {
-        if (row.hasOwnProperty(key)) {
-          const value = row[key];
-          if (value === null || value === undefined || value === "") {
-            // Empty value found in the row, replace with "NULL"
-            row[key] = "NULL";
-          }
-        }
-      }
-    }
-    return table;
-  }
   
   const cancelProcess = () => {
       FileService.deleteFile(fileId).then((res)=>{
-        toggleEmptyDetect(false);
+        toggleNormalized(false);
         reset();
         nav("/");
       }).catch((err)=>{
         console.log(err);
-      })
-      
+      })      
   }
+
   function nextFunc(){
     const sd = sheetdata as WorkbookData;
-    //use algorithm for replacing empty values with NULL
-    for (const sheet in emptylist){
-        sd[emptylist[sheet]] = replaceEmptyWithNull(sd[emptylist[sheet]] as TableRow[]); 
-        workbook!.Sheets[emptylist[sheet]] = XLSX.utils.json_to_sheet(sd[emptylist[sheet]], {skipHeader:true});
-      }
-    updateSData(sd as Object);
-    //clean empty list
-    while(emptylist.length > 0){
-     emptylist.pop();
-    }
-    toggleEmptyDetect(false)
-    //check if inconsistency list has values
-    if(inclist.length > 0){
-      //open inconsistency prompt
-      toggleInconsistentDetect(true);
-    }else{
-      //else open success prompt
-      toggleImportSuccess(true);
-    }
+    console.log("Normalized Data here:");
   }
   
   return (
@@ -186,12 +219,11 @@ useEffect(()=>{
         p: 2,
     }}>
         <div style={{marginTop:"3%", padding:"2em", backgroundColor:"#DCF1EC"}}>
-          <p style={{fontSize:"32px", padding:0, margin:0}}>DataMate has detected empty cells, do you wish to continue?</p>
-          <p style={{fontSize:"16px", paddingTop:'1em', paddingLeft:0, paddingBottom:'1em', margin:0}}>Empty cells will be assigned to NULL.</p>
+          <p style={{fontSize:"32px", padding:0, margin:0}}>DataMate has detected that your table can be normalized for easier transition to database.</p>
+          <p style={{fontSize:"16px", paddingTop:'1em', paddingLeft:0, paddingBottom:'1em', margin:0}}>Will you accept this suggestions?</p>
           <div style={{display:'flex', flexDirection:'row'}}>
             <div style={{width: '85%'}}>
-              {/* for table preview */}
-              {HeaderArr !== undefined && BodyArr !== undefined? <>
+            {HeaderArr !== undefined && BodyArr !== undefined? <>
                           <Paper elevation={0} sx={{ maxHeight:'270px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
                           <TableContainer>
                               <Table stickyHeader aria-label="sticky table">
@@ -215,14 +247,10 @@ useEffect(()=>{
                                           {row.map((cell, j) => {
                                           return (
                                               <>
-                                              {cell !== ""?
                                               <TableCell style={{padding:5, width: '1px', whiteSpace: 'nowrap', fontSize:'10px'}}
                                               key={j} align='left' width="100px">
                                               {cell === true? "TRUE": cell === false? "FALSE":cell}
-                                              </TableCell>:
-                                              <TableCell style={{backgroundColor:"orange" ,padding:5, width: '1px', whiteSpace: 'nowrap', fontSize:'10px'}}
-                                              key={j} align='left' width="100px"></TableCell>
-                                              }
+                                              </TableCell>
                                               </>
                                           );
                                           })}
@@ -246,7 +274,7 @@ useEffect(()=>{
               <><CircularProgress size="10rem" 
               color="success" /></>}
             </div>
-            <div style={{width: '15%'}}>
+            <div style={{width: '15%', display:"flex", flexDirection:"row"}} >
               {/* for table tabs */}
               <Tabs
                 orientation="vertical"
@@ -259,9 +287,9 @@ useEffect(()=>{
                 }}
                 aria-label="secondary tabs example"
                 >
-                {emptylist.length > 0? emptylist.map((sheet,i) =>{
-                    return(                                
-                        <Tab sx={{backgroundColor:"#D9D9D9"}}value={sheet} label={sheet} />
+                {vsheets.length > 0? vsheets.map((sheet,i) =>{
+                    return(
+                          <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left"}}  value={sheet} label={sheet} />                     
                     )
                 }):<></>}
               </Tabs>
@@ -270,7 +298,6 @@ useEffect(()=>{
           <div style={{display:"flex", justifyContent:"space-between"}}>
           <Button disableElevation onClick={cancelProcess} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: 'white', color:'black', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Cancel</Button>
           <Button disableElevation onClick={nextFunc} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Next</Button>
-
           </div>
         </div>
     </Box>

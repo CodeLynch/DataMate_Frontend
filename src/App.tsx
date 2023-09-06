@@ -87,9 +87,11 @@ function App() {
   //string array for the sheetnames of the sheets that are valid tables of the uploaded file
   const [visibleSheetNames, setVSheets] = useState<string[]>([]);
   //string array for the sheetnames of the sheets that have empty values
-  const [SheetsWithEmpty, setSWE] = useState<string[]>([])
+  const [SheetsWithEmpty, setSWE] = useState<string[]>([]);
   //string array for the sheetnames of the sheets that have inconsistent values
-  const [IncSheets, setIS] = useState<string[]>([])
+  const [IncSheets, setIS] = useState<string[]>([]);
+  //string array for the sheetnames of the sheets to be normalized
+  const [normSheets, setNS] = useState<string[]>([]);
   //object state for the sheet data of the uploaded file
   const [sheetData, setSData] = useState<Object>({});
   //number state for the index of the sheet to be displayed in select table
@@ -180,6 +182,10 @@ function App() {
     IncSheets.push(sheet)
   }
 
+  const updateNormList = (sheet:string) => {
+    normSheets.push(sheet)
+  }
+
   const updateSheetData = (sheet:Object) => {
     setSData(sheet)
   }
@@ -187,6 +193,7 @@ function App() {
   const resetVariables = () => {
     setSWE([]);
     setIS([]);
+    setNS([]);
     setTableDetect(false);
     setIncDetect(false);
     setNoTableDetect(false);
@@ -270,8 +277,10 @@ function App() {
                       updateEmpty={updateEmptyList}
                       updateInc={updateIncList}
                       updateSData={updateSheetData}
+                      updateNorm={updateNormList}
                       emptySheets={SheetsWithEmpty}
                       incSheets={IncSheets}
+                      normSheets={normSheets}
                       reset={resetVariables}
                       wb={workbook}
                       />
@@ -313,9 +322,10 @@ function App() {
                     </Modal>
 
                     {/* modal for normalize tables here  */}
-                    <Modal open={showUpload} onClose={toggleUpload}>
+                    <Modal open={NormalizeTable} onClose={toggleUpload}>
                     <div>
                       <NormalizePrompt
+                      toggleNormalized={toggleNormalized}
                       toggleEmptyDetect={toggleEmptyDetect}
                       toggleInconsistentDetect={toggleInconsistent}
                       toggleImportSuccess={toggleImportSuccess}                     
@@ -325,7 +335,7 @@ function App() {
                       updateSData={updateSheetData}
                       reset={resetVariables}
                       workbook={workbook}
-                      emptylist={SheetsWithEmpty}
+                      normList={normSheets}
                       inclist={IncSheets}
                       sheets={sheetNames}
                       />
@@ -381,9 +391,6 @@ function App() {
                       />
                     </div>  
                     </Modal>
-
-
-
 
                     <ProcessingPage stopLoading={StopLoading} startProcessing={StartProcessing}
                     toggleTable={toggleTableDetect}
