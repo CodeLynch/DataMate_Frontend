@@ -8,6 +8,18 @@ const config = {
     }
 }
 
+type User = {
+    userId: number,
+    firstName: string,
+    lastName: string,
+    email: string,
+    address: string,
+    username: string,
+    password: string,
+    businessName: string,
+    businessType: string,
+  }
+
 class UserService {
 
     postUser(data: FormData, userImage?: File){
@@ -25,7 +37,10 @@ class UserService {
     getUserById(id: string) {
         return axios.get(USER_BASE_URL + "/getUserById/" + id);
     }
-
+    
+    putUser = (id: string, data: User) => {
+        return axios.put(USER_BASE_URL + "/putUser?userId" + id, data);
+    };
 }
 
 export default new UserService();
