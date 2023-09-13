@@ -190,6 +190,10 @@ function App() {
     setSData(sheet)
   }
 
+  const updateWorkbook = (workbook:XLSX.WorkBook) => {
+    setWB(workbook);
+  }
+
   const resetVariables = () => {
     setSWE([]);
     setIS([]);
@@ -333,6 +337,7 @@ function App() {
                       vsheets={visibleSheetNames}
                       sheetdata={sheetData}
                       updateSData={updateSheetData}
+                      updateWB={updateWorkbook}
                       reset={resetVariables}
                       workbook={workbook}
                       normList={normSheets}

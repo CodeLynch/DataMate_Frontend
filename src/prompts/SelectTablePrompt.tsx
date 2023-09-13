@@ -374,7 +374,6 @@ function createColumns(strings: string[]): HeaderConfig[] {
           }
       }
     }
-  
     return false; // No inconsistent values found in any column
   }
 

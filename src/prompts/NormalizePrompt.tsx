@@ -19,7 +19,13 @@ const styles = {
         background: '#71C887',
       },
 };
-
+interface TableRow {
+    [columnName: string]: string | number | boolean;
+  }
+  
+  interface SheetData {
+    [sheetName: string]: TableRow[];
+  }
 type NormalizeProps = {
     toggleNormalized: (status:boolean) => void,
     toggleEmptyDetect: (status:boolean) => void,
@@ -34,6 +40,7 @@ type NormalizeProps = {
     sheetdata: object,
     reset: () => void,
     updateSData: (data:Object) => void,
+    updateWB: (workbook:XLSX.WorkBook) => void,
   }
 
 interface WorkbookData {
@@ -49,17 +56,65 @@ interface NewTable {
     tableValues: (string | number)[][],
 }
 
-const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImportSuccess, toggleInconsistentDetect, workbook, sheets, vsheets, normList, sheetdata, reset, inclist, updateSData}: NormalizeProps) => {  
+
+const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImportSuccess, 
+  toggleInconsistentDetect, workbook, sheets, vsheets, normList, sheetdata, reset, inclist, 
+  updateSData, updateWB}: NormalizeProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
+  const [sheetNames, setSheetNames] = useState<string[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
   const [HeaderArr, setHArr] = useState<[][] | undefined>(undefined)
   const [BodyArr, setBArr] = useState<[][] | undefined>(undefined)
   const [newTablesArr, setTablesArr] = useState<NewTable[]>([])
   const [doneNormalizing, setNormDone] = useState(false);
+  const [toReread, setReread] = useState(false);
   const [PrimaryTableCtr, setPTabCtr] = useState(0);
+  const [origWB, setOrigWB] = useState<XLSX.WorkBook>({...workbook!})
+  const [startProcess, setStartProcess] = useState(false);
   const nav = useNavigate();
 
+  //function to remove empty rows in Sheet Object Data
+  function sheetjs_cleanEmptyRows(sd:XLSX.SheetType) {
+    const data = []
+        for (var row = 0; row < sd.length; row++) {
+              var i = sd[row].length;
+              var j = 0;
+            for ( var cell = 0; cell < sd[row].length; cell++){
+                if (sd[row][cell].length == 0 ) { 
+                    j++
+                }
+            }
+          if (j < i) {
+            data.push(sd[row]);
+          }
+        }
+        return data;
+ }
+
+const readData = (wb: XLSX.WorkBook) => {
+    let sheetdata:Object = {}
+    wb.SheetNames.map((sheet, i) => 
+    {
+        const worksheet = wb.Sheets[sheet];
+        const jsondata = XLSX.utils.sheet_to_json(worksheet,{
+            header: 1,
+            raw: true,
+            defval: "",
+        }) as unknown;
+        const sd = sheetjs_cleanEmptyRows(jsondata as XLSX.SheetType)
+        const js = sd as Object
+        sheetdata = {...sheetdata, [sheet]: js}            
+    })
+    updateSData(sheetdata)
+     //typing currentSheet as key of sheetData
+     const currSheet = currentSheet as keyof typeof sheetdata
+     //typing object value as unknown before converting to row
+     const row =  sheetdata[currSheet] as unknown
+     let rowArr = row as [][]
+     setHArr(rowArr)
+     console.log("Sheet Data: ",sheetdata);
+}
 
   //add primary key function
   function addPrimaryKey(table: (string | number)[][]): (string | number)[][] {
@@ -94,7 +149,6 @@ const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImp
         });
     });
 
-    console.log("has valid primary key? ", hasValidPrimaryKey);
     if (hasValidPrimaryKey) {
         return table;
     }
@@ -103,10 +157,10 @@ const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImp
     if (uniqueColumns.length > 0) {
         const primaryKeyColumn = uniqueColumns[0];
         
-        // Add the primary key column to the header row
+        // Add the primary key column to the header row on the left
         headerRow.unshift(primaryKeyColumn);
         
-        // Add the primary key values to each data row
+        // Add the primary key values to each data row on the left
         let idCounter = 1;
         for (let i = 1; i < table.length; i++) {
             table[i].unshift(idCounter++);
@@ -115,7 +169,7 @@ const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImp
         return table;
     }
     
-    // If no valid primary key is found, add an auto-incrementing 'id' column
+    // If no valid primary key is found, add an auto-incrementing 'id' column on the left
     headerRow.unshift('id');
     let idCounter = 1;
     for (let i = 1; i < table.length; i++) {
@@ -127,7 +181,7 @@ const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImp
 
 function getUniquePrimaryTableName(): string{
   setPTabCtr(PrimaryTableCtr + 1);
-  return `new_PrimaryTable_${PrimaryTableCtr + 1}`;;
+  return `PrimaryTable_${PrimaryTableCtr + 1}`;;
 }
 
 
@@ -151,13 +205,10 @@ function getColumnDependencies(columnName: string, table: (string | number)[][],
         const targetValue = table[row][columnIndex];
         const otherValue = table[row][col];
 
-        console.log("tv: ", targetValue, "ov: ", otherValue)
         if (!hasCorrespondingValue(table, columnName, otherColumn as string, targetValue, otherValue)) {
-          console.log("So it is not a dependency")
           isDependency = false;
           break;
         }
-        console.log("So it is a dependency")
       }
 
       if (isDependency && !doneSearching.includes(otherColumn as string)) {
@@ -255,24 +306,98 @@ function removeRepeatingRows(table: (string | number)[][]): (string | number)[][
 
   return uniqueTable;
 }
+//replacing values in primary tables with foreign keys
+function replaceWithFK(tableA: (string | number)[][], tableB: (string | number)[][]) {
+  // Deep copy of tableA
+  const mergedTable: (string | number)[][] = JSON.parse(JSON.stringify(tableA));
+
+  // Identify common columns between Table A and Table B
+  console.log("A: ",tableA[0], " and ", "B:", tableB[0])
+  const commonColumns = tableA[0].filter((col) => tableB[0].includes(col));
+  console.log("common cols:", commonColumns);
+  if (commonColumns.length === 0) {
+    // If no common columns, return the original Table A as is
+    return mergedTable;
+  }
+
+  // Remove common columns (except for the primary key) from mergedTable
+  const primaryKeyIndex = mergedTable[0].indexOf(commonColumns[0]);
+  const removedCol: string[] = [];
+  mergedTable[0] = mergedTable[0].filter((col, index) => {
+    //if column is not found in tbl B return true
+    if (!commonColumns.includes(col) || col === commonColumns[0] || index === 0) {   
+      console.log("COLUMN:",col," returns true");
+      return true;
+    }
+    //if column is found in tbl B return false and push index to removed Indexes
+    console.log("COLUMN:",col," returns false", "with index ", tableB[0].indexOf(col));
+    if(!(tableB[0].indexOf(col) === 0)){
+      removedCol.push(col as string);
+    }
+    return false;
+  });
+
+  // Create a mapping of primary key values in Table B to their corresponding rows
+  const primaryKeyMap: { [key: string]: (string | number)[] } = {};
+  for (let i = 1; i < tableB.length; i++) {
+    const primaryKeyValue = tableB[i][primaryKeyIndex]?.toString();
+    if (primaryKeyValue !== undefined) {
+      primaryKeyMap[primaryKeyValue] = tableB[i];
+    }
+  }
+
+  console.log("col to remove: ", removedCol)
+  // get table A column names
+  const headerRow = tableA[0];
+  // Find the index of the column name
+  console.log("Merged table before? ",mergedTable)
+
+  // Remove values from mergedTable for common columns (except for the primary key)
+  for(const col in removedCol){
+    const columnIndex = headerRow.findIndex((name) => name === removedCol[col]);
+    console.log("column index of ",removedCol[col], " is ", columnIndex);
+    for (let i = 1; i < mergedTable.length; i++) {
+    const foreignKeyValue = mergedTable[i][primaryKeyIndex]?.toString();
+    console.log("Merged table after: ",mergedTable)
+    if (primaryKeyMap[foreignKeyValue]) {
+        console.log("Removing: ", mergedTable[i][columnIndex])
+        mergedTable[i].splice(columnIndex, 1); // Splice removes the value at the specified index
+    } else {
+        console.log("Removing: ", mergedTable[i][columnIndex])
+        mergedTable[i].splice(columnIndex, 1); // Splice removes the value at the specified index
+    }
+    }
+    headerRow.splice(columnIndex, 1);
+  }
+  
+
+  return mergedTable;
+}
+
+
 
 function normalizeTbl(inputTable: (string | number)[][]): void {
-  let doNotSearch:string[] = [];
-  const numCols = inputTable[0].length;
-
-  for (let col = 0; col < numCols; col++) {
-    const columnName = inputTable[0][col];
-    console.log(`Column Name: ${columnName}`);
-    if(!doNotSearch.includes(columnName as string)){
-      console.log(columnName," not found in do not search");
-      let depArr = getColumnDependencies(columnName as string, inputTable, doNotSearch);
-      console.log("Dependency array: ", depArr);
-      if(depArr.length > 1 && depArr.length !== numCols){
-        //inserting the column and the dependencies into do not search
-        for(const col in depArr){
-          doNotSearch.push(depArr[col]); 
+    let doNotSearch:string[] = [];
+    const numCols = inputTable[0].length;
+    let newPrimaryTable: (string | number)[][] = [...inputTable];
+    let primaryTableName = getUniquePrimaryTableName();
+    
+    
+    for (let col = 0; col < numCols; col++) {
+      const columnName = inputTable[0][col];
+      console.log(`Column Name: ${columnName}`);
+      if(!doNotSearch.includes(columnName as string)){
+        console.log(columnName," not found in do not search");
+        let depArr = getColumnDependencies(columnName as string, newPrimaryTable, doNotSearch);
+        console.log("Dependency array: ", depArr);
+        if(depArr.length > 1 && depArr.length !== numCols){
+          for(const col in depArr){
+            //inserting the column and the dependencies into do not search
+            doNotSearch.push(depArr[col]); 
+          } 
           //concat the columns in the depArr as table
-          let newTblVal =  concatenateColumns(depArr, inputTable);
+          console.log("depArr", depArr)
+          let newTblVal =  concatenateColumns(depArr, newPrimaryTable);
           //remove repeating values
           newTblVal = removeRepeatingRows(newTblVal)
           //add primary key if not existing
@@ -283,30 +408,26 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
             newTablesArr.push(
               {tableName:depArr[0], tableValues: newTblVal}
             )
-          }
-        }      
-      }else{
-        doNotSearch.push(columnName as string);
+          }        
+          newPrimaryTable = replaceWithFK(newPrimaryTable, newTblVal)           
+          console.log("npt:", newPrimaryTable) 
+        
+        }else{
+          doNotSearch.push(columnName as string);
       }
     }
     console.log("----"); // Separator between columns
+    if(!newTablesArr.some(newtab => newtab.tableName === primaryTableName)){
+      newTablesArr.push(
+        {tableName:primaryTableName, tableValues: newPrimaryTable}
+      )
+    }else{
+      let pIndex = newTablesArr.findIndex(obj => { return obj.tableName === primaryTableName;})
+      newTablesArr[pIndex].tableValues = newPrimaryTable;
+    }  
+    console.log("newtab Array: ", newTablesArr);
+    setNormDone(true);
   }
-
-
-
-//   for each sheet (table) of workbook{
-//     let pk = getPrimaryKey(sheet);
-//     if(pk === null or undefined){
-// 	createPrimaryKey(sheet)
-// 	}
-//     for each column of sheet{
-// 	 let depVals:string[] = getDependecies(col);
-// 	 if(isRepeating(column)){
-//          //transfer column to a new table along with its dependencies with an auto-integer primary key
-//          //alter original table to replace column with foreign key and remove dependencies
-// 	 }
-// 	}
-// }
 }
 
   //pagination functions ------------------------------------------
@@ -344,38 +465,71 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
     console.log("Array contains: ",newTablesArr);
   },[newTablesArr])
 
-  // const originalTable: (string | number)[][] = [
-  //   ["Book ID", "Title", "Author ID", "Author Name", "Genre ID", "Genre Name"],
-  //   [1, "The Great Gatsby", 101, "F. Scott Fitzgerald", 201, "Fiction"],
-  //   [2, "To Kill a Mockingbird", 102, "Harper Lee", 202, "Fiction"],
-  //   [3, "1984", 103, "George Orwell", 201, "Fiction"],
-  //   [4, "Pride and Prejudice", 104, "Jane Austen", 203, "Romance"],
-  //   [5, "The Hobbit", 105, "J.R.R. Tolkien", 204, "Fantasy"],
-  //   [6, "LOTR", 105, "J.R.R. Tolkien", 204, "Fantasy"],
-  // ];
+  const originalTable: (string | number)[][] = [
+    ["Book ID", "Title", "Author ID", "Author Name", "Genre ID", "Genre Name"],
+    [1, "The Great Gatsby", 101, "F. Scott Fitzgerald", 201, "Fiction"],
+    [2, "To Kill a Mockingbird", 102, "Harper Lee", 202, "Fiction"],
+    [3, "1984", 103, "George Orwell", 201, "Fiction"],
+    [4, "Pride and Prejudice", 104, "Jane Austen", 203, "Romance"],
+    [5, "The Hobbit", 105, "J.R.R. Tolkien", 204, "Fantasy"],
+    [6, "LOTR", 105, "J.R.R. Tolkien", 204, "Fantasy"],
+  ];
+
+  const tableBEx: (string | number)[][] = [
+    ["Author ID", "Author Name"],
+    [101, "F. Scott Fitzgerald"],
+    [102, "Harper Lee"],
+    [103, "George Orwell"],
+    [104, "Jane Austen"],
+    [105, "J.R.R. Tolkien"],
+    [105, "J.R.R. Tolkien"],
+  ];
+
 
   //useEffect for normalizing table on load;
   useEffect(()=>{
-    if(!doneNormalizing){
-      let sd = sheetdata as WorkbookData;
+    if(startProcess && JSON.stringify(sheetdata) !== '{}'){
+      let sd = sheetdata as WorkbookData; 
+      let newWB:XLSX.WorkBook = {...workbook!}
       
+      //clear sheets in new work book copy
+      for(const sheet in newWB.SheetNames){
+         delete_ws(newWB, newWB.SheetNames[sheet as unknown as number])
+      }
+
       for(const sheet in normList){ 
         //adding primary keys to the sheets w/ no keys
         sd[normList[sheet]] = addPrimaryKey(sd[normList[sheet]] as [][]); 
+        //appending the updated sheet to workbook
         workbook!.Sheets[normList[sheet]] = XLSX.utils.aoa_to_sheet(sd[normList[sheet]] as [][]);
-        normalizeTbl(sd[normList[sheet]] as [][]); 
-        //normalizeTbl(originalTable);
+        //adding possible tables to newtablesArr
+        normalizeTbl(sd[normList[sheet]] as [][]);
+        //appending each new possible table in array to workbook 
         for(const newtable in newTablesArr){
           let ws = XLSX.utils.aoa_to_sheet(newTablesArr[newtable].tableValues);
+          
           /* Add the worksheet to the workbook */
           if(!workbook?.SheetNames.includes(newTablesArr[newtable].tableName)){
-            XLSX.utils.book_append_sheet(workbook!, ws, newTablesArr[newtable].tableName);
+            XLSX.utils.book_append_sheet(newWB!, ws, newTablesArr[newtable].tableName);
           }          
         }
       }
-      
       updateSData(sd as Object);
-      console.log("Current sd: ",sd);
+      updateWB(newWB);          
+      console.log("setting normalization to done...")
+      setNormDone(true);
+    }
+  },[startProcess])
+
+  useEffect(()=>{
+      if(JSON.stringify(sheetdata) !== '{}' && sheetdata !== undefined){
+        setStartProcess(true);
+      }
+  },[workbook, sheetNames])
+
+  //useEffect once normalization process is done
+  useEffect(()=>{
+    if(doneNormalizing){
       while(vsheets.length > 0){
         vsheets.pop();
       }
@@ -384,13 +538,25 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
       })
       console.log("VS:",vsheets);
       setCurrentSheet(vsheets[0])
-      setNormDone(true);
+      console.log("sd:",sheetdata);
+      console.log("setting read for re-read to true...")
+      setReread(true);
+      console.log("original workbook:", origWB);
     }
-  },[])
+    
+  },[doneNormalizing])
 
-  //set currentSheet and header array on load based from props
   useEffect(()=>{
-    if(doneNormalizing){
+    if(toReread){
+      console.log("read this data:", workbook)
+      readData(workbook!)
+    }
+    },[toReread])
+
+  //useEffect once done re-reading data
+  //set currentSheet and header array based from props
+  useEffect(()=>{
+    if(JSON.stringify(sheetdata) !== '{}')  {
       //typing currentSheet as key of sheetData
       const currSheet = currentSheet as keyof typeof sheetdata
       //typing object value as unknown before converting to row
@@ -398,8 +564,7 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
       let rowArr = row as [][]
       setHArr(rowArr)
     }
-    
-  },[doneNormalizing])
+  },[sheetdata])
 
   //useEffect for re-assigning the header array for the table when currentSheet state has changed
   useEffect(()=>{
@@ -460,7 +625,7 @@ useEffect(()=>{
           <div style={{display:'flex', flexDirection:'row'}}>
             <div style={{width: '85%'}}>
             {HeaderArr !== undefined && BodyArr !== undefined? <>
-                          <Paper elevation={0} sx={{ maxHeight:'270px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
+                          <Paper elevation={0} sx={{ minHeight:"150px", maxHeight:'270px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
                           <TableContainer>
                               <Table stickyHeader aria-label="sticky table">
                               <TableHead >
@@ -510,30 +675,38 @@ useEffect(()=>{
               <><CircularProgress size="10rem" 
               color="success" /></>}
             </div>
-            <div style={{width: '15%', display:"flex", flexDirection:"row"}} >
+            <div style={{width: '20%'}}>
               {/* for table tabs */}
-              <Tabs
-                orientation="vertical"
-                value= {currentSheet}
-                onChange={changeSheet}
-                TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
-                sx={{
-                "& button":{borderRadius: 0, color: 'black', backgroundColor: '#DCF1EC'},
-                "& button.Mui-selected":{backgroundColor: '#71C887', color: 'white'},
-                }}
-                aria-label="secondary tabs example"
-                >
-                {vsheets.length > 0? vsheets.map((sheet,i) =>{
-                    return(
-                          <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left"}}  value={sheet} label={sheet} />                     
-                    )
-                }):<></>}
-              </Tabs>
-            </div>
+              <div style={{display:"flex", flexDirection:"row", justifyContent:"space-between"}}>
+                  <Tabs
+                    orientation="vertical"
+                    variant="scrollable"
+                    scrollButtons={vsheets.length < 4? false: "auto"}
+                    value= {currentSheet}
+                    onChange={changeSheet}
+                    TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
+                    sx={{
+                    width:"100%",
+                    "& button":{borderRadius: 0, color: 'black', backgroundColor: '#DCF1EC'},
+                    "& button.Mui-selected":{backgroundColor: '#71C887', color: 'white'},
+                    }}
+                    aria-label="secondary tabs example"
+                    >
+                    {vsheets.length > 0? vsheets.map((sheet,i) =>{
+                        return(                                
+                          <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left"}}  value={sheet} label={sheet} />
+                        )
+                    }):<p></p>}
+                  </Tabs>
+              </div>
+            </div> 
           </div> 
           <div style={{display:"flex", justifyContent:"space-between"}}>
           <Button disableElevation onClick={cancelProcess} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: 'white', color:'black', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Cancel</Button>
-          <Button disableElevation onClick={nextFunc} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Next</Button>
+          <div>
+            <Button disableElevation onClick={nextFunc} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Decline</Button>
+            <Button disableElevation onClick={nextFunc} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Accept</Button>
+          </div>
           </div>
         </div>
     </Box>
