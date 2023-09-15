@@ -4,6 +4,8 @@ import * as XLSX from 'xlsx'
 import { Box, Button, CircularProgress, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, styled } from "@mui/material";
 import { useEffect, useState } from "react";
 import FileService from "../services/FileService";
+import { table } from "console";
+import { tab } from "@testing-library/user-event/dist/tab";
 
 
 
@@ -117,67 +119,54 @@ const readData = (wb: XLSX.WorkBook) => {
 }
 
   //add primary key function
-  function addPrimaryKey(table: (string | number)[][]): (string | number)[][] {
+  function addPrimaryKey(table: (number | string)[][], tableName:string): void {
+    // Check if the table is empty
+    if (table.length === 0 || table[0].length === 0) {
+      console.log("Table is empty. No modifications needed.");
+      return;
+    }
+  
+    // Assuming the first row contains the column names
     const headerRow = table[0];
-
-    // Check if the table already has a primary key column
-    const hasPrimaryKey = headerRow.some((columnName) => {
-        const values = new Set(table.slice(1).map((row) => row[headerRow.indexOf(columnName)]));
-        return values.size === table.length - 1;
-    });
-
-    if (hasPrimaryKey) {
-        console.log("Table already has a primary key.");
-        return table;
-    }
-
-    // Determine candidate primary key columns with unique values
-    const uniqueColumns: string[] = [];
-    
-    for (let i = 0; i < headerRow.length; i++) {
-        const columnName = headerRow[i];
-        const values = new Set(table.slice(1).map((row) => row[i]));
-        if (values.size === table.length - 1) {
-            uniqueColumns.push(columnName.toString());
+  
+    // Check if the table already has an auto-increment primary key
+    const hasNumberIDColumn = headerRow.some((columnName, columnIndex) => {
+      if (typeof table[1][columnIndex] === 'number') {
+        console.log("checking", table[1][columnIndex])
+        let uniqueVal: number[] = [];
+        for(let i=1; i < table.length; i++){
+          if(!uniqueVal.includes(table[i][columnIndex] as number)){
+            uniqueVal.push(table[i][columnIndex] as number)
+          }else{
+            return false;
+          }
         }
-    }
-    
-    // Check if any unique column has dependent columns
-    const hasValidPrimaryKey = uniqueColumns.some((primaryKey) => {
-        return !table.slice(1).some((row) => {
-            return uniqueColumns.some((uniqueCol) => uniqueCol !== primaryKey && row[headerRow.indexOf(uniqueCol)] !== null);
-        });
+        return true;
+      }
+      return false;
     });
-
-    if (hasValidPrimaryKey) {
-        return table;
+  
+    if (hasNumberIDColumn) {
+      console.log("Table already has a Number ID key. No modifications needed.");
+      return;
     }
-
-    // If there are unique columns, consider the first one as the primary key
-    if (uniqueColumns.length > 0) {
-        const primaryKeyColumn = uniqueColumns[0];
-        
-        // Add the primary key column to the header row on the left
-        headerRow.unshift(primaryKeyColumn);
-        
-        // Add the primary key values to each data row on the left
-        let idCounter = 1;
-        for (let i = 1; i < table.length; i++) {
-            table[i].unshift(idCounter++);
-        }
-        
-        return table;
+  
+    // Find the first available index for the new 'id' column
+    let idColumnIndex = 1;
+    while (headerRow.includes(`${tableName}_id`)) {
+      idColumnIndex++;
     }
-    
-    // If no valid primary key is found, add an auto-incrementing 'id' column on the left
-    headerRow.unshift('id');
-    let idCounter = 1;
+  
+    // Add the 'id' column to the header row at the beginning
+    headerRow.unshift(`${tableName}_id`);
+  
+    // Add auto-incrementing values to each row
     for (let i = 1; i < table.length; i++) {
-        table[i].unshift(idCounter++);
+      table[i].unshift(i);
     }
-    
-    return table;
-}
+  
+    console.log("Added an auto-increment 'id' column to the table.");
+  }
 
 function getUniquePrimaryTableName(): string{
   setPTabCtr(PrimaryTableCtr + 1);
@@ -306,13 +295,39 @@ function removeRepeatingRows(table: (string | number)[][]): (string | number)[][
 
   return uniqueTable;
 }
+
+function findPrimaryKey(table: (string | number)[][], columnName: string, searchValue: string | number): string | number {
+  console.log("searching for ", searchValue, " at " , columnName)
+  
+  // Find the index of the specified column
+  const columnIndex = table[0].indexOf(columnName);
+  console.log("index of column is ", columnIndex);
+
+  // If the column doesn't exist in the table, return null
+  if (columnIndex === -1) {
+    return -1;
+  }
+
+  // Iterate through the table's rows to find the primary key for the given value
+  for (let i = 1; i < table.length; i++) {
+    console.log(table[i][columnIndex], " === ", searchValue)
+    if (table[i][columnIndex] === searchValue) {
+      // Return the primary key value (assuming it's in the first column)
+      return table[i][0];
+    }
+  }
+
+  // If no match is found
+  return -1;
+}
+
 //replacing values in primary tables with foreign keys
 function replaceWithFK(tableA: (string | number)[][], tableB: (string | number)[][]) {
   // Deep copy of tableA
   const mergedTable: (string | number)[][] = JSON.parse(JSON.stringify(tableA));
 
   // Identify common columns between Table A and Table B
-  console.log("A: ",tableA[0], " and ", "B:", tableB[0])
+  console.log("A: ",tableA, " and ", "B:", tableB)
   const commonColumns = tableA[0].filter((col) => tableB[0].includes(col));
   console.log("common cols:", commonColumns);
   if (commonColumns.length === 0) {
@@ -325,15 +340,13 @@ function replaceWithFK(tableA: (string | number)[][], tableB: (string | number)[
   const removedCol: string[] = [];
   mergedTable[0] = mergedTable[0].filter((col, index) => {
     //if column is not found in tbl B return true
-    if (!commonColumns.includes(col) || col === commonColumns[0] || index === 0) {   
+    if (!commonColumns.includes(col)) {   
       console.log("COLUMN:",col," returns true");
       return true;
     }
     //if column is found in tbl B return false and push index to removed Indexes
     console.log("COLUMN:",col," returns false", "with index ", tableB[0].indexOf(col));
-    if(!(tableB[0].indexOf(col) === 0)){
-      removedCol.push(col as string);
-    }
+    removedCol.push(col as string);
     return false;
   });
 
@@ -349,8 +362,22 @@ function replaceWithFK(tableA: (string | number)[][], tableB: (string | number)[
   console.log("col to remove: ", removedCol)
   // get table A column names
   const headerRow = tableA[0];
-  // Find the index of the column name
-  console.log("Merged table before? ",mergedTable)
+  console.log("hr", headerRow);
+
+  // Replace the first column in removedCol with the first column in tableB (primary key of tableB)
+  let fColumnIndex = headerRow.findIndex((name) => name === removedCol[0]);
+  headerRow[fColumnIndex] = tableB[0][0];
+  console.log("new name: ",mergedTable[0][fColumnIndex]);
+  
+  for(let i = 1; i < mergedTable.length; i++){
+    console.log("val", mergedTable[i][fColumnIndex])
+    console.log("replacing with ",findPrimaryKey(tableB, removedCol[0], mergedTable[i][fColumnIndex]));
+    mergedTable[i][fColumnIndex] = findPrimaryKey(tableB, removedCol[0], mergedTable[i][fColumnIndex]);
+  }
+  //remove first column
+  removedCol.splice(0,1)
+
+  console.log("after replacing col with fk col to remove: ", removedCol)
 
   // Remove values from mergedTable for common columns (except for the primary key)
   for(const col in removedCol){
@@ -369,11 +396,10 @@ function replaceWithFK(tableA: (string | number)[][], tableB: (string | number)[
     }
     headerRow.splice(columnIndex, 1);
   }
-  
+  mergedTable[0] = headerRow;
 
   return mergedTable;
 }
-
 
 
 function normalizeTbl(inputTable: (string | number)[][]): void {
@@ -390,7 +416,7 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
         console.log(columnName," not found in do not search");
         let depArr = getColumnDependencies(columnName as string, newPrimaryTable, doNotSearch);
         console.log("Dependency array: ", depArr);
-        if(depArr.length > 1 && depArr.length !== numCols){
+        if(depArr.length > 1 && depArr.length !== numCols - col){
           for(const col in depArr){
             //inserting the column and the dependencies into do not search
             doNotSearch.push(depArr[col]); 
@@ -401,7 +427,7 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
           //remove repeating values
           newTblVal = removeRepeatingRows(newTblVal)
           //add primary key if not existing
-          newTblVal = addPrimaryKey(newTblVal);
+          addPrimaryKey(newTblVal, depArr[0]);
           console.log("updated val w/ key: ", newTblVal);
           //push new table to the newTablesArr
           if(!newTablesArr.some(newtab => newtab.tableName === depArr[0])){
@@ -499,7 +525,7 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
 
       for(const sheet in normList){ 
         //adding primary keys to the sheets w/ no keys
-        sd[normList[sheet]] = addPrimaryKey(sd[normList[sheet]] as [][]); 
+        addPrimaryKey(sd[normList[sheet]] as [][], normList[sheet]); 
         //appending the updated sheet to workbook
         workbook!.Sheets[normList[sheet]] = XLSX.utils.aoa_to_sheet(sd[normList[sheet]] as [][]);
         //adding possible tables to newtablesArr
