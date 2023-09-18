@@ -1,6 +1,6 @@
 import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as XLSX from 'xlsx'
 import FileService from "../services/FileService";
 
@@ -11,6 +11,7 @@ type ProcessingPageProps = {
     toggleNoTable: (status:boolean) => void,
     setTblCount: (num:number) => void;
     setFileData: (wb: XLSX.WorkBook | null, sheets:string[], vsheets:string[] ,sheetdata: object ) => void,
+    reset: () => void,
   }
 
   interface TableRow {
@@ -22,8 +23,9 @@ type ProcessingPageProps = {
   }
 
 
-export default function ProcessingPage ({stopLoading, startProcessing, toggleTable, toggleNoTable, setTblCount, setFileData}:ProcessingPageProps) {
+export default function ProcessingPage ({reset, stopLoading, startProcessing, toggleTable, toggleNoTable, setTblCount, setFileData}:ProcessingPageProps) {
     const loc = useLocation();
+    const nav = useNavigate();
     const fileId = loc.state.fileid;
     const [tblCtr, setTblCtr] = useState<number>(0)
     const [workbook, setWB] = useState<XLSX.WorkBook | null>()
@@ -100,7 +102,12 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
          //typing object value as unknown before converting to row
          const row =  sheetData[currSheet] as unknown
          let rowArr = row as [][]
-         setHArr(rowArr)
+         if(rowArr?.length > 500){
+            cancelProcess();
+            alert("Maximum amount of rows reached: 500");
+         }else{
+            setHArr(rowArr)
+         }       
          console.log("Sheet Data: ",sheetData);
     }
 
@@ -113,6 +120,16 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
         }).catch((err)=>{
             console.log(err);
         }) 
+    }
+
+    const cancelProcess = () => {
+        FileService.deleteFile(fileId).then((res)=>{
+          reset();
+          nav("/");
+        }).catch((err)=>{
+          console.log(err);
+        })
+        
     }
 
     //useEffect to fetch data on load
@@ -159,6 +176,7 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
     //start counting sheet amount once start count boolean is changed
     useEffect(()=>{
         if(startCount){
+
             let ctr = 0
             console.log("sn: ",sheetNames);
             //push table sheets to vsheets
@@ -263,6 +281,8 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
         }
         console.log("BArr",BodyArr)
     },[HeaderArr])
+
+
     
 
     return(

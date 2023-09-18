@@ -314,6 +314,8 @@ function App() {
                       reset={resetVariables}
                       wb={workbook}
                       sheetIndex={sheetIndex}
+                      normSheets={normSheets}
+                      updateNorm={updateNormList}
                       />
                     </div>  
                     </Modal>
@@ -363,6 +365,7 @@ function App() {
                       reset={resetVariables}
                       inclist={IncSheets}
                       updateSData = {updateSheetData}
+                      normSheets={normSheets}
                       />
                     </div>  
                     </Modal>
@@ -381,6 +384,7 @@ function App() {
                       reset={resetVariables}
                       inclist={IncSheets}
                       updateSData = {updateSheetData}
+                      normSheets={normSheets}
                       />
                     </div>  
                     </Modal>
@@ -401,7 +405,8 @@ function App() {
                     toggleTable={toggleTableDetect}
                     toggleNoTable={toggleNoTableDetect}
                     setTblCount={setTblCount}
-                    setFileData={setFileData}/>
+                    setFileData={setFileData}
+                    reset={resetVariables}/>
                     </>
                   }
                   />

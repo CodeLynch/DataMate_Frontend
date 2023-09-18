@@ -34,6 +34,7 @@ type EmptyProps = {
     sheetdata: object,
     reset: () => void,
     updateSData: (data:Object) => void,
+    normSheets:string[];
   }
 
 interface WorkbookData {
@@ -44,7 +45,7 @@ interface TableRow {
     [key: string]: string | number;
 }
 
-const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, toggleInconsistentDetect, workbook, toggleNormalized, sheets, vsheets, emptylist, sheetdata, reset, inclist, updateSData}: EmptyProps) => {  
+const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, toggleInconsistentDetect, workbook, normSheets, toggleNormalized, sheets, vsheets, emptylist, sheetdata, reset, inclist, updateSData}: EmptyProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -169,6 +170,8 @@ useEffect(()=>{
     if(inclist.length > 0){
       //open inconsistency prompt
       toggleInconsistentDetect(true);
+    }else if(normSheets.length > 0){
+      toggleNormalized(true);
     }else{
       //else open success prompt
       toggleImportSuccess(true);

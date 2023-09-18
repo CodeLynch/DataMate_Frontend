@@ -30,6 +30,7 @@ type IncProps = {
     sheetdata: object,
     reset: () => void,
     updateSData: (data:Object) => void,
+    normSheets: string[],
   }
 
 interface WorkbookData {
@@ -44,7 +45,7 @@ interface ColumnTypes {
     [columnName: string]: string[];
 }
 
-const InconsistentDetectPrompt = ({fileId, toggleNormalized, toggleImportSuccess, toggleInconsistentDetect, reset, workbook, sheets, vsheets, sheetdata, inclist, updateSData}: IncProps) => {  
+const InconsistentDetectPrompt = ({fileId, toggleNormalized, normSheets, toggleImportSuccess, toggleInconsistentDetect, reset, workbook, sheets, vsheets, sheetdata, inclist, updateSData}: IncProps) => {  
   const nav = useNavigate();
 
 
@@ -166,7 +167,13 @@ const InconsistentDetectPrompt = ({fileId, toggleNormalized, toggleImportSuccess
     }
     console.log("result: ", sd);
     toggleInconsistentDetect(false);
-    toggleImportSuccess(true);
+
+    if(normSheets.length > 0){
+      toggleNormalized(true);
+    }else{
+      toggleImportSuccess(true);
+    }
+    
   }
   
 

@@ -118,6 +118,24 @@ const readData = (wb: XLSX.WorkBook) => {
      console.log("Sheet Data: ",sheetdata);
 }
 
+function convertObjectToArray(obj: Record<string, string>[] | (number | string)[][]): (number | string)[][] {
+  if (Array.isArray(obj[0])) {
+    // If the first element is already an array, assume it's an array of arrays
+    return obj as (number | string)[][];
+  }
+
+  const resultArray: (number | string)[][] = [];
+
+  for (const item of obj) {
+    if (typeof item === 'object') {
+      const values = Object.values(item);
+      resultArray.push(values);
+    }
+  }
+
+  return resultArray;
+}
+
   //add primary key function
   function addPrimaryKey(table: (number | string)[][], tableName:string): void {
     // Check if the table is empty
@@ -128,6 +146,7 @@ const readData = (wb: XLSX.WorkBook) => {
   
     // Assuming the first row contains the column names
     const headerRow = table[0];
+    console.log("Header Row is: ", headerRow);
   
     // Check if the table already has an auto-increment primary key
     const hasNumberIDColumn = headerRow.some((columnName, columnIndex) => {
@@ -416,7 +435,7 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
         console.log(columnName," not found in do not search");
         let depArr = getColumnDependencies(columnName as string, newPrimaryTable, doNotSearch);
         console.log("Dependency array: ", depArr);
-        if(depArr.length > 1 && depArr.length !== numCols - col){
+        if(depArr.length > 1 && depArr.length < numCols - col){
           for(const col in depArr){
             //inserting the column and the dependencies into do not search
             doNotSearch.push(depArr[col]); 
@@ -427,7 +446,7 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
           //remove repeating values
           newTblVal = removeRepeatingRows(newTblVal)
           //add primary key if not existing
-          addPrimaryKey(newTblVal, depArr[0]);
+          addPrimaryKey(newTblVal as [][], depArr[0]);
           console.log("updated val w/ key: ", newTblVal);
           //push new table to the newTablesArr
           if(!newTablesArr.some(newtab => newtab.tableName === depArr[0])){
@@ -491,45 +510,28 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
     console.log("Array contains: ",newTablesArr);
   },[newTablesArr])
 
-  const originalTable: (string | number)[][] = [
-    ["Book ID", "Title", "Author ID", "Author Name", "Genre ID", "Genre Name"],
-    [1, "The Great Gatsby", 101, "F. Scott Fitzgerald", 201, "Fiction"],
-    [2, "To Kill a Mockingbird", 102, "Harper Lee", 202, "Fiction"],
-    [3, "1984", 103, "George Orwell", 201, "Fiction"],
-    [4, "Pride and Prejudice", 104, "Jane Austen", 203, "Romance"],
-    [5, "The Hobbit", 105, "J.R.R. Tolkien", 204, "Fantasy"],
-    [6, "LOTR", 105, "J.R.R. Tolkien", 204, "Fantasy"],
-  ];
-
-  const tableBEx: (string | number)[][] = [
-    ["Author ID", "Author Name"],
-    [101, "F. Scott Fitzgerald"],
-    [102, "Harper Lee"],
-    [103, "George Orwell"],
-    [104, "Jane Austen"],
-    [105, "J.R.R. Tolkien"],
-    [105, "J.R.R. Tolkien"],
-  ];
-
-
   //useEffect for normalizing table on load;
   useEffect(()=>{
     if(startProcess && JSON.stringify(sheetdata) !== '{}'){
       let sd = sheetdata as WorkbookData; 
       let newWB:XLSX.WorkBook = {...workbook!}
       
-      //clear sheets in new work book copy
+      //clear sheets found in norm list in new work book copy
       for(const sheet in newWB.SheetNames){
-         delete_ws(newWB, newWB.SheetNames[sheet as unknown as number])
+         
+         if(normList.includes(newWB.SheetNames[sheet])){
+            console.log("Deleting ", newWB.SheetNames[sheet], "...")
+           delete_ws(newWB, newWB.SheetNames[sheet as unknown as number])
+         }
       }
 
       for(const sheet in normList){ 
         //adding primary keys to the sheets w/ no keys
-        addPrimaryKey(sd[normList[sheet]] as [][], normList[sheet]); 
+        addPrimaryKey(convertObjectToArray(sd[normList[sheet]] as [][]), normList[sheet]); 
         //appending the updated sheet to workbook
-        workbook!.Sheets[normList[sheet]] = XLSX.utils.aoa_to_sheet(sd[normList[sheet]] as [][]);
+        workbook!.Sheets[normList[sheet]] = XLSX.utils.aoa_to_sheet(convertObjectToArray(sd[normList[sheet]] as [][]));
         //adding possible tables to newtablesArr
-        normalizeTbl(sd[normList[sheet]] as [][]);
+        normalizeTbl(convertObjectToArray(sd[normList[sheet]] as [][]));
         //appending each new possible table in array to workbook 
         for(const newtable in newTablesArr){
           let ws = XLSX.utils.aoa_to_sheet(newTablesArr[newtable].tableValues);

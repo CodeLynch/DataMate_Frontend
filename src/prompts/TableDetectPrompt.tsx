@@ -281,102 +281,112 @@ useEffect(()=>{
       return false; // The table is empty
     }
   
-    // Initialize an object to store unique values for each column
-    const uniqueValues: { [key: string]: Set<string | number> } = {};
-  
+    let isFirstIteration = true;
+    const firstColumnValues: Set<number> = new Set();
+
     for (const row of table) {
-      for (const columnName in row) {
-        if (row.hasOwnProperty(columnName)) {
-          const cellValue = row[columnName];
-  
-          // Initialize a set for each column if it doesn't exist
-          if (!uniqueValues[columnName]) {
-            uniqueValues[columnName] = new Set();
-          }
-  
-          // Check for null values in the column
-          if (cellValue === null || cellValue === "NULL") {
-            console.log(cellValue, "will return false");
-            return false; // Found a null value, not a possible primary key
-          }
-  
-          // Check for uniqueness within the column
-          if (uniqueValues[columnName].has(cellValue)) {
-            console.log(cellValue, "will return false");
-            return false; // Found a duplicate value, not a possible primary key
-          }
-  
-          // Add the value to the set
-          uniqueValues[columnName].add(cellValue);
-        }
+      if (isFirstIteration) {
+        isFirstIteration = false;
+        continue; // Skip the first iteration (headers)
       }
-    }
-  
-    // Check if there is at least one column with all unique values and no nulls
-    for (const columnName in uniqueValues) {
-      if (uniqueValues.hasOwnProperty(columnName)) {
-        if (uniqueValues[columnName].size === table.length) {
-          console.log(uniqueValues[columnName]," will return true")
-          return true; // Found a possible primary key column
-        }
+
+      const firstColumnValue = row[Object.keys(row)[0]]; // Get the value of the first column in each row
+
+      if (typeof firstColumnValue !== "number" || firstColumnValues.has(firstColumnValue)) {
+        return false; // The first column has a non-numeric value or a duplicate value
       }
+
+      firstColumnValues.add(firstColumnValue);
     }
-    console.log("There are no columns with unique values so I return false");
-    return false; // No possible primary key column found
+    
+  
+  
+    return true; // The first column has unique numeric values
   }
 
-  function canBeNormalized(rows: TableRow[]): boolean {
-    const valueToColumnsMap: { [key: string]: string[] } = {};
-    const dependencies: { [key: string]: Set<string> } = {};
+  //getting a string array of a column name and its dependencies
+function getColumnDependencies(columnName: string, table: (string | number)[][], doneSearching: string[]): string[] {
+  const columnIndex = table[0].indexOf(columnName);
 
-    // Populate the valueToColumnsMap with values as keys and an array of columns that have that value
-    for (const row of rows) {
-        for (const key in row) {
-            const value = row[key].toString();
-            if (!valueToColumnsMap[value]) {
-                valueToColumnsMap[value] = [];
-            }
-            valueToColumnsMap[value].push(key);
+  if (columnIndex === -1) {
+    return [];
+  }
+
+  const numRows = table.length;
+  const dependencies: string[] = [columnName];
+
+  for (let col = 1; col < table[0].length; col++) {
+    if (col !== columnIndex) {
+      const otherColumn = table[0][col];
+      let isDependency = true;
+
+      for (let row = 1; row < numRows; row++) {
+        const targetValue = table[row][columnIndex];
+        const otherValue = table[row][col];
+
+        if (!hasCorrespondingValue(table, columnName, otherColumn as string, targetValue, otherValue)) {
+          isDependency = false;
+          break;
         }
-    }
+      }
 
-    // Build dependencies between columns based on values in each row
-    for (const value in valueToColumnsMap) {
-        const columns = valueToColumnsMap[value];
-        if (columns.length > 1) {
-            for (let i = 0; i < columns.length; i++) {
-                const columnA = columns[i];
-                if (!dependencies[columnA]) {
-                    dependencies[columnA] = new Set();
-                }
-                for (let j = 0; j < columns.length; j++) {
-                    const columnB = columns[j];
-                    if (i !== j) {
-                        if (dependsOn(rows, columnA, columnB)) {
-                            dependencies[columnA].add(columnB);
-                        }
-                    }
-                }
-            }
-        }
+      if (isDependency && !doneSearching.includes(otherColumn as string)) {
+        dependencies.push(otherColumn as string);
+      }
     }
+  }
 
-    // Check if any column has dependencies
-    for (const column in dependencies) {
-        if (dependencies[column].size > 0) {
-            console.log(dependencies[column], "will return true");
-            return true;
-        }
-    }
+  return dependencies;
+}
 
-    console.log("none returned true");
+function hasCorrespondingValue(table: (string | number)[][], columnName1: string, columnName2: string, targetValue: any, currentValue: any): boolean {
+  const columnIndex1 = table[0].indexOf(columnName1);
+  const columnIndex2 = table[0].indexOf(columnName2);
+
+  if (columnIndex1 === -1 || columnIndex2 === -1) {
     return false;
+  }
+
+  for (let row = 1; row < table.length; row++) {
+    if (table[row][columnIndex1] === targetValue && table[row][columnIndex2] !== currentValue) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
-function dependsOn(rows: TableRow[], columnA: string, columnB: string): boolean {
-    // Check if columnA depends on columnB by checking if there is any row where columnA equals columnB
-    return rows.some((row) => row[columnA] === row[columnB]);
-}
+  function canBeNormalized(rows: (string | number)[][]): boolean {
+    let doNotSearch:string[] = [];
+    const numCols = rows[0].length;
+    let res = false;
+
+    for (let col = 0; col < numCols; col++) {
+      const columnName = rows[0][col];
+      console.log(`Column Name: ${columnName}`);
+      if(!doNotSearch.includes(columnName as string)){
+        console.log(columnName," not found in do not search");
+        let depArr = getColumnDependencies(columnName as string, rows, doNotSearch);
+        console.log("Dependency array: ", depArr);
+        console.log("total cols left:", numCols - col)
+        if(depArr.length > 1 && depArr.length !== numCols - col){
+          for(const col in depArr){
+            //inserting the column and the dependencies into do not search
+            doNotSearch.push(depArr[col]); 
+          } 
+          //concat the columns in the depArr as table
+          console.log("depArr", depArr)
+          res = true;
+          break;
+        }else{
+          doNotSearch.push(columnName as string);
+        }
+      }
+    }
+
+    return res;
+  }
+
 
   function togglePrompts(){
     const sd = sheetdata as WorkbookData;
@@ -396,10 +406,10 @@ function dependsOn(rows: TableRow[], columnA: string, columnB: string): boolean 
           SetInconsistent(true);
         }
       }
-      console.log("result: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as TableRow[]));
-      console.log("has possible pk: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]), "can be normalized: ", canBeNormalized(sd[vsheets[s]] as TableRow[]));
+      console.log("result: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as [][]));
+      console.log("has possible pk: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]), "can be normalized: ", canBeNormalized(sd[vsheets[s]] as [][]));
       //if block for normalized prompt
-      if(!(hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as TableRow[]) )){
+      if(!(hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as [][]))){
         console.log("this happened");
         if(!normSheets.includes(vsheets[s])){
           updateNorm(vsheets[s]);
