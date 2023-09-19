@@ -1,6 +1,6 @@
 import FileScreen from "../components/FileScreen";
 
-export default function SpecificTemplatePage() {
+export default function FilePage() {
   return (
     <div>
       <FileScreen></FileScreen>

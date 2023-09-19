@@ -30,6 +30,7 @@ import EmptyDetectPrompt from "./prompts/EmptyDetectPrompt";
 import InconsistentDetectPrompt from "./prompts/InconsistentDetectPrompt";
 import SuccessPrompt from "./prompts/SuccessPrompt";
 import ProcessingPage from "./pages/ProcessingPage";
+import DeleteProfile from "./components/DeleteProfile";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -426,64 +427,16 @@ function App() {
                     </>
                   }
                 />
-                <Route path="/template/1">
-                  <Route
-                    index
-                    element={
-                      <Box sx={{ padding: "1px" }}>
-                        <SpecificTemplatePage />
-                      </Box>
-                    }
-                  />
-                </Route>
+                <Route path="/template/" element={<SpecificTemplatePage />} />
                 <Route
-                  path="/file"
-                  element={
-                    <>
-                      <Filepage stopLoading={StopLoading} />
-                    </>
-                  }
+                  path="/file/"
+                  element={<Filepage stopLoading={StopLoading} />}
                 />
-                <Route path="/templates">
-                  <Route
-                    index
-                    element={
-                      <Box sx={{ padding: "1px" }}>
-                        <TemplatesPage />
-                      </Box>
-                    }
-                  />
-                </Route>
-                <Route path="/files">
-                  <Route
-                    index
-                    element={
-                      <Box sx={{ padding: "1px" }}>
-                        <FileScreenPage />
-                      </Box>
-                    }
-                  />
-                </Route>
-                <Route path="/databases">
-                  <Route
-                    index
-                    element={
-                      <Box sx={{ padding: "1px" }}>
-                        <DatabaseScreenPage />
-                      </Box>
-                    }
-                  />
-                </Route>
-                <Route path="/delete-profile">
-                  <Route
-                    index
-                    element={
-                      <Box sx={{ padding: "1px" }}>
-                        <DeleteProfile />
-                      </Box>
-                    }
-                  />
-                </Route>
+                <Route path="/templates" element={<TemplatesPage />} />
+                <Route path="/files" element={<FileScreenPage />} />
+                <Route path="/databases" element={<DatabaseScreenPage />} />
+                <Route path="/delete-profile/:id" element={<DeleteProfile />} />
+
                 {/* Add your other routes here */}
               </Routes>
             </Box>
