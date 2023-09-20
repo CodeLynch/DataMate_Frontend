@@ -23,8 +23,22 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchIcon from "@mui/icons-material/Search";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import FileService from "../api/FileService";
+import { ResponseFile } from "../api/dataTypes";
+import ImportFile from "../prompts/ImportFile";
+
+type FileId = string;
 
 const FileList: React.FC<{}> = () => {
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  const openImportModal = () => {
+    setIsImportModalOpen(true);
+  };
+
+  const closeImportModal = () => {
+    setIsImportModalOpen(false);
+  };
   const [isLargeScreen, setIsLargeScreen] = useState(false);
 
   useEffect(() => {
@@ -39,47 +53,32 @@ const FileList: React.FC<{}> = () => {
     };
   }, []);
 
-  const files = [
-    {
-      id: "1",
-      name: "file1.xlsx",
-      thumbnailUrl:
-        "https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png",
-      lastModified: "07-24-2023",
-    },
-    {
-      id: "2",
-      name: "file2.xlsx",
-      thumbnailUrl:
-        "https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png",
-      lastModified: "07-24-2023",
-    },
-    {
-      id: "17eKuW",
-      name: "3minVideo- Mariel Genodiala.mp4",
-      thumbnailUrl:
-        "https://lh3.google.com/u/0/d/17eKuWffSREjjJWVIgoSrvB0icBBIcByh=w494-h370-p-k-nu-iv3",
-      lastModified: "07-24-2023",
-    },
-    {
-      id: "4",
-      name: "file4.xlsx",
-      thumbnailUrl:
-        "https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png",
-      lastModified: "07-24-2023",
-    },
-    {
-      id: "vB0icBBIcByh",
-      name: "3minVideo- Mariel Genodiala.mp4",
-      thumbnailUrl:
-        "https://lh3.google.com/u/0/d/17eKuWffSREjjJWVIgoSrvB0icBBIcByh=w494-h370-p-k-nu-iv3",
-    },
-  ];
-
+  const [files, setFiles] = useState<ResponseFile[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState("All");
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [selectedMenuOption, setSelectedMenuOption] = useState("");
+
+  //fetch all files
+  useEffect(() => {
+    const fetchData = async () => {
+      const files = await FileService.getAllFiles();
+      setFiles(files.filter((file) => !file.isdeleted));
+    };
+
+    fetchData();
+  }, []);
+
+  //delete specific file
+  const handleDelete = async (id: number) => {
+    try {
+      await FileService.deleteFile(id);
+      setFiles((prevFiles) => prevFiles.filter((file) => file.fileId !== id));
+    } catch (error) {
+      console.error("Delete error:", error);
+      // Handle error
+    }
+  };
 
   //Sort by
   const handleDropdownToggle = () => {
@@ -92,16 +91,26 @@ const FileList: React.FC<{}> = () => {
   };
 
   //file menu
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  //to fully get
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [selectedFileId, setSelectedFileId] = useState<FileId | null>(null);
 
   const handleIconButtonClick = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
-    setAnchorEl(event.currentTarget);
+    const target = event.currentTarget;
+    const fileId = target.dataset.fileId;
+
+    if (fileId) {
+      setAnchorEl(target);
+      setSelectedFileId(fileId);
+    }
   };
 
   const handlePopoverClose = () => {
     setAnchorEl(null);
+    setSelectedFileId(null);
   };
 
   const handleOptionSelectPop = (option: string) => {
@@ -137,6 +146,16 @@ const FileList: React.FC<{}> = () => {
     setShowAdditionalButtons(!showAdditionalButtons);
   };
 
+  //search funtion
+  const [searchQuery, setSearchQuery] = useState(""); // State for the search query
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const filteredFiles = files.filter((file) =>
+    file.fileName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   return (
     <Grid
       paddingLeft={{ lg: 2, xl: 2 }}
@@ -190,22 +209,30 @@ const FileList: React.FC<{}> = () => {
               type="text"
               placeholder="Search"
               aria-label="Search"
+              // value={searchQuery}
+              // onChange={handleSearchInputChange}
             />
           </Grid>
           {isLargeScreen && (
-            <Link underline="none" href="/home" color={"black"}>
-              <IconButton
-                style={{
-                  marginLeft: "24px",
-                  fontSize: "20px",
-                }}
-              >
-                <AddCircleIcon
-                  style={{ height: "30", width: "30", color: "green" }}
-                />
-                <span style={{ color: "black", marginLeft: "12px" }}>New</span>
-              </IconButton>
-            </Link>
+            <IconButton
+              style={{
+                marginLeft: "24px",
+                fontSize: "20px",
+              }}
+              onClick={openImportModal}
+            >
+              <AddCircleIcon
+                style={{ height: "30", width: "30", color: "green" }}
+              />
+              <span style={{ color: "black", marginLeft: "12px" }}>New</span>
+            </IconButton>
+          )}
+          {isImportModalOpen && (
+            <ImportFile
+              toggleImport={closeImportModal}
+              startLoading={() => {}}
+              setFileId={(num: number) => {}}
+            />
           )}
           {isLargeScreen && (
             <IconButton
@@ -321,161 +348,7 @@ const FileList: React.FC<{}> = () => {
               </Button>
             </div>
           )}
-          {/* <div style={{ textAlign: "left" }}>
-            {window.innerWidth <= 768 && (
-              <button
-                style={{
-                  paddingLeft: "16px",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                }}
-                onClick={toggleAdditionalButtons}
-              >
-                <MoreVertIcon
-                  style={{ fill: "green", width: "1em", height: "1em" }}
-                />
-              </button>
-            )}
-            <Drawer
-              anchor="bottom"
-              open={showAdditionalButtons}
-              onClose={toggleAdditionalButtons}
-            >
-              <Stack
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                }}
-              >
-                <IconButton
-                  style={{
-                    marginLeft: "24px",
-                    marginTop: "20px",
-                    fontSize: "20px",
-                  }}
-                >
-                  <AddCircleIcon
-                    style={{ height: "30", width: "30", color: "green" }}
-                  />
-                  <span style={{ color: "black", marginLeft: "12px" }}>
-                    New
-                  </span>
-                </IconButton>
-                <IconButton
-                  style={{
-                    marginLeft: "24px",
-                    fontSize: "20px",
-                  }}
-                >
-                  <img
-                    src={trashBinImage}
-                    alt="Bin"
-                    style={{
-                      width: "28px",
-                      height: "28px",
-                      marginRight: "12px",
-                    }}
-                  />
-                  <span style={{ color: "black" }}>Bin</span>
-                </IconButton>
-                <IconButton
-                  style={{
-                    marginLeft: "24px",
-                    fontSize: "20px",
-                  }}
-                >
-                  <span style={{ color: "black" }}>Activity Log</span>
-                </IconButton>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <span
-                    style={{
-                      color: "#000",
-                      marginRight: "12px",
-                      marginLeft: "28px",
-                      fontSize: "20px",
-                    }}
-                  >
-                    Sort by:
-                  </span>
-                  <FormControl>
-                    <div
-                      onClick={handleDropdownToggle}
-                      style={{
-                        background: "#71C887",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "8px 16px",
-                        width: "fit-content", // Add this line to adjust the width
-                      }}
-                    >
-                      <span
-                        style={{
-                          color: "#fff",
-                          fontWeight: "bold",
-                          marginRight: "8px",
-                        }}
-                      >
-                        {selectedOption}
-                      </span>
-                      <KeyboardArrowDownIcon
-                        style={{ fontSize: "20px", color: "#fff" }}
-                      />
-                    </div>
-                    {isDropdownOpen && (
-                      <div
-                        style={{
-                          background: "#fff",
-                          borderRadius: "4px",
-                          position: "absolute",
-                          top: "100%",
-                          left: 0,
-                          marginTop: "8px",
-                          padding: "8px",
-                          fontSize: "20px",
-                          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Optional: Add a shadow for better visibility
-                        }}
-                      >
-                        <MenuItem
-                          onClick={() => handleOptionSelect("All")}
-                          style={{ cursor: "pointer", color: "#000" }}
-                        >
-                          All
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => handleOptionSelect("Date")}
-                          style={{ cursor: "pointer", color: "#000" }}
-                        >
-                          Date
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => handleOptionSelect("Size")}
-                          style={{ cursor: "pointer", color: "#000" }}
-                        >
-                          Size
-                        </MenuItem>
-                      </div>
-                    )}
-                  </FormControl>
-                </div>
-                <Button
-                  style={{
-                    marginLeft: "24px",
-                    cursor: "pointer",
-                    background: "none",
-                    border: "none",
-                    color: "red",
-                    fontSize: "10px",
-                  }}
-                >
-                  Clear Filter
-                </Button>
-              </Stack>
-            </Drawer>
-          </div> */}
+
           <div style={{ textAlign: "left" }}>
             {window.innerWidth <= 768 && (
               <IconButton
@@ -651,9 +524,9 @@ const FileList: React.FC<{}> = () => {
           paddingLeft={{ lg: 10, xl: 12 }}
           paddingRight={{ xs: 2, sm: 2 }}
         >
-          {files.map((file) => (
+          {/* {files.map((file) => (
             <Grid
-              key={file.id}
+              key={file.fileId}
               item
               paddingLeft={2}
               //12 is the w-full
@@ -683,8 +556,13 @@ const FileList: React.FC<{}> = () => {
                   }}
                 >
                   <div style={{ flex: "1" }}>
-                    <Link underline="none" href="/FilePage" color={"black"}>
-                      {file.name}
+                    <Link
+                      underline="none"
+                      href={file.fileDownloadUri}
+                      target="_blank"
+                      color="black"
+                    >
+                      {file.fileName}
                     </Link>
                   </div>
                   <IconButton
@@ -749,7 +627,7 @@ const FileList: React.FC<{}> = () => {
                   <Link href="/FilePage">
                     <Box
                       component="img"
-                      src={file.thumbnailUrl}
+                      // src={file.thumbnailUrl}
                       alt="Thumbnail preview of a Drive item"
                       style={{
                         width: "100%",
@@ -774,7 +652,156 @@ const FileList: React.FC<{}> = () => {
                 }}
                 paddingRight={{ lg: 15 }}
               >
-                Last Modified: {file.lastModified}
+                Last Modified: {file.latestDateModified}
+              </Grid>
+            </Grid>
+          ))} */}
+          {files.map((file) => (
+            <Grid
+              key={file.fileId}
+              item
+              paddingLeft={2}
+              xs={12}
+              sm={6}
+              md={4}
+              lg={4}
+              xl={4}
+              paddingBottom={2}
+            >
+              <Grid
+                maxWidth={{ xs: "100%", sm: "100%", xl: "80%", lg: "60%" }}
+                paddingX={"20px"}
+                paddingY={{ lg: "10px" }}
+                style={{
+                  backgroundColor: "#71C887",
+                  borderRadius: "8px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <div style={{ flex: "1" }}>
+                    <Link
+                      underline="none"
+                      href={`/file/${file.fileName}`}
+                      color="black"
+                    >
+                      {file.fileName}
+                    </Link>
+                  </div>
+                  <IconButton
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                    onClick={handleIconButtonClick}
+                    data-file-id={file.fileId} // Add this line
+                  >
+                    <MoreHorizIcon
+                      style={{ fill: "black", width: "1em", height: "1em" }}
+                    />
+                  </IconButton>
+
+                  <Popover
+                    open={
+                      isPopoverOpen &&
+                      String(selectedFileId) === String(file.fileId)
+                    }
+                    anchorEl={anchorEl}
+                    onClose={handlePopoverClose}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "center",
+                    }}
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "center",
+                    }}
+                  >
+                    <List>
+                      <ListItem
+                        button
+                        onClick={() => {
+                          console.log(
+                            `Details option selected for fileId: ${file.fileId}`
+                          );
+                          handleOptionSelectPop("details");
+                        }}
+                      >
+                        <ListItemText primary="Details" />
+                      </ListItem>
+                      <ListItem
+                        button
+                        onClick={() => {
+                          console.log(
+                            `Delete option selected for fileId: ${file.fileId}`
+                          );
+                          handleDelete(file.fileId);
+                        }}
+                      >
+                        <ListItemText primary="Delete" />
+                      </ListItem>
+                      <ListItem
+                        button
+                        onClick={() => {
+                          console.log(
+                            `Open option selected for fileId: ${file.fileId}`
+                          );
+                          handleOptionSelectPop("open");
+                        }}
+                      >
+                        <ListItemText primary="Open" />
+                      </ListItem>
+                    </List>
+                  </Popover>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100%",
+                  }}
+                >
+                  <Link href={`/file/${file.fileId}`}>
+                    {" "}
+                    <img
+                      src="https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png"
+                      alt="Thumbnail preview of a Drive item"
+                      style={{
+                        width: "100%",
+                        height: "200px",
+                        paddingTop: "3px",
+                        paddingBottom: "10px",
+                        borderRadius: "8px",
+                        display: "block",
+                        margin: "0 auto",
+                      }}
+                    />
+                  </Link>
+                </div>
+              </Grid>
+              <Grid
+                style={{
+                  textAlign: "center",
+                  marginTop: "0.5rem",
+                  fontSize: "14px",
+                  color: "#888",
+                  fontStyle: "italic",
+                }}
+                paddingRight={{ lg: 15 }}
+              >
+                Last Modified: {file.latestDateModified}
               </Grid>
             </Grid>
           ))}
