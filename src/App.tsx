@@ -1,28 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import SnackbarContextProvider from './helpers/SnackbarContext';
-import Topbar from './components/Topbar';
-import { ThemeProvider } from '@mui/material/styles';
-import { PaletteColorOptions, createTheme } from '@mui/material/styles';
-import { Backdrop, Box, Button, CircularProgress, Modal, Typography } from '@mui/material';
-import './App.css';
-import Home from './components/Home';
-import ImportFile from './prompts/ImportFile';
-import './styles/SupportStyles.css'
-import Filepage from './pages/Filepage';
-import SpecificTemplatePage from './pages/SpecificTemplatePage';
-import Navbar from './components/Navbar';
-import TemplatesPage from './pages/TemplatesPage';
-import FileScreenPage from './pages/FileScreenPage';
-import * as XLSX from 'xlsx';
-import DatabaseScreenPage from './pages/DatabaseScreenPage';
-import TableDetectPrompt from './prompts/TableDetectPrompt';
-import SelectTablePrompt from './prompts/SelectTablePrompt';
-import NoTablesDetectPrompt from './prompts/NoTablesDetectPrompt';
-import EmptyDetectPrompt from './prompts/EmptyDetectPrompt';
-import InconsistentDetectPrompt from './prompts/InconsistentDetectPrompt';
-import SuccessPrompt from './prompts/SuccessPrompt';
-import ProcessingPage from './pages/ProcessingPage';
+import React, { useEffect, useState } from "react";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import SnackbarContextProvider from "./helpers/SnackbarContext";
+import Topbar from "./components/Topbar";
+import { ThemeProvider } from "@mui/material/styles";
+import { PaletteColorOptions, createTheme } from "@mui/material/styles";
+import {
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  Modal,
+  Typography,
+} from "@mui/material";
+import "./App.css";
+import Home from "./components/Home";
+import ImportFile from "./prompts/ImportFile";
+import "./styles/SupportStyles.css";
+import Filepage from "./pages/Filepage";
+import SpecificTemplatePage from "./pages/SpecificTemplatePage";
+import Navbar from "./components/Navbar";
+import TemplatesPage from "./pages/TemplatesPage";
+import FileScreenPage from "./pages/FileScreenPage";
+import * as XLSX from "xlsx";
+import DatabaseScreenPage from "./pages/DatabaseScreenPage";
+import TableDetectPrompt from "./prompts/TableDetectPrompt";
+import SelectTablePrompt from "./prompts/SelectTablePrompt";
+import NoTablesDetectPrompt from "./prompts/NoTablesDetectPrompt";
+import EmptyDetectPrompt from "./prompts/EmptyDetectPrompt";
+import InconsistentDetectPrompt from "./prompts/InconsistentDetectPrompt";
+import SuccessPrompt from "./prompts/SuccessPrompt";
+import ProcessingPage from "./pages/ProcessingPage";
+import DeleteProfile from "./components/DeleteProfile";
 import NormalizePrompt from './prompts/NormalizePrompt';
 
 /* Customize default MUI theme */
@@ -81,7 +89,7 @@ function App() {
   //number state for the id of the current file uploaded
   const [uploadedFileId, setUploadedFileId] = useState(0);
   //workbook state for the current uploaded file
-  const [workbook, setWB] = useState<XLSX.WorkBook | null>()
+  const [workbook, setWB] = useState<XLSX.WorkBook | null>();
   //string array state for the sheetnames of the current uploaded file
   const [sheetNames, setSheetNames] = useState<string[]>([]);
   //string array for the sheetnames of the sheets that are valid tables of the uploaded file
@@ -97,7 +105,6 @@ function App() {
   //number state for the index of the sheet to be displayed in select table
   const [sheetIndex, setSIndex] = useState(0);
 
-
   // const handleDrawerOpen = () => {
   //   setOpen(true);
   // };
@@ -110,27 +117,27 @@ function App() {
     setShowUpload(!showUpload);
   };
 
-  const toggleTableDetect = (status:boolean) =>{
+  const toggleTableDetect = (status: boolean) => {
     setTableDetect(status);
-  }
+  };
 
-  const toggleNoTableDetect = (status:boolean) =>{
+  const toggleNoTableDetect = (status: boolean) => {
     setNoTableDetect(status);
-  }
+  };
 
-  const toggleEmptyDetect = (status:boolean) =>{
+  const toggleEmptyDetect = (status: boolean) => {
     setEmptyDetect(status);
-  }
+  };
 
-  const toggleInconsistent = (status:boolean) =>{
+  const toggleInconsistent = (status: boolean) => {
     setIncDetect(status);
-  }
+  };
 
-  const toggleImportSuccess = (status:boolean) =>{
+  const toggleImportSuccess = (status: boolean) => {
     setSuccess(status);
-  }
+  };
 
-  const toggleSelect = (status:boolean, sheetIndex:number) =>{
+  const toggleSelect = (status: boolean, sheetIndex: number) => {
     setSIndex(sheetIndex);
     setSelect(status);
   }
@@ -153,30 +160,35 @@ function App() {
 
   const StartProcessing = () => {
     setProcessing(true);
-  }
+  };
 
   const StopProcessing = () => {
     setProcessing(false);
-  }
+  };
 
-  const setTblCount = (count:number) =>{
+  const setTblCount = (count: number) => {
     setTableCount(count);
-  }
+  };
 
-  const setFileId = (id:number) => {
+  const setFileId = (id: number) => {
     setUploadedFileId(id);
-  }
+  };
 
-  const setFileData = (wb: XLSX.WorkBook | null, sheets:string[], vsheets:string[] ,sheetdata: object ) =>{
+  const setFileData = (
+    wb: XLSX.WorkBook | null,
+    sheets: string[],
+    vsheets: string[],
+    sheetdata: object
+  ) => {
     setWB(wb);
     setSheetNames(sheets);
     setVSheets(vsheets);
     setSData(sheetdata);
-  }
+  };
 
-  const updateEmptyList = (sheet:string) => {
-    SheetsWithEmpty.push(sheet)
-  }
+  const updateEmptyList = (sheet: string) => {
+    SheetsWithEmpty.push(sheet);
+  };
 
   const updateIncList = (sheet:string) => {
     IncSheets.push(sheet)
@@ -201,11 +213,11 @@ function App() {
     setTableDetect(false);
     setIncDetect(false);
     setNoTableDetect(false);
-  }
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
     resetVariables();
-  },[])
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -231,9 +243,13 @@ function App() {
                     element={
                       <>
                         <Modal open={showUpload} onClose={toggleUpload}>
-                        <div>
-                          <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} setFileId={setFileId} />
-                        </div>  
+                          <div>
+                            <ImportFile
+                              toggleImport={toggleUpload}
+                              startLoading={StartLoading}
+                              setFileId={setFileId}
+                            />
+                          </div>
                         </Modal>
                         <Box>
                           <div>
@@ -243,25 +259,36 @@ function App() {
                           </div>
                         </Box>
                       </>
-                      }
-                    />
-                  </Route>
-                  <Route path="/processing" element={
+                    }
+                  />
+                </Route>
+                <Route
+                  path="/processing"
+                  element={
                     <>
-                    <Backdrop
-                    sx={{ color: '#FFFFFF', zIndex: (theme) => theme.zIndex.modal - 1,
-                    marginTop:"4rem",
-                    position: 'fixed',
-                    width: '100%',
-                    height:'100%',}}
-                    open={isProcessing}
-                    >
-                      <div style={{display: 'flex', flexDirection:"column", justifyContent:"center", alignItems:"center"}}>
-                        <CircularProgress size="10rem" 
-                          color="success" />
-                        <h1>Processing data...</h1>
-                      </div>
-                    </Backdrop>
+                      <Backdrop
+                        sx={{
+                          color: "#FFFFFF",
+                          zIndex: (theme) => theme.zIndex.modal - 1,
+                          marginTop: "4rem",
+                          position: "fixed",
+                          width: "100%",
+                          height: "100%",
+                        }}
+                        open={isProcessing}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <CircularProgress size="10rem" color="success" />
+                          <h1>Processing data...</h1>
+                        </div>
+                      </Backdrop>
 
                     {//modal for detect tables here
                     } 
@@ -320,12 +347,16 @@ function App() {
                     </div>  
                     </Modal>
 
-                    {/* modal for no tables detected here  */}
-                    <Modal open={NoTableDetect} onClose={toggleNoTableDetect}>
-                    <div>
-                      <NoTablesDetectPrompt toggleNoTable={toggleUpload} fileId={uploadedFileId} reset={resetVariables} />
-                    </div>  
-                    </Modal>
+                      {/* modal for no tables detected here  */}
+                      <Modal open={NoTableDetect} onClose={toggleNoTableDetect}>
+                        <div>
+                          <NoTablesDetectPrompt
+                            toggleNoTable={toggleUpload}
+                            fileId={uploadedFileId}
+                            reset={resetVariables}
+                          />
+                        </div>
+                      </Modal>
 
                     {/* modal for normalize tables here  */}
                     <Modal open={NormalizeTable} onClose={toggleUpload}>
@@ -426,36 +457,16 @@ function App() {
                     </>
                   }
                 />
-                <Route path="/templates">
-                  <Route
-                    index
-                    element={
-                      <Box sx={{ padding: "1px" }}>
-                        <TemplatesPage />
-                      </Box>
-                    }
-                  />
-                </Route>
-                <Route path="/files">
-                  <Route
-                    index
-                    element={
-                      <Box sx={{ padding: "1px" }}>
-                        <FileScreenPage />
-                      </Box>
-                    }
-                  />
-                </Route>
-                <Route path="/databases">
-                  <Route
-                    index
-                    element={
-                      <Box sx={{ padding: "1px" }}>
-                        <DatabaseScreenPage />
-                      </Box>
-                    }
-                  />
-                </Route>
+                <Route path="/template/" element={<SpecificTemplatePage />} />
+                <Route
+                  path="/file/"
+                  element={<Filepage stopLoading={StopLoading} />}
+                />
+                <Route path="/templates" element={<TemplatesPage />} />
+                <Route path="/files" element={<FileScreenPage />} />
+                <Route path="/databases" element={<DatabaseScreenPage />} />
+                <Route path="/delete-profile/:id" element={<DeleteProfile />} />
+
                 {/* Add your other routes here */}
               </Routes>
             </Box>
