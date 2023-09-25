@@ -11,13 +11,14 @@ import FileService from '../api/FileService';
 
 export default function DeletedFiles() {
     const [isLabelShrunk, setIsLabelShrunk] = useState(false);
-    // const [selectedOption, setSelectedOption] = useState('');
     const [sort, setSort] = React.useState('');
     const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null);
     const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedRows, setSelectedRows] = useState<string[]>([]);
     const [selectedOption, setSelectedOption] = useState<string>('');
+    const [restoreError, setRestoreError] = useState<string>('');
+    const [deleteError, setDeleteError] = useState<string>('');
    
     const theme = useTheme();
     const isNotXsScreen = useMediaQuery(theme.breakpoints.up('sm'));
@@ -36,20 +37,52 @@ export default function DeletedFiles() {
         }
     };
 
-    const handleCheckboxChange = (event: any) => {
+    const handleCheckboxDeleteChange = (event: any) => {
         const value = event.target.value;
-    
+
         if (selectedOption === value) {
             setSelectedOption('');
         } else {
             setSelectedOption(value);
-    
-            // Open the "Delete Forever" dialog when "Delete Forever" is selected
-            if (value === 'delete' && selectedRows.length > 0) {
-                handleDeleteDialogOpen();
+
+            // open dialog when Delete Forever is selected
+            if (value === 'delete') {
+                if (selectedRows.length > 0) {
+                    setDeleteError('');
+                    handleDeleteDialogOpen();
+                } else {
+                    setDeleteError('Please select a file first.');
+                    setSelectedOption('');
+                }
+            } else {
+                setDeleteError('');
             }
         }
     };
+
+    const handleCheckboxRestoreChange = (event: any) => {
+        const value = event.target.value;
+
+        if (selectedOption === value) {
+            setSelectedOption('');
+        } else {
+            setSelectedOption(value);
+
+            // open dialog when Restore is selected
+            if (value === 'restore') {
+                if (selectedRows.length > 0) {
+                    setRestoreError('');
+                    setIsRestoreDialogOpen(true);
+                } else {
+                    setRestoreError('Please select a file first.');
+                    setSelectedOption('');
+                }
+            } else {
+                setRestoreError('');
+            }
+        }
+    };
+
     
     const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setMenuAnchor(event.currentTarget);
@@ -161,20 +194,6 @@ export default function DeletedFiles() {
       additionalHeight
     );
   };
-
-  const handleCheckboxRestoreChange = (event: any) => {
-    const value = event.target.value;
-
-    if (selectedOption === value) {
-        setSelectedOption('');
-    } else {
-        setSelectedOption(value);
-
-        if (value === 'restore' && selectedRows.length > 0) {
-            setIsRestoreDialogOpen(true);
-        }
-    }
-    };
 
     const handleRestoreDialogClose = () => {
         setIsRestoreDialogOpen(false);
@@ -289,7 +308,7 @@ export default function DeletedFiles() {
                                         label="Delete Forever"
                                         labelPlacement="end"
                                         checked={selectedOption === 'delete'}
-                                        onChange={handleCheckboxChange}
+                                        onChange={handleCheckboxDeleteChange}
                                     />
                                     <FormControlLabel
                                         value="restore"
@@ -300,6 +319,9 @@ export default function DeletedFiles() {
                                         onChange={handleCheckboxRestoreChange}
                                     />
                                 </Stack>
+                                <Typography variant="body2" color="error">
+                                    {deleteError || restoreError}
+                                </Typography>
                             </Grid>
                         </Grid>
 
@@ -364,7 +386,7 @@ export default function DeletedFiles() {
                                         label="Delete Forever"
                                         labelPlacement="end"
                                         checked={selectedOption === 'delete'}
-                                        onChange={handleCheckboxChange}
+                                        onChange={handleCheckboxDeleteChange}
                                     />
                                 </MenuItem>
                                 <MenuItem>
@@ -377,6 +399,9 @@ export default function DeletedFiles() {
                                         onChange={handleCheckboxRestoreChange}
                                     />
                                 </MenuItem>
+                                <Typography variant="body2" color="error" ml={2}>
+                                    {deleteError || restoreError}
+                                </Typography>
                                 <MenuItem>
                                     <FormControl fullWidth>
                                         <InputLabel id="demo-simple-select-label">Sort by</InputLabel>
@@ -423,7 +448,7 @@ export default function DeletedFiles() {
 
             <br/><br/>
             <Box sx={{
-          height: calculateDataGridHeight(), // Set the DataGrid height dynamically
+          height: calculateDataGridHeight(),
           width: '100%',
         }}>
                 <DataGrid
