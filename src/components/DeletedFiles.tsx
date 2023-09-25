@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
-import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, Grid, IconButton, InputLabel, Menu, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, FormControlLabel, FormGroup, Grid, IconButton, InputLabel, Menu, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import InputAdornment from '@mui/material/InputAdornment';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import RestoreIcon from '@mui/icons-material/Restore';
+import { FileEntity } from '../api/dataTypes';
+import FileService from '../api/FileService';
+
 
 export default function DeletedFiles() {
     const [isLabelShrunk, setIsLabelShrunk] = useState(false);
-    const [selectedOption, setSelectedOption] = useState('');
+    // const [selectedOption, setSelectedOption] = useState('');
     const [sort, setSort] = React.useState('');
     const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null);
-
+    const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [selectedRows, setSelectedRows] = useState<string[]>([]);
+    const [selectedOption, setSelectedOption] = useState<string>('');
+   
     const theme = useTheme();
     const isNotXsScreen = useMediaQuery(theme.breakpoints.up('sm'));
 
@@ -29,14 +38,19 @@ export default function DeletedFiles() {
 
     const handleCheckboxChange = (event: any) => {
         const value = event.target.value;
-
+    
         if (selectedOption === value) {
             setSelectedOption('');
         } else {
             setSelectedOption(value);
+    
+            // Open the "Delete Forever" dialog when "Delete Forever" is selected
+            if (value === 'delete' && selectedRows.length > 0) {
+                handleDeleteDialogOpen();
+            }
         }
     };
-
+    
     const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setMenuAnchor(event.currentTarget);
     };
@@ -44,6 +58,188 @@ export default function DeletedFiles() {
     const handleMenuClose = () => {
         setMenuAnchor(null);
     };
+
+    // for grid
+    const columns: GridColDef[] = [
+        {
+          field: 'fileName',
+          headerName: 'File Name',
+          width: 1250,
+          renderCell: (params) => (
+              <div>{params.row.fileName}</div>
+          ),
+        },
+        {
+          field: 'restore',
+          headerName: '',
+          width: 50,
+          sortable: false,
+          renderCell: (params) => (
+              <div>
+                <RestoreIcon sx={{color: '#14847C'}}/>
+              </div>
+          ),
+          disableColumnMenu: true,
+        },
+        {
+            field: 'latestDateModified',
+            headerName: 'Date',
+            width: 150,
+            type: 'date',
+            valueGetter: (params) => {
+              const dateString = params.row.latestDateModified;
+              if (dateString) {
+                const dateParts = dateString.split('-');
+                if (dateParts.length === 3) {
+                  const year = parseInt(dateParts[0], 10);
+                  const month = parseInt(dateParts[1], 10) - 1;
+                  const day = parseInt(dateParts[2], 10);
+                  return new Date(year, month, day);
+                }
+              }
+              return null;
+            },
+          }, 
+      ];
+      
+
+      const themeInstance = useTheme();
+    //   const matchesXS = useMediaQuery(themeInstance.breakpoints.down('xs'));
+      const matchesSM = useMediaQuery(themeInstance.breakpoints.down('sm'));
+      const matchesMD = useMediaQuery(themeInstance.breakpoints.down('md'));
+      const matchesLG = useMediaQuery(themeInstance.breakpoints.down('lg'));
+      const matchesXL = useMediaQuery(themeInstance.breakpoints.down('xl'));
+
+      if (matchesXL) {
+        columns[0].width = 1250; // width for xl screens
+        columns[2].width = 150; 
+      }
+    
+      if (matchesLG) {
+        columns[0].width = 850; // width for lg screens
+        columns[2].width = 150; 
+      }
+    
+      if (matchesMD) {
+        columns[0].width = 600; // width for md screens
+        columns[2].width = 100; 
+      }
+    
+      if (matchesSM) {
+        columns[0].width = 280; // width for sm screens
+        columns[2].width = 100; 
+      }
+
+      const [deletedFiles, setDeletedFiles] = useState<FileEntity[]>([]);
+      const getRowId = (row:any) => row.fileId;
+
+  useEffect(() => {
+    const fetchDeletedFiles = async () => {
+      try {
+        const files = await FileService.getDeletedFiles();
+        setDeletedFiles(files);
+      } catch (error) {
+        console.error("Error fetching deleted files:", error);
+      }
+    };
+
+    fetchDeletedFiles();
+  }, []);
+
+  const rowHeight = 50; 
+  const additionalHeight = 40;
+
+  const calculateDataGridHeight = () => {
+    const headerHeight = 56; 
+    const paginationHeight = 40; 
+    const numberOfRows = deletedFiles.length;
+
+    return (
+      headerHeight +
+      numberOfRows * rowHeight +
+      paginationHeight +
+      additionalHeight
+    );
+  };
+
+  const handleCheckboxRestoreChange = (event: any) => {
+    const value = event.target.value;
+
+    if (selectedOption === value) {
+        setSelectedOption('');
+    } else {
+        setSelectedOption(value);
+
+        if (value === 'restore' && selectedRows.length > 0) {
+            setIsRestoreDialogOpen(true);
+        }
+    }
+    };
+
+    const handleRestoreDialogClose = () => {
+        setIsRestoreDialogOpen(false);
+    };
+
+    const handleDeleteDialogOpen = () => {
+        setIsDeleteDialogOpen(true);
+    };
+
+    const handleDeleteDialogClose = () => {
+        setIsDeleteDialogOpen(false);
+    };
+
+    const handleDelete = async () => {
+        if (selectedRows.length > 0) {
+          const deleteResults = await Promise.all(
+            selectedRows.map(async (id) => {
+              const result = await FileService.permanentDeleteFile(parseInt(id));
+              return { id, result };
+            })
+          );
+      
+          setDeletedFiles((prevDeletedFiles) =>
+            prevDeletedFiles.filter(
+              (file) => !selectedRows.includes(file.fileId.toString())
+            )
+          );
+      
+          setSelectedRows([]);
+          setSelectedOption('');
+      
+          setIsDeleteDialogOpen(false);
+        }
+      };
+      
+    const handleRestore = async () => {
+        if (selectedRows.length > 0) {
+            const restoreResults = await Promise.all(
+                selectedRows.map(async (id) => {
+                    const result = await FileService.restoreFile(parseInt(id));
+                    return { id, result };
+                })
+            );
+    
+            const successfulRestorations = restoreResults.filter((r) => r.result === "File restored successfully");
+            const failedRestorations = restoreResults.filter((r) => r.result !== "File restored successfully");
+    
+            if (successfulRestorations.length > 0) {
+                const files = await FileService.getDeletedFiles();
+                setDeletedFiles(files);
+    
+                setSelectedRows([]);
+                setSelectedOption('');
+    
+                console.log("Files restored successfully:", successfulRestorations);
+            }
+    
+            if (failedRestorations.length > 0) {
+                console.error("Failed to restore files:", failedRestorations);
+            }
+    
+            handleRestoreDialogClose();
+        }
+    };
+   
 
     return (
         <div>
@@ -101,7 +297,7 @@ export default function DeletedFiles() {
                                         label="Restore Files"
                                         labelPlacement="end"
                                         checked={selectedOption === 'restore'}
-                                        onChange={handleCheckboxChange}
+                                        onChange={handleCheckboxRestoreChange}
                                     />
                                 </Stack>
                             </Grid>
@@ -178,7 +374,7 @@ export default function DeletedFiles() {
                                         label="Restore Files"
                                         labelPlacement="end"
                                         checked={selectedOption === 'restore'}
-                                        onChange={handleCheckboxChange}
+                                        onChange={handleCheckboxRestoreChange}
                                     />
                                 </MenuItem>
                                 <MenuItem>
@@ -224,6 +420,78 @@ export default function DeletedFiles() {
                     </Box>
                     )}
             </Stack>
+
+            <br/><br/>
+            <Box sx={{
+          height: calculateDataGridHeight(), // Set the DataGrid height dynamically
+          width: '100%',
+        }}>
+                <DataGrid
+                    rows={deletedFiles}
+                    columns={columns}
+                    getRowId={(row) => row.fileId}
+                    isRowSelectable={(params) => true}
+                    initialState={{
+                    pagination: {
+                        paginationModel: {
+                        pageSize: 5,
+                        },
+                    },
+                    }}
+                    pageSizeOptions={[5, 10, 20, 30, 50]}
+                    checkboxSelection
+                    // rowSelectionModel={selectedRows}
+                    onRowSelectionModelChange={(newSelection) => {
+                        setSelectedRows(newSelection.map((id) => id.toString()));
+                    }}
+                    disableRowSelectionOnClick
+                />
+            </Box>
+
+            <Dialog
+                open={isRestoreDialogOpen}
+                onClose={handleRestoreDialogClose}
+                aria-labelledby="restore-dialog-title"
+                aria-describedby="restore-dialog-description"
+            >
+                <DialogTitle id="restore-dialog-title">Restore Files</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="restore-dialog-description">
+                        Are you sure you want to restore these files?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleRestoreDialogClose} color="primary">
+                        Back
+                    </Button>
+                    <Button onClick={handleRestore} color="primary">
+                        Confirm
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={isDeleteDialogOpen}
+                onClose={handleDeleteDialogClose}
+                aria-labelledby="delete-dialog-title"
+                aria-describedby="delete-dialog-description"
+            >
+                <DialogTitle id="delete-dialog-title">Delete Forever</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="delete-dialog-description">
+                        Are you sure you want to delete these files?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteDialogClose} color="primary">
+                        Back
+                    </Button>
+                    <Button onClick={handleDelete} color="primary">
+                        Confirm
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
         </div>
     );
 }
