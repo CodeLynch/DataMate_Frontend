@@ -31,6 +31,7 @@ import InconsistentDetectPrompt from "./prompts/InconsistentDetectPrompt";
 import SuccessPrompt from "./prompts/SuccessPrompt";
 import ProcessingPage from "./pages/ProcessingPage";
 import DeleteProfile from "./components/DeleteProfile";
+import NormalizePrompt from './prompts/NormalizePrompt';
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -79,6 +80,8 @@ function App() {
   const [EmptyDetect, setEmptyDetect] = useState(false);
   //boolean state for empty values in tables prompt
   const [InconsistentDetect, setIncDetect] = useState(false);
+  //boolean state for normalized prompt
+  const [NormalizeTable, setNormTable] = useState(false);
   //boolean state for import success prompt
   const [ImportSuccess, setSuccess] = useState(false);
   //number state for the numbers of table found in an uploaded file
@@ -95,6 +98,8 @@ function App() {
   const [SheetsWithEmpty, setSWE] = useState<string[]>([]);
   //string array for the sheetnames of the sheets that have inconsistent values
   const [IncSheets, setIS] = useState<string[]>([]);
+  //string array for the sheetnames of the sheets to be normalized
+  const [normSheets, setNS] = useState<string[]>([]);
   //object state for the sheet data of the uploaded file
   const [sheetData, setSData] = useState<Object>({});
   //number state for the index of the sheet to be displayed in select table
@@ -135,7 +140,11 @@ function App() {
   const toggleSelect = (status: boolean, sheetIndex: number) => {
     setSIndex(sheetIndex);
     setSelect(status);
-  };
+  }
+
+  const toggleNormalized = (status:boolean) =>{
+    setNormTable(status);
+  }
 
   const StartLoading = () => {
     setLoading(true);
@@ -181,17 +190,26 @@ function App() {
     SheetsWithEmpty.push(sheet);
   };
 
-  const updateIncList = (sheet: string) => {
-    IncSheets.push(sheet);
-  };
+  const updateIncList = (sheet:string) => {
+    IncSheets.push(sheet)
+  }
 
-  const updateSheetData = (sheet: Object) => {
-    setSData(sheet);
-  };
+  const updateNormList = (sheet:string) => {
+    normSheets.push(sheet)
+  }
+
+  const updateSheetData = (sheet:Object) => {
+    setSData(sheet)
+  }
+
+  const updateWorkbook = (workbook:XLSX.WorkBook) => {
+    setWB(workbook);
+  }
 
   const resetVariables = () => {
     setSWE([]);
     setIS([]);
+    setNS([]);
     setTableDetect(false);
     setIncDetect(false);
     setNoTableDetect(false);
@@ -272,68 +290,62 @@ function App() {
                         </div>
                       </Backdrop>
 
-                      {
-                        //modal for detect tables here
-                      }
-                      <Modal
-                        open={TableDetect}
-                        onClose={() => {
-                          toggleTableDetect(false);
-                        }}
-                      >
-                        <div>
-                          <TableDetectPrompt
-                            toggleTableDetect={toggleTableDetect}
-                            toggleSelect={toggleSelect}
-                            toggleEmptyDetect={toggleEmptyDetect}
-                            toggleInconsistentDetect={toggleInconsistent}
-                            toggleImportSuccess={toggleImportSuccess}
-                            tblCount={tableCount}
-                            fileId={uploadedFileId}
-                            vsheets={visibleSheetNames}
-                            sheetdata={sheetData}
-                            updateEmpty={updateEmptyList}
-                            updateInc={updateIncList}
-                            updateSData={updateSheetData}
-                            emptySheets={SheetsWithEmpty}
-                            incSheets={IncSheets}
-                            reset={resetVariables}
-                            wb={workbook}
-                          />
-                        </div>
-                      </Modal>
+                    {//modal for detect tables here
+                    } 
+                    <Modal open={TableDetect} onClose={()=>{toggleTableDetect(false)}}>
+                    <div>
+                      <TableDetectPrompt 
+                      toggleNormalized={toggleNormalized}
+                      toggleTableDetect={toggleTableDetect} 
+                      toggleSelect={toggleSelect}
+                      toggleEmptyDetect={toggleEmptyDetect}
+                      toggleInconsistentDetect={toggleInconsistent}
+                      toggleImportSuccess={toggleImportSuccess}
+                      tblCount={tableCount} 
+                      fileId={uploadedFileId}
+                      vsheets={visibleSheetNames}
+                      sheetdata={sheetData}
+                      updateEmpty={updateEmptyList}
+                      updateInc={updateIncList}
+                      updateSData={updateSheetData}
+                      updateNorm={updateNormList}
+                      emptySheets={SheetsWithEmpty}
+                      incSheets={IncSheets}
+                      normSheets={normSheets}
+                      reset={resetVariables}
+                      wb={workbook}
+                      />
+                    </div>  
+                    </Modal>
 
-                      {
-                        //modal for select tables here
-                      }
-                      <Modal
-                        open={SelectTable}
-                        onClose={() => {
-                          toggleSelect(false, 0);
-                        }}
-                      >
-                        <div>
-                          <SelectTablePrompt
-                            toggleSelect={toggleSelect}
-                            toggleTableDetect={toggleTableDetect}
-                            toggleEmptyDetect={toggleEmptyDetect}
-                            toggleInconsistentDetect={toggleInconsistent}
-                            toggleImportSuccess={toggleImportSuccess}
-                            tblCount={tableCount}
-                            fileId={uploadedFileId}
-                            vsheets={visibleSheetNames}
-                            sheetdata={sheetData}
-                            updateEmpty={updateEmptyList}
-                            updateInc={updateIncList}
-                            updateSData={updateSheetData}
-                            emptySheets={SheetsWithEmpty}
-                            incSheets={IncSheets}
-                            reset={resetVariables}
-                            wb={workbook}
-                            sheetIndex={sheetIndex}
-                          />
-                        </div>
-                      </Modal>
+                    {//modal for select tables here
+                    } 
+                    <Modal open={SelectTable} onClose={()=>{toggleSelect(false,0)}}>
+                    <div>
+                      <SelectTablePrompt 
+                      toggleNormalized={toggleNormalized}
+                      toggleSelect={toggleSelect}
+                      toggleTableDetect={toggleTableDetect}
+                      toggleEmptyDetect={toggleEmptyDetect}
+                      toggleInconsistentDetect={toggleInconsistent}
+                      toggleImportSuccess={toggleImportSuccess}
+                      tblCount={tableCount} 
+                      fileId={uploadedFileId}
+                      vsheets={visibleSheetNames}
+                      sheetdata={sheetData}
+                      updateEmpty={updateEmptyList}
+                      updateInc={updateIncList}
+                      updateSData={updateSheetData}
+                      emptySheets={SheetsWithEmpty}
+                      incSheets={IncSheets}
+                      reset={resetVariables}
+                      wb={workbook}
+                      sheetIndex={sheetIndex}
+                      normSheets={normSheets}
+                      updateNorm={updateNormList}
+                      />
+                    </div>  
+                    </Modal>
 
                       {/* modal for no tables detected here  */}
                       <Modal open={NoTableDetect} onClose={toggleNoTableDetect}>
@@ -346,84 +358,102 @@ function App() {
                         </div>
                       </Modal>
 
-                      {/* modal for split tables detected here 
-                    <Modal open={showUpload} onClose={toggleUpload}>
+                    {/* modal for normalize tables here  */}
+                    <Modal open={NormalizeTable} onClose={toggleUpload}>
                     <div>
-                      <ImportFile toggleImport={toggleUpload} startLoading={StartLoading} />
-                    </div>  
-                    </Modal> */}
-
-                      <Modal
-                        open={EmptyDetect}
-                        onClose={() => {
-                          toggleEmptyDetect(false);
-                        }}
-                      >
-                        <div>
-                          <EmptyDetectPrompt
-                            toggleEmptyDetect={toggleEmptyDetect}
-                            toggleInconsistentDetect={toggleInconsistent}
-                            toggleImportSuccess={toggleImportSuccess}
-                            fileId={uploadedFileId}
-                            workbook={workbook}
-                            sheets={sheetNames}
-                            vsheets={visibleSheetNames}
-                            sheetdata={sheetData}
-                            emptylist={SheetsWithEmpty}
-                            reset={resetVariables}
-                            inclist={IncSheets}
-                            updateSData={updateSheetData}
-                          />
-                        </div>
-                      </Modal>
-
-                      <Modal
-                        open={InconsistentDetect}
-                        onClose={() => {
-                          toggleInconsistent(false);
-                        }}
-                      >
-                        <div>
-                          <InconsistentDetectPrompt
-                            toggleInconsistentDetect={toggleInconsistent}
-                            toggleImportSuccess={toggleImportSuccess}
-                            fileId={uploadedFileId}
-                            workbook={workbook}
-                            sheets={sheetNames}
-                            vsheets={visibleSheetNames}
-                            sheetdata={sheetData}
-                            reset={resetVariables}
-                            inclist={IncSheets}
-                            updateSData={updateSheetData}
-                          />
-                        </div>
-                      </Modal>
-
-                      <Modal
-                        open={ImportSuccess}
-                        onClose={() => {
-                          toggleImportSuccess(false);
-                        }}
-                      >
-                        <div>
-                          <SuccessPrompt
-                            toggleImportSuccess={toggleImportSuccess}
-                            fileId={uploadedFileId}
-                            reset={resetVariables}
-                            workbook={workbook}
-                            sdata={sheetData}
-                          />
-                        </div>
-                      </Modal>
-
-                      <ProcessingPage
-                        stopLoading={StopLoading}
-                        startProcessing={StartProcessing}
-                        toggleTable={toggleTableDetect}
-                        toggleNoTable={toggleNoTableDetect}
-                        setTblCount={setTblCount}
-                        setFileData={setFileData}
+                      <NormalizePrompt
+                      toggleNormalized={toggleNormalized}
+                      toggleEmptyDetect={toggleEmptyDetect}
+                      toggleInconsistentDetect={toggleInconsistent}
+                      toggleImportSuccess={toggleImportSuccess}                     
+                      fileId={uploadedFileId}
+                      vsheets={visibleSheetNames}
+                      sheetdata={sheetData}
+                      updateSData={updateSheetData}
+                      updateWB={updateWorkbook}
+                      reset={resetVariables}
+                      workbook={workbook}
+                      normList={normSheets}
+                      inclist={IncSheets}
+                      sheets={sheetNames}
                       />
+                    </div>  
+                    </Modal>
+
+                    <Modal open={EmptyDetect} onClose={()=>{toggleEmptyDetect(false)}}>
+                    <div>
+                      <EmptyDetectPrompt 
+                      toggleNormalized={toggleNormalized}
+                      toggleEmptyDetect={toggleEmptyDetect}
+                      toggleInconsistentDetect={toggleInconsistent}
+                      toggleImportSuccess={toggleImportSuccess}
+                      fileId={uploadedFileId}
+                      workbook={workbook}
+                      sheets={sheetNames}
+                      vsheets={visibleSheetNames}
+                      sheetdata={sheetData}
+                      emptylist={SheetsWithEmpty}
+                      reset={resetVariables}
+                      inclist={IncSheets}
+                      updateSData = {updateSheetData}
+                      normSheets={normSheets}
+                      />
+                    </div>  
+                    </Modal>
+
+                    <Modal open={InconsistentDetect} onClose={()=>{toggleInconsistent(false)}}>
+                    <div>
+                      <InconsistentDetectPrompt
+                      toggleNormalized={toggleNormalized} 
+                      toggleInconsistentDetect={toggleInconsistent}
+                      toggleImportSuccess={toggleImportSuccess}
+                      fileId={uploadedFileId}
+                      workbook={workbook}
+                      sheets={sheetNames}
+                      vsheets={visibleSheetNames}
+                      sheetdata={sheetData}
+                      reset={resetVariables}
+                      inclist={IncSheets}
+                      updateSData = {updateSheetData}
+                      normSheets={normSheets}
+                      />
+                    </div>  
+                    </Modal>
+
+                    <Modal open={ImportSuccess} onClose={()=>{toggleImportSuccess(false)}}>
+                    <div>
+                      <SuccessPrompt 
+                      toggleImportSuccess={toggleImportSuccess}
+                      fileId={uploadedFileId}
+                      reset={resetVariables}
+                      workbook={workbook}
+                      sdata={sheetData}
+                      />
+                    </div>  
+                    </Modal>
+
+                    <ProcessingPage stopLoading={StopLoading} startProcessing={StartProcessing}
+                    toggleTable={toggleTableDetect}
+                    toggleNoTable={toggleNoTableDetect}
+                    setTblCount={setTblCount}
+                    setFileData={setFileData}
+                    reset={resetVariables}/>
+                    </>
+                  }
+                  />
+                  <Route path="/template/1">
+                    <Route
+                      index
+                      element={
+                        <Box sx={{ padding: '1px' }}>
+                          <SpecificTemplatePage/>
+                        </Box>
+                      }
+                    />
+                  </Route>
+                  <Route path="/file" element={
+                    <>
+                      <Filepage stopLoading={StopLoading} />
                     </>
                   }
                 />

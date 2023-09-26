@@ -25,6 +25,7 @@ type DetectProps = {
     toggleSelect: (status:boolean, sheetIndex:number) => void,
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
+    toggleNormalized:(status:boolean) => void,
     toggleImportSuccess: (status:boolean) => void,
     tblCount: number,
     fileId: number,
@@ -32,8 +33,10 @@ type DetectProps = {
     sheetdata: object,
     updateEmpty: (sheet:string) => void,
     updateInc: (sheet:string) => void,
+    updateNorm: (sheet:string) => void,
     emptySheets: string[],
     incSheets: string[],
+    normSheets: string[],
     reset: () => void,
     updateSData: (data:Object) => void,
     wb: XLSX.WorkBook | null | undefined;
@@ -53,7 +56,8 @@ interface ListItem {
 }
 
 const TableDetectPrompt = ({toggleTableDetect, toggleSelect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
-toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb}: DetectProps) => {  
+toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb, toggleNormalized,
+normSheets, updateNorm}: DetectProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -64,6 +68,7 @@ toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, u
   const [CheckboxList, setCBList] = useState<ListItem[]>([]);
   const [hasEmpty, SetEmpty] = useState(false);
   const [isInconsistent, SetInconsistent] = useState(false);
+  const [isNotNormalized, setNotNormalized] = useState(false);
   const [isCheckDone, setCheckDone] = useState(false);
 
   const nav = useNavigate();
@@ -183,10 +188,16 @@ useEffect(()=>{
           toggleTableDetect(false);
           toggleInconsistentDetect(true);
           console.log("Inconsistency triggered");
-        }else{
+        }else if(isNotNormalized){
+          toggleTableDetect(false);
+          toggleNormalized(true);
+          console.log("Normalized Prompt triggered");
+        }
+        else{
           toggleTableDetect(false);
           toggleImportSuccess(true);
           console.log("Success Triggered")
+          console.log("Cause isNotNormalized:", isNotNormalized)
         }
   }
     
@@ -264,6 +275,119 @@ useEffect(()=>{
     return false; // No inconsistent values found in any column
   }
 
+  //function for checking if a table has a primary key
+  function hasPossiblePrimaryKey(table: TableRow[]): boolean {
+    if (table.length === 0) {
+      return false; // The table is empty
+    }
+  
+    let isFirstIteration = true;
+    const firstColumnValues: Set<number> = new Set();
+
+    for (const row of table) {
+      if (isFirstIteration) {
+        isFirstIteration = false;
+        continue; // Skip the first iteration (headers)
+      }
+
+      const firstColumnValue = row[Object.keys(row)[0]]; // Get the value of the first column in each row
+
+      if (typeof firstColumnValue !== "number" || firstColumnValues.has(firstColumnValue)) {
+        return false; // The first column has a non-numeric value or a duplicate value
+      }
+
+      firstColumnValues.add(firstColumnValue);
+    }
+    
+  
+  
+    return true; // The first column has unique numeric values
+  }
+
+  //getting a string array of a column name and its dependencies
+function getColumnDependencies(columnName: string, table: (string | number)[][], doneSearching: string[]): string[] {
+  const columnIndex = table[0].indexOf(columnName);
+
+  if (columnIndex === -1) {
+    return [];
+  }
+
+  const numRows = table.length;
+  const dependencies: string[] = [columnName];
+
+  for (let col = 1; col < table[0].length; col++) {
+    if (col !== columnIndex) {
+      const otherColumn = table[0][col];
+      let isDependency = true;
+
+      for (let row = 1; row < numRows; row++) {
+        const targetValue = table[row][columnIndex];
+        const otherValue = table[row][col];
+
+        if (!hasCorrespondingValue(table, columnName, otherColumn as string, targetValue, otherValue)) {
+          isDependency = false;
+          break;
+        }
+      }
+
+      if (isDependency && !doneSearching.includes(otherColumn as string)) {
+        dependencies.push(otherColumn as string);
+      }
+    }
+  }
+
+  return dependencies;
+}
+
+function hasCorrespondingValue(table: (string | number)[][], columnName1: string, columnName2: string, targetValue: any, currentValue: any): boolean {
+  const columnIndex1 = table[0].indexOf(columnName1);
+  const columnIndex2 = table[0].indexOf(columnName2);
+
+  if (columnIndex1 === -1 || columnIndex2 === -1) {
+    return false;
+  }
+
+  for (let row = 1; row < table.length; row++) {
+    if (table[row][columnIndex1] === targetValue && table[row][columnIndex2] !== currentValue) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+  function canBeNormalized(rows: (string | number)[][]): boolean {
+    let doNotSearch:string[] = [];
+    const numCols = rows[0].length;
+    let res = false;
+
+    for (let col = 0; col < numCols; col++) {
+      const columnName = rows[0][col];
+      console.log(`Column Name: ${columnName}`);
+      if(!doNotSearch.includes(columnName as string)){
+        console.log(columnName," not found in do not search");
+        let depArr = getColumnDependencies(columnName as string, rows, doNotSearch);
+        console.log("Dependency array: ", depArr);
+        console.log("total cols left:", numCols - col)
+        if(depArr.length > 1 && depArr.length !== numCols - col){
+          for(const col in depArr){
+            //inserting the column and the dependencies into do not search
+            doNotSearch.push(depArr[col]); 
+          } 
+          //concat the columns in the depArr as table
+          console.log("depArr", depArr)
+          res = true;
+          break;
+        }else{
+          doNotSearch.push(columnName as string);
+        }
+      }
+    }
+
+    return res;
+  }
+
+
   function togglePrompts(){
     const sd = sheetdata as WorkbookData;
     for(const s in vsheets){
@@ -281,6 +405,17 @@ useEffect(()=>{
           updateInc(vsheets[s]);
           SetInconsistent(true);
         }
+      }
+      console.log("result: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as [][]));
+      console.log("has possible pk: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]), "can be normalized: ", canBeNormalized(sd[vsheets[s]] as [][]));
+      //if block for normalized prompt
+      if(!(hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as [][]))){
+        console.log("this happened");
+        if(!normSheets.includes(vsheets[s])){
+          updateNorm(vsheets[s]);
+          setNotNormalized(true);
+        }
+        
       }
     }
      setCheckDone(true);    

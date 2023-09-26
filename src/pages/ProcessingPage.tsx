@@ -1,6 +1,6 @@
 import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as XLSX from 'xlsx'
 import FileService from "../services/FileService";
 
@@ -11,6 +11,7 @@ type ProcessingPageProps = {
     toggleNoTable: (status:boolean) => void,
     setTblCount: (num:number) => void;
     setFileData: (wb: XLSX.WorkBook | null, sheets:string[], vsheets:string[] ,sheetdata: object ) => void,
+    reset: () => void,
   }
 
   interface TableRow {
@@ -22,8 +23,9 @@ type ProcessingPageProps = {
   }
 
 
-export default function ProcessingPage ({stopLoading, startProcessing, toggleTable, toggleNoTable, setTblCount, setFileData}:ProcessingPageProps) {
+export default function ProcessingPage ({reset, stopLoading, startProcessing, toggleTable, toggleNoTable, setTblCount, setFileData}:ProcessingPageProps) {
     const loc = useLocation();
+    const nav = useNavigate();
     const fileId = loc.state.fileid;
     const [tblCtr, setTblCtr] = useState<number>(0)
     const [workbook, setWB] = useState<XLSX.WorkBook | null>()
@@ -61,8 +63,8 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
      function isValidTable(sheetData: SheetData, sheetName: string): boolean {
         const tableData = sheetData[sheetName];
 
-        console.log("Table Data is: ", tableData);
-        if(!tableData || !Array.isArray(tableData) || tableData.length < 2) {
+        console.log("Table Data is: ", tableData, "while it's length is: ", tableData.length);
+        if(!tableData || !Array.isArray(tableData) || tableData.length < 3) {
             console.log("and that's not a table");  
             return false;
           }
@@ -100,7 +102,12 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
          //typing object value as unknown before converting to row
          const row =  sheetData[currSheet] as unknown
          let rowArr = row as [][]
-         setHArr(rowArr)
+         if(rowArr?.length > 500){
+            cancelProcess();
+            alert("Maximum amount of rows reached: 500");
+         }else{
+            setHArr(rowArr)
+         }       
          console.log("Sheet Data: ",sheetData);
     }
 
@@ -113,6 +120,16 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
         }).catch((err)=>{
             console.log(err);
         }) 
+    }
+
+    const cancelProcess = () => {
+        FileService.deleteFile(fileId).then((res)=>{
+          reset();
+          nav("/");
+        }).catch((err)=>{
+          console.log(err);
+        })
+        
     }
 
     //useEffect to fetch data on load
@@ -135,18 +152,47 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
        
     },[workbook, sheetNames])
 
+    function delete_ws(wb:XLSX.WorkBook, wsname:string) {
+        const sidx = wb.SheetNames.indexOf(wsname);
+        if(sidx == -1) throw `cannot find ${wsname} in workbook`;
+        
+        // remove from workbook
+        wb.SheetNames.splice(sidx,1);
+        delete wb.Sheets[wsname];
+      
+        // // update other structures
+        // if(wb.Workbook) {
+        //   if(wb.Workbook.Views) wb.Workbook.Views.splice(sidx, 1);
+        //   if(wb.Workbook.Names) {
+        //     let names = wb.Workbook.Names;
+        //     for(let j = names.length - 1; j >= 0; --j) {
+        //       if(names[j]?.Sheet == sidx) names = names.splice(j,1);
+        //       else if(names[j]?.Sheet > sidx) --names[j]?.Sheet;
+        //     }
+        //   }
+        // }
+    }
+
     //start counting sheet amount once start count boolean is changed
     useEffect(()=>{
         if(startCount){
+
             let ctr = 0
+            console.log("sn: ",sheetNames);
+            //push table sheets to vsheets
             sheetNames.map((sheet, i) => {
                 const sheetAttr = sheet as keyof typeof sheetData
                 if(isValidTable(sheetData as SheetData, sheetAttr)){
-                    // const row =  sheetData[sheetAttr] as unknown
-                    // let rowArr = row as [][]
                     visibleSheetNames.push(sheet);
                     ctr++; 
-                }                
+                }               
+            })
+            //delete sheets that are not a table
+            sheetNames.map((sheet, i) => {
+                const sheetAttr = sheet as keyof typeof sheetData
+                if(!isValidTable(sheetData as SheetData, sheetAttr)){
+                    delete_ws(workbook!, sheet)
+                }               
             })
             if(ctr != 0){
                 setTblCtr(ctr)
@@ -235,11 +281,13 @@ export default function ProcessingPage ({stopLoading, startProcessing, toggleTab
         }
         console.log("BArr",BodyArr)
     },[HeaderArr])
+
+
     
 
     return(
         <>
-            <div className="gradientbg" style={{paddingTop:"50px", paddingRight:"50px", width:'95vw',height:'100vh'}}>
+            <div className="gradientbg" style={{paddingTop:"50px", paddingRight:"50px", width:'100%',height:'100vh'}}>
                 {HeaderArr !== undefined && BodyArr !== undefined && !isProcessing ? <>
                 <div style={{marginRight:'70px', marginLeft:'50px', padding:'15px', height:'80vh', opacity:.8}}>
                     <div style={{marginTop:"1em"}}>
