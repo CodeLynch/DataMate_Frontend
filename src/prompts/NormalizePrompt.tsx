@@ -72,8 +72,9 @@ const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImp
   const [doneNormalizing, setNormDone] = useState(false);
   const [toReread, setReread] = useState(false);
   const [PrimaryTableCtr, setPTabCtr] = useState(0);
-  const [origWB, setOrigWB] = useState<XLSX.WorkBook>({...workbook!})
+  const [origWB, setOrigWB] = useState<XLSX.WorkBook | null>();
   const [startProcess, setStartProcess] = useState(false);
+  const [normWB, setNormWB] = useState<XLSX.WorkBook | null>();
   const nav = useNavigate();
 
   //function to remove empty rows in Sheet Object Data
@@ -109,6 +110,7 @@ const readData = (wb: XLSX.WorkBook) => {
         sheetdata = {...sheetdata, [sheet]: js}            
     })
     updateSData(sheetdata)
+    
      //typing currentSheet as key of sheetData
      const currSheet = currentSheet as keyof typeof sheetdata
      //typing object value as unknown before converting to row
@@ -510,11 +512,16 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
     console.log("Array contains: ",newTablesArr);
   },[newTablesArr])
 
+  useEffect(()=>{
+    console.log("wb: ", workbook);
+    setOrigWB(workbook);
+  },[])
+
   //useEffect for normalizing table on load;
   useEffect(()=>{
     if(startProcess && JSON.stringify(sheetdata) !== '{}'){
       let sd = sheetdata as WorkbookData; 
-      let newWB:XLSX.WorkBook = {...workbook!}
+      let newWB:XLSX.WorkBook = JSON.parse(JSON.stringify(workbook)) as XLSX.WorkBook;
       
       //clear sheets found in norm list in new work book copy
       for(const sheet in newWB.SheetNames){
@@ -543,7 +550,7 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
         }
       }
       updateSData(sd as Object);
-      updateWB(newWB);          
+      setNormWB(newWB);         
       console.log("setting normalization to done...")
       setNormDone(true);
     }
@@ -561,7 +568,7 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
       while(vsheets.length > 0){
         vsheets.pop();
       }
-      workbook?.SheetNames.map((sheet, i)=>{
+      normWB?.SheetNames.map((sheet, i)=>{
         vsheets.push(sheet);
       })
       console.log("VS:",vsheets);
@@ -569,15 +576,14 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
       console.log("sd:",sheetdata);
       console.log("setting read for re-read to true...")
       setReread(true);
-      console.log("original workbook:", origWB);
     }
     
   },[doneNormalizing])
 
   useEffect(()=>{
     if(toReread){
-      console.log("read this data:", workbook)
-      readData(workbook!)
+      console.log("read this data:", normWB)
+      readData(normWB!)
     }
     },[toReread])
 
@@ -631,8 +637,15 @@ useEffect(()=>{
   }
 
   function nextFunc(){
-    const sd = sheetdata as WorkbookData;
-    console.log("Normalized Data here:");
+    updateWB(normWB!);
+    toggleNormalized(false);
+    toggleImportSuccess(true);
+  }
+
+  function declineFunc(){
+    updateWB(origWB!);
+    toggleNormalized(false);
+    toggleImportSuccess(true);
   }
   
   return (
@@ -732,7 +745,7 @@ useEffect(()=>{
           <div style={{display:"flex", justifyContent:"space-between"}}>
           <Button disableElevation onClick={cancelProcess} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: 'white', color:'black', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Cancel</Button>
           <div>
-            <Button disableElevation onClick={nextFunc} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Decline</Button>
+            <Button disableElevation onClick={declineFunc} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Decline</Button>
             <Button disableElevation onClick={nextFunc} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Accept</Button>
           </div>
           </div>
