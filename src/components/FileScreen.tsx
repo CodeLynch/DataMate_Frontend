@@ -39,6 +39,7 @@ const FileList: React.FC<{}> = () => {
   const closeImportModal = () => {
     setIsImportModalOpen(false);
   };
+
   const [isLargeScreen, setIsLargeScreen] = useState(false);
 
   useEffect(() => {
@@ -59,15 +60,42 @@ const FileList: React.FC<{}> = () => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [selectedMenuOption, setSelectedMenuOption] = useState("");
 
-  //fetch all files
+  const [userId, setUserId] = useState(null);
   useEffect(() => {
+    //dynamic fetching
     const fetchData = async () => {
-      const files = await FileService.getAllFiles();
-      setFiles(files.filter((file) => !file.isdeleted));
+      if (userId !== null) {
+        const files = await FileService.getFilesByUserId(userId);
+        setFiles(files.filter((file) => !file.isdeleted));
+      }
     };
 
     fetchData();
-  }, []);
+  }, [userId]);
+
+  //fetch all files
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const files = await FileService.getAllFiles();
+  //     setFiles(files.filter((file) => !file.isdeleted));
+  //   };
+
+  //   fetchData();
+  // }, []);
+
+  //fetch files by userId
+
+  // useEffect(() => {
+  //   //static example
+  //   const fetchData = async () => {
+  //     const userId = 1;
+
+  //     const files = await FileService.getFilesByUserId(userId);
+  //     setFiles(files.filter((file) => !file.isdeleted));
+  //   };
+
+  //   fetchData();
+  // }, []);
 
   //delete specific file
   const handleDelete = async (id: number) => {
@@ -76,7 +104,6 @@ const FileList: React.FC<{}> = () => {
       setFiles((prevFiles) => prevFiles.filter((file) => file.fileId !== id));
     } catch (error) {
       console.error("Delete error:", error);
-      // Handle error
     }
   };
 
@@ -156,6 +183,28 @@ const FileList: React.FC<{}> = () => {
   const filteredFiles = files.filter((file) =>
     file.fileName.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const userId = 1;
+
+      const files = await FileService.getFilesByUserId(userId);
+      setFiles(files.filter((file) => !file.isdeleted));
+    };
+
+    fetchData();
+  }, []);
+  const [searchResult, setSearchResult] = useState<ResponseFile[]>([]);
+
+  useEffect(() => {
+    setSearchResult(filteredFiles);
+  }, [searchQuery, filteredFiles]);
+
+  //layout for grid
+  const itemsPerRow = Math.min(searchResult.length, 3); // Maximum 3 items per row
+  const lgValue = Math.floor(12 / itemsPerRow);
+  const xlValue = Math.floor(12 / itemsPerRow);
+
   return (
     <Grid
       paddingLeft={{ lg: 2, xl: 2 }}
@@ -181,7 +230,7 @@ const FileList: React.FC<{}> = () => {
             style={{
               display: "flex",
               alignItems: "center",
-              flex: 1, // Set flex to 0.5 for half width
+              flex: 1,
               borderRadius: "40px",
               height: "30px",
               boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.1)",
@@ -209,8 +258,8 @@ const FileList: React.FC<{}> = () => {
               type="text"
               placeholder="Search"
               aria-label="Search"
-              // value={searchQuery}
-              // onChange={handleSearchInputChange}
+              value={searchQuery}
+              onChange={handleSearchInputChange}
             />
           </Grid>
           {isLargeScreen && (
@@ -234,20 +283,23 @@ const FileList: React.FC<{}> = () => {
               setFileId={(num: number) => {}}
             />
           )}
+
           {isLargeScreen && (
-            <IconButton
-              style={{
-                marginLeft: "24px",
-                fontSize: "20px",
-              }}
-            >
-              <img
-                src={trashBinImage}
-                alt="Bin"
-                style={{ width: "28px", height: "28px", marginRight: "12px" }}
-              />
-              <span style={{ color: "black" }}>Bin</span>
-            </IconButton>
+            <Link underline="none" href="/deleted-files" color={"black"}>
+              <IconButton
+                style={{
+                  marginLeft: "24px",
+                  fontSize: "20px",
+                }}
+              >
+                <img
+                  src={trashBinImage}
+                  alt="Bin"
+                  style={{ width: "28px", height: "28px", marginRight: "12px" }}
+                />
+                <span style={{ color: "black" }}>Bin</span>
+              </IconButton>
+            </Link>
           )}
           {isLargeScreen && (
             <Link underline="none" href="/" color={"black"}>
@@ -515,148 +567,21 @@ const FileList: React.FC<{}> = () => {
         </Grid>
       </section>
 
-      <section style={{ display: "flex", justifyContent: "center" }}>
+      <section
+        style={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <Grid
           container
-          spacing={{ md: 3, lg: 0, xl: 1 }}
-          style={{ margin: "auto" }} // Use auto margins
+          spacing={{ md: 3, lg: 3, xl: 3 }}
+          style={{ margin: "auto" }}
           paddingY={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
-          paddingLeft={{ lg: 10, xl: 12 }}
           paddingRight={{ xs: 2, sm: 2 }}
         >
-          {/* {files.map((file) => (
-            <Grid
-              key={file.fileId}
-              item
-              paddingLeft={2}
-              //12 is the w-full
-              xs={12}
-              sm={6}
-              md={4}
-              lg={4}
-              xl={4}
-              paddingBottom={2}
-            >
-              <Grid
-                maxWidth={{ xs: "100%", sm: "100%", xl: "80%", lg: "60%" }}
-                paddingX={"20px"}
-                paddingY={{ lg: "10px" }}
-                style={{
-                  backgroundColor: "#71C887",
-                  borderRadius: "8px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center", // Align items vertically in the center
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <div style={{ flex: "1" }}>
-                    <Link
-                      underline="none"
-                      href={file.fileDownloadUri}
-                      target="_blank"
-                      color="black"
-                    >
-                      {file.fileName}
-                    </Link>
-                  </div>
-                  <IconButton
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                    onClick={handleIconButtonClick}
-                  >
-                    <MoreHorizIcon
-                      style={{ fill: "black", width: "1em", height: "1em" }}
-                    />
-                  </IconButton>
-
-                  <Popover
-                    open={isPopoverOpen}
-                    anchorEl={anchorEl}
-                    onClose={handlePopoverClose}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "center",
-                    }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "center",
-                    }}
-                  >
-                    <List>
-                      <ListItem
-                        button
-                        onClick={() => handleOptionSelectPop("details")}
-                      >
-                        <ListItemText primary="Details" />
-                      </ListItem>
-                      <ListItem
-                        button
-                        onClick={() => handleOptionSelectPop("delete")}
-                      >
-                        <ListItemText primary="Delete" />
-                      </ListItem>
-                      <ListItem
-                        button
-                        onClick={() => handleOptionSelectPop("open")}
-                      >
-                        <ListItemText primary="Open" />
-                      </ListItem>
-                    </List>
-                  </Popover>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "100%",
-                  }}
-                >
-                  <Link href="/FilePage">
-                    <Box
-                      component="img"
-                      // src={file.thumbnailUrl}
-                      alt="Thumbnail preview of a Drive item"
-                      style={{
-                        width: "100%",
-                        height: "200px",
-                        paddingTop: "3px",
-                        paddingBottom: "10px",
-                        borderRadius: "8px",
-                        display: "block",
-                        margin: "0 auto", // Center the image horizontally
-                      }}
-                    />
-                  </Link>
-                </div>
-              </Grid>
-              <Grid
-                style={{
-                  textAlign: "center",
-                  marginTop: "0.5rem",
-                  fontSize: "14px",
-                  color: "#888",
-                  fontStyle: "italic",
-                }}
-                paddingRight={{ lg: 15 }}
-              >
-                Last Modified: {file.latestDateModified}
-              </Grid>
-            </Grid>
-          ))} */}
-          {files.map((file) => (
+          {/* {files.map((file) => ( */}
+          {searchResult.map((file) => (
             <Grid
               key={file.fileId}
               item
@@ -664,17 +589,21 @@ const FileList: React.FC<{}> = () => {
               xs={12}
               sm={6}
               md={4}
-              lg={4}
-              xl={4}
+              lg={lgValue}
+              xl={xlValue}
               paddingBottom={2}
+              // sx={{ textAlign: "center" }}
             >
               <Grid
-                maxWidth={{ xs: "100%", sm: "100%", xl: "80%", lg: "60%" }}
+                // maxWidth={{ xs: "100%", sm: "100%", xl: "80%", lg: "60%" }}
+                maxWidth="100%"
+                width={{ xs: "full", sm: "full", lg: "320px" }}
                 paddingX={"20px"}
                 paddingY={{ lg: "10px" }}
                 style={{
                   backgroundColor: "#71C887",
                   borderRadius: "8px",
+                  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
                 }}
               >
                 <div
@@ -799,7 +728,6 @@ const FileList: React.FC<{}> = () => {
                   color: "#888",
                   fontStyle: "italic",
                 }}
-                paddingRight={{ lg: 15 }}
               >
                 Last Modified: {file.latestDateModified}
               </Grid>
@@ -807,6 +735,11 @@ const FileList: React.FC<{}> = () => {
           ))}
         </Grid>
       </section>
+      {searchResult.length === 0 && (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          {searchQuery && `No files found for "${searchQuery}"`}
+        </div>
+      )}
     </Grid>
   );
 };
