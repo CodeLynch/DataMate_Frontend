@@ -104,7 +104,7 @@ function App() {
   //object state for the sheet data of the uploaded file
   const [sheetData, setSData] = useState<Object>({});
   //number state for the index of the sheet to be displayed in select table
-  const [sheetIndex, setSIndex] = useState(0);
+  const [sheetIndex, setSIndex] = useState(0); 
 
   // const handleDrawerOpen = () => {
   //   setOpen(true);
