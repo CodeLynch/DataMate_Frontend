@@ -2,99 +2,129 @@ import * as React from 'react';
 import { Box, Button, Stack, Typography } from "@mui/material"
 import GirlImg from '../images/girl.png';
 import DownArrow from '../images/downarrow.png';
-import TemplatesScreen from '../images/templatesScreen.png';
-import SpecificTemplateScreen from '../images/SpecificTemplate.png';
-import TemplateSample from '../images/templatesample.png';
-import UploadFile from '../images/UploadFile.png';
-import Restructure from '../images/Path2Loading.png';
-import ConvertDownload from '../images/convertdownload.png';
+import TemplateInstructions from '../images/instructions_one.gif';
+import UploadInstructions from '../images/instructions_two.gif';
+import NumOneIcon from '../images/onenum.png';
+import NumTwoIcon from '../images/twonum.png';
+import NumThreeIcon from '../images/threenum.png';
 import ImportFile from '../prompts/ImportFile';
+import { useNavigate } from 'react-router-dom';
 
-export default function Home(){
+type HomeProps = {
+    toggleImport: () => void,
+}
+
+export default function Home({toggleImport}:HomeProps){
     const [importFile, setImportFile] = React.useState(false);
-
-    const handleImportFileClick = () => {
-        setImportFile(true);
-    };
-  
-    const handleCloseModal = () => {
-        setImportFile(false);
-    };
+    const nav = useNavigate();
   
     const helpSectionRef = React.useRef<HTMLDivElement | null>(null);
     const handleGetStartedClick = () => {
+        const yOffset = -70; 
+        const element = document.getElementById('helpstart');
+        const y = element!.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+        window.scrollTo({top: y, behavior: 'smooth'});
         if (helpSectionRef.current) {
-            helpSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+            helpSectionRef.current.scrollIntoView({behavior: 'smooth', block: 'start'});
         }
     };
 
+    const handleTemplatesClick =()=>{
+        nav('/templates')
+    }
+    
+
     return(
         <Box>
-            <section className='gradientbg'>
-                <Box sx={{ display: 'flex', paddingBottom: '5rem' }}> 
+            <section className='gradientbg hero-banner'>
+                <Box className='wrapper'>
                     <Box>
                         <h1 className='h1-container'>Streamline Your <br></br>Data Management</h1> 
                         <p className='subheading1'>Download templates or import your <br></br>spreadsheet today!</p>
                         <Box className='btnstyle'>
-                            <Button onClick={handleGetStartedClick} variant="contained" type="submit" style={{fontWeight: 'bold', backgroundColor: 'white', color:'#71C887',  borderRadius: 50, paddingInline: 30}}>
+                            <Button onClick={handleGetStartedClick} variant="contained" type="submit">
                                 GET STARTED
-                                <img src={DownArrow} className="button-icon"/>
+                                <img src={DownArrow} className="button-vector"/>
                             </Button>
                         </Box>
                     </Box>
-                    <Box className='girl-img'>
+
+                    <Box className='img-banner'>
                         <img className='float-image' src={GirlImg}/>
                     </Box>
                 </Box>
+                
             </section>
 
-            <section ref={helpSectionRef}>
-                <h2 style={{paddingLeft: '6rem'}}>How can we help you?</h2>
-                <p style={{paddingLeft: '6rem'}}>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
-                <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <Stack direction="row" sx={{paddingBottom: '6rem', paddingTop: '2rem'}}>
-                        <img src={TemplatesScreen} style={{width: 605, height: 393}}/>
-                        <h3 className='g1' style={{paddingLeft: '15rem', paddingTop: '2rem'}}>Select a <span style={{ color: '#71C887' }}>template <br/> provided</span> by <br/>our app</h3>
-                    </Stack>
-                    <Stack direction="row" sx={{paddingBottom: '6rem', paddingTop: '2rem'}}>
-                        <h3 className='g1' style={{ paddingRight: '21rem', paddingTop: '6rem' }}><span style={{ color: '#71C887' }}>Download</span> the <br/> template</h3>
-                        <img src={SpecificTemplateScreen} style={{width: 603, height: 391}}/>
-                    </Stack>
+            <section id="helpstart">
+                <div className='wrapper'>
+                    <h2 className='h2-style'>How can we help you?</h2>
+                    <p className='pHome-style'>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
+                </div>
 
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                        <h3 className='g1' style={{ marginBottom: '1rem' }}>
-                            <span style={{ color: '#71C887' }}>Use</span> the template in <span style={{ color: '#71C887' }}>creating</span> your data
-                        </h3>
-                        <img src={TemplateSample} style={{ width: 758, height: 321, marginBottom: '1rem', marginTop: '3rem' }} />
-                        <Button variant="contained" sx={{ fontWeight: 'bold', backgroundColor: '#71C887', color: 'white', borderRadius: 50, paddingInline: 4, marginTop: '5rem' }}>
-                            GO TO TEMPLATES
-                        </Button>
-                    </Box>
-                    
-                </Stack>
-               
+                <div className='template-content-holder'>
+                    <div className='wrapper-template'>
+                        <Stack direction={{ xs: 'column', sm: 'column', md: 'row' }} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                            <Box className='template-gif-container'>
+                                <img className='template-gif' src={TemplateInstructions}/>
+                            </Box>
+                            <Stack>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                    <img className='num-style-temp' src={NumOneIcon}/>
+                                    <p className='temp-text-style'>Select a template provided by our app</p>      
+                                </Stack>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                    <img className='num-style-temp' src={NumTwoIcon}/>
+                                    <p className='temp-text-style'>Download a template</p>      
+                                </Stack>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                    <img className='num-style-temp' src={NumThreeIcon}/>
+                                    <p className='temp-text-style'>Use the template in creating your data</p>      
+                                </Stack>
+                            </Stack>
+                        </Stack>
+                    </div>
+                </div>
+                <Box className='templateBtn' sx={{display: 'flex', justifyContent: 'center'}}>
+                    <Button onClick={handleTemplatesClick} variant="contained">
+                        GO TO TEMPLATES
+                    </Button>
+                </Box>
 
-                <p style={{paddingTop: '8rem',  textAlign: 'center', paddingBottom: '2rem'}}>Already have an existing spreadsheet? We can clean it or turn it to a database.</p>
-
-                <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <Stack direction="row" sx={{paddingBottom: '6rem', paddingTop: '2rem'}}>
-                        <h3 className='g1' style={{ paddingRight: '15rem' , paddingTop: '3rem' }}>Import a <br/> <span style={{ color: '#71C887' }}>spreadsheet</span> file <br/> from your <br/> <span style={{ color: '#71C887' }}>computer</span></h3>
-                        <img src={UploadFile} style={{width: 660, height: 410}}/>
-                    </Stack>
-                    <Stack direction="row" sx={{paddingBottom: '6rem', paddingTop: '2rem'}}>
-                        <img src={Restructure} style={{width: 595, height: 372}}/>
-                        <h3 className='g1' style={{paddingLeft: '18rem', paddingTop: '2rem'}}>Our app <span style={{ color: '#71C887' }}>will <br/> restructure</span> your <br/> spreadsheet</h3>
-                    </Stack>
-                    <Stack direction="row" sx={{paddingBottom: '8rem', paddingTop: '2rem'}}>
-                        <h3 className='g1' style={{ paddingRight: '8rem' , paddingTop: '3rem'}}>Convert your <br/> spreadsheet into a <br/> <span style={{ color: '#71C887' }}>database</span> or <span style={{ color: '#71C887' }}>download</span> it</h3>
-                        <img src={ConvertDownload} style={{width: 605, height: 380}}/>
-                    </Stack>
-                    <Button  onClick={handleImportFileClick} variant="contained" sx={{fontWeight: 'bold', backgroundColor: '#71C887', color:'white',  borderRadius: 50, paddingInline: 4, marginBottom: '10rem'}}>IMPORT SPREADSHEET</Button>
-                    <ImportFile open={importFile} onClose={handleCloseModal} />
-                </Stack>
+                <div className='wrapper'>
+                    <p className='import-intro'>Already have an existing spreadsheet? We can clean it or turn it to a database.</p>
+                </div>
+                   
+                <div className='upload-content-holder'>
+                    <div className='wrapper-upload'>
+                        <Stack direction={{ xs: 'column', sm: 'column', md: 'row-reverse' }} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                            <Box className='import-gif-container'>
+                                <img className='import-gif' src={UploadInstructions}/>
+                            </Box>
+                            <Stack>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                    <img className='num-style-imp' src={NumOneIcon}/>
+                                    <p className='up-text-style'>Import a spreadsheet file from your computer</p>      
+                                </Stack>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                    <img className='num-style-imp' src={NumTwoIcon}/>
+                                    <p className='up-text-style'>Our app will restructure your sheet</p>      
+                                </Stack>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                    <img className='num-style-imp' src={NumThreeIcon}/>
+                                    <p className='up-text-style'>Convert spreadsheet into a database or download it</p>      
+                                </Stack>
+                            </Stack>
+                        </Stack>
+                    </div>
+                </div>
+                <Box className='importBtn templateBtn' sx={{display: 'flex', justifyContent: 'center'}}>
+                     <Button  onClick={toggleImport} variant="contained">IMPORT SPREADSHEET</Button>
+                </Box>
             </section>
 
-            <section className='footer'>
+            <section className='footer gradientbg'>
                 <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <p style={{ fontSize: 15, color: 'white', paddingTop: '1rem'}}>© 2023  All Rights Reserved, DataMate</p>
                     <p style={{ fontSize: 15, color: 'white', marginTop: '-0.5rem', paddingBottom: '1rem'}}>Privacy Policy  |   Terms</p>

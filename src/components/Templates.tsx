@@ -15,20 +15,32 @@ import noRecentFiles from '../images/noRecentFiless.png';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import SpecificTemplate from '../pages/SpecificTemplatePage';
 import { useNavigate } from 'react-router-dom';
+import TemplateItem, { TemplateItemType } from './TemplateItem';
+import axios from 'axios';
+
 
 
 export default function Templates(){
+    const [templateList,setTemplateList] = React.useState<TemplateItemType[]>([]);
 
-    const navigate = useNavigate();
-    
+    React.useEffect(()=>{
+      axios.get("http://localhost:8080/templates"
+      ).then((res)=>{
+          console.log(res.data);
+          if(res.data){
+            setTemplateList(res.data);  
+          }
+      }).catch(err => {
+          console.log(err);
+      })
+    },[])
 
-    const handleSpecificTemplateClick = () => {
-      navigate("/template-one");
-  }
-  
+    React.useEffect(()=>{
+      console.log("TL",templateList)
+    }, [templateList])
     return(
         <div>
-          <Stack direction="column" className='gradientbg'>
+          <Stack direction="column" className='gradientbg' sx={{paddingBottom:"2em"}}>
             <h1 style={{color: 'white', fontSize: 60, textAlign: 'center'}}>Download Template</h1>
             <p style={{color: 'white', fontSize: 22, paddingLeft: 5, textAlign:'center'}}> 
               Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
@@ -36,8 +48,10 @@ export default function Templates(){
           <TextField className='search'
           hiddenLabel
           size="medium"  
-          defaultValue="Search"
-          InputProps={{ startAdornment: (<InputAdornment position="start"> <SearchOutlinedIcon /> </InputAdornment>) }} 
+          placeholder="Search"
+          sx={{border: 'none', "& fieldset": { border: 'none' },}}
+          InputProps={{ startAdornment: (<InputAdornment position="start"> <SearchOutlinedIcon /> </InputAdornment>),
+          disableUnderline: true, }} 
         /><br></br><br></br><br></br>
           </Stack>
 
@@ -49,8 +63,17 @@ export default function Templates(){
 
           <h3 style={{marginLeft: '11rem', marginTop: '3rem', fontSize: 30}}>All Templates</h3>
           
-          
-          <Box onClick={handleSpecificTemplateClick} className='boxx'
+          <div style={{ display:'flex', justifyContent:"left", 
+          paddingLeft:"10em",
+          paddingRight:"10em"}}>
+          {
+            templateList !== undefined ?
+            templateList.map((template, i)=>{
+              return(<TemplateItem templateId={template.templateId} templateName={template.templateName}/>)
+            }):<></>
+          }
+          </div>
+          {/* <Box onClick={handleSpecificTemplateClick} className='boxx'
               sx={{
                 display: 'flex',
                 marginRight: 100,
@@ -63,12 +86,11 @@ export default function Templates(){
           <Box className='boxxx' sx={{ justifyContent: 'center', display: 'flex'}}>
           <img src={spreadsheet} style={{width: 50, height: 50, paddingTop: 40}}/>
           </Box>
-          <p style={{color: 'white', fontSize: 16.5, paddingLeft: 100, paddingTop: 159, textAlign:'center'}}> 
-              Template1.xlsx</p>
-          </Box>
+          <p style={{color: 'white', fontSize: 16.5, paddingLeft: '3.5rem', paddingTop: 159, textAlign:'center'}}> 
+            SalesReportTemplate.xlsx</p>
+          </Box> */}
           <br></br>
-          
-        
+                  
         </div>
         )
     

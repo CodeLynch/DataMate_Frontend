@@ -14,11 +14,11 @@ const NavbarList = ({ open }: NavbarListProps) => {
   }
 
   return (
-    <>
+    <div style={{height:"100vh"}}>
       {/* Main List */}
       <List>
         <ListItem disablePadding sx={{ display: 'block' }}>
-          <NavbarLink to="/home" text="Home" open={open} end={true} />
+          <NavbarLink to="/" text="Home" open={open} end={true} />
         </ListItem>
         <ListItem disablePadding sx={{ display: 'block' }}>
           <NavbarLink to="/databases" text="Databases" open={open} end={false} />
@@ -33,37 +33,30 @@ const NavbarList = ({ open }: NavbarListProps) => {
           <NavbarLink to="/contact-us" text="Contact us"  open={open} end={false} />
         </ListItem>   
       </List>
-
       {/* Log out option */}
-
-      <List>
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '50vh' }}>
-            <div style={{  marginRight: "auto",marginTop: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
-            <ListItem disablePadding >
-              <ListItemButton
-                onClick={handleLogout}
-                sx={{
-                  color: 'tertiary.contrastText',
-                  minHeight: 48,
-                  px: 2.5,
-                  '&:hover': { backgroundColor: 'secondary.main' },
-                  '&.Mui-selected': {
-                    backgroundColor: 'secondary.main',
-                    color: 'tertiary.contrastText',
-                  },
-                }}
-              >
-                <ListItemText 
-                  primary={<Typography variant="body1" 
-                  sx={{ fontWeight: 'bold', paddingLeft: '0rem' , paddingRight: "10rem"}}>
-                  Log out
-                  </Typography>} />
-              </ListItemButton>
+    <List>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '40vh' }}>
+            <div style={{ marginTop: 'auto' }}>
+            <ListItem disablePadding>
+                <ListItemButton onClick={handleLogout} 
+                sx={{ 
+                    color: "tertiary.contrastText",
+                    minHeight: 30,
+                    justifyContent: open ? 'initial' : 'center',
+                    px: 2.5,
+                    "&.Mui-selected": { backgroundColor: "secondary.main" },
+                    "&.Mui-selected:hover": { backgroundColor: "secondary.main" },
+                }}>
+                  <div style={{display:"flex", justifyContent:"left"}}>
+                    <ListItemText primary={<Typography variant="body1" sx={{ padding:0, fontWeight: 'bold'}}>Log out</Typography>} />
+                  </div>
+                </ListItemButton>
             </ListItem>
             </div>
         </div>
     </List>
-    </>
+
+    </div>
   );
 }
 
