@@ -24,7 +24,7 @@ export default function TemplateItem({templateId, templateName}: TemplateItemTyp
       }}}>
         <CardContent style={{display:'flex', justifyContent:"center", paddingTop:"20px",alignContent:"center", flexDirection:"column"}}>
             <div style={{display:'flex', justifyContent:"center", backgroundColor:"white", alignContent:"center", height:"10em", width:"14em"}}>
-            <img src={spreadsheet} style={{width: 50, height: 50, paddingTop:"20px"}}/>
+            <img src={spreadsheet} style={{width: 50, height: 50, paddingTop:"20px"}} />
             </div>
             <Typography variant="body2" sx={{padding:0, color:"white", margin:"1em", textAlign:"center"}}>
                 <b>{templateName}</b>

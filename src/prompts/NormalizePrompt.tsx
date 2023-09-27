@@ -76,6 +76,7 @@ const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImp
   const [startProcess, setStartProcess] = useState(false);
   const [normWB, setNormWB] = useState<XLSX.WorkBook | null>();
   const nav = useNavigate();
+  var nameid = 1;
 
   //function to remove empty rows in Sheet Object Data
   function sheetjs_cleanEmptyRows(sd:XLSX.SheetType) {
@@ -190,8 +191,8 @@ function convertObjectToArray(obj: Record<string, string>[] | (number | string)[
   }
 
 function getUniquePrimaryTableName(): string{
-  setPTabCtr(PrimaryTableCtr + 1);
-  return `PrimaryTable_${PrimaryTableCtr + 1}`;;
+  nameid++;
+  return `PrimaryTable_${nameid - 1}`;
 }
 
 
@@ -428,6 +429,7 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
     const numCols = inputTable[0].length;
     let newPrimaryTable: (string | number)[][] = [...inputTable];
     let primaryTableName = getUniquePrimaryTableName();
+    console.log("ptn is ", primaryTableName);
     
     
     for (let col = 0; col < numCols; col++) {
@@ -524,12 +526,22 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
       let newWB:XLSX.WorkBook = JSON.parse(JSON.stringify(workbook)) as XLSX.WorkBook;
       
       //clear sheets found in norm list in new work book copy
+      console.log("normlist:", normList, " and newwb sheets:", newWB.SheetNames);
+      let sheetCount = 0;
       for(const sheet in newWB.SheetNames){
-         
-         if(normList.includes(newWB.SheetNames[sheet])){
-            console.log("Deleting ", newWB.SheetNames[sheet], "...")
-           delete_ws(newWB, newWB.SheetNames[sheet as unknown as number])
+        sheetCount++;
+      }
+      console.log("sheet count:", sheetCount);
+      let k = 0;
+      for(let i=0; i < sheetCount; i++){
+        console.log("checking index ", i - k)
+        console.log("checking...", newWB.SheetNames[i - k]);
+         if(normList.includes(newWB.SheetNames[i - k])){
+            console.log("Deleting ", newWB.SheetNames[i - k], "...")
+            delete_ws(newWB, newWB.SheetNames[i - k])
+            k++;
          }
+         
       }
 
       for(const sheet in normList){ 
@@ -544,7 +556,7 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
           let ws = XLSX.utils.aoa_to_sheet(newTablesArr[newtable].tableValues);
           
           /* Add the worksheet to the workbook */
-          if(!workbook?.SheetNames.includes(newTablesArr[newtable].tableName)){
+          if(!newWB?.SheetNames.includes(newTablesArr[newtable].tableName)){
             XLSX.utils.book_append_sheet(newWB!, ws, newTablesArr[newtable].tableName);
           }          
         }
