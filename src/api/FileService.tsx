@@ -72,6 +72,20 @@ const FileService = {
     }
   },
 
+  // fetch files by user ID
+  getFilesByUserId: async (userId: number): Promise<ResponseFile[]> => {
+    try {
+      const response: AxiosResponse<ResponseFile[]> = await axios.get(
+        `${API_BASE_URL}/filesByUserId?userId=${userId}`
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Get files by user ID error:", error);
+      return [];
+    }
+  },
+
   // fetch file by ID
   getFile: async (id: number): Promise<FileEntity | null> => {
     try {
@@ -131,31 +145,28 @@ const FileService = {
   // restore file by id
   restoreFile: async (id: number): Promise<string> => {
     try {
-        const response: AxiosResponse<string> = await axios.put(
-            `${API_BASE_URL}/restoreFile/${id}`
-        );
-        return response.data;
+      const response: AxiosResponse<string> = await axios.put(
+        `${API_BASE_URL}/restoreFile/${id}`
+      );
+      return response.data;
     } catch (error) {
-        console.error("Restore error:", error);
-        return "Restore Failed!";
+      console.error("Restore error:", error);
+      return "Restore Failed!";
     }
   },
 
   // permanent delete by id
   permanentDeleteFile: async (id: number): Promise<string> => {
     try {
-        const response: AxiosResponse<string> = await axios.delete(
-            `${API_BASE_URL}/deleteFilePermanent/${id}`
-        );
-        return response.data;
+      const response: AxiosResponse<string> = await axios.delete(
+        `${API_BASE_URL}/deleteFilePermanent/${id}`
+      );
+      return response.data;
     } catch (error) {
-        console.error("Permanent delete error:", error);
-        return "Permanent Delete Failed!";
+      console.error("Permanent delete error:", error);
+      return "Permanent Delete Failed!";
     }
   },
-
-
 };
-
 
 export default FileService;
