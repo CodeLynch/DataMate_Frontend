@@ -25,12 +25,15 @@ import {
   useTheme,
 } from "@mui/material";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import InputAdornment from "@mui/material/InputAdornment";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, enUS } from "@mui/x-data-grid";
 import RestoreIcon from "@mui/icons-material/Restore";
 import { FileEntity } from "../api/dataTypes";
 import FileService from "../api/FileService";
+import { useNavigate } from "react-router-dom";
+
 
 export default function DeletedFiles() {
   const [isLabelShrunk, setIsLabelShrunk] = useState(false);
@@ -42,6 +45,16 @@ export default function DeletedFiles() {
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [restoreError, setRestoreError] = useState<string>("");
   const [deleteError, setDeleteError] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [deletedFiles, setDeletedFiles] = useState<FileEntity[]>([]);
+  const [filteredFiles, setFilteredFiles] = useState<FileEntity[]>([]);
+  const nav = useNavigate();
+
+  const customLocaleText = {
+    ...enUS,
+    noRowsLabel: "No files",
+  };
+
 
   const theme = useTheme();
   const isNotXsScreen = useMediaQuery(theme.breakpoints.up("sm"));
@@ -59,6 +72,33 @@ export default function DeletedFiles() {
       setIsLabelShrunk(false);
     }
   };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  useEffect(() => {
+    const fetchDeletedFiles = async () => {
+      const userId = 1; // to be changed
+      try {
+        const files = await FileService.getDeletedFilesById(userId);
+        setDeletedFiles(files);
+      } catch (error) {
+        console.error("Error fetching deleted files:", error);
+      }
+    };
+
+    fetchDeletedFiles();
+  }, []);
+
+ // hook for search function
+  useEffect(() => {
+    const filteredFiles = deletedFiles.filter((file) =>
+      file.fileName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredFiles(filteredFiles);
+  }, [searchQuery, filteredFiles]);
+  
 
   const handleCheckboxDeleteChange = (event: any) => {
     const value = event.target.value;
@@ -129,14 +169,17 @@ export default function DeletedFiles() {
       sortable: false,
       renderCell: (params) => (
         <div>
-          <RestoreIcon sx={{ color: "#14847C" }} />
+          <RestoreIcon
+          sx={{ color: "#14847C", cursor: "pointer" }}
+          onClick={() => handleRestore(params.row.fileId)}
+        />
         </div>
       ),
       disableColumnMenu: true,
     },
     {
       field: "latestDateModified",
-      headerName: "Date",
+      headerName: "Latest Date Modified",
       width: 150,
       type: "date",
       valueGetter: (params) => {
@@ -155,6 +198,7 @@ export default function DeletedFiles() {
     },
   ];
 
+  // for grid responsiveness
   const themeInstance = useTheme();
   //   const matchesXS = useMediaQuery(themeInstance.breakpoints.down('xs'));
   const matchesSM = useMediaQuery(themeInstance.breakpoints.down("sm"));
@@ -182,21 +226,8 @@ export default function DeletedFiles() {
     columns[2].width = 100;
   }
 
-  const [deletedFiles, setDeletedFiles] = useState<FileEntity[]>([]);
+  // const [deletedFiles, setDeletedFiles] = useState<FileEntity[]>([]);
   const getRowId = (row: any) => row.fileId;
-
-  useEffect(() => {
-    const fetchDeletedFiles = async () => {
-      try {
-        const files = await FileService.getDeletedFiles();
-        setDeletedFiles(files);
-      } catch (error) {
-        console.error("Error fetching deleted files:", error);
-      }
-    };
-
-    fetchDeletedFiles();
-  }, []);
 
   const rowHeight = 50;
   const additionalHeight = 40;
@@ -248,7 +279,8 @@ export default function DeletedFiles() {
     }
   };
 
-  const handleRestore = async () => {
+  const handleRestore = async (fileId:any) => {
+    const userId = 1; // to be changed
     if (selectedRows.length > 0) {
       const restoreResults = await Promise.all(
         selectedRows.map(async (id) => {
@@ -265,7 +297,7 @@ export default function DeletedFiles() {
       );
 
       if (successfulRestorations.length > 0) {
-        const files = await FileService.getDeletedFiles();
+        const files = await FileService.getDeletedFilesById(userId);
         setDeletedFiles(files);
 
         setSelectedRows([]);
@@ -279,16 +311,21 @@ export default function DeletedFiles() {
       }
 
       handleRestoreDialogClose();
+      
     }
   };
+  
 
   return (
     <div>
       <Box m={4}>
-        <Typography variant="h4" fontWeight="bold" color="#374248">
-          {" "}
-          Deleted Files{" "}
-        </Typography>
+        <Stack direction="row">
+          <ArrowBackIosNewIcon sx={{ fontSize: '30px', color: '#374248', cursor: 'pointer', mr: 2, mt: .8 }} onClick={() => { nav('/files'); }}/>
+          <Typography variant="h4" fontWeight="bold" color="#374248">
+            {/* {" "} */}
+            Deleted Files
+          </Typography>
+        </Stack>
       </Box>
       <Stack direction="row" mx={4}>
         <Grid container>
@@ -311,6 +348,8 @@ export default function DeletedFiles() {
               }}
               onFocus={handleTextFieldFocus}
               onBlur={handleTextFieldBlur}
+              value={searchQuery}
+              onChange={handleSearchChange}
               sx={{
                 boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.3)",
                 borderRadius: "20px",
@@ -356,48 +395,6 @@ export default function DeletedFiles() {
               justifyContent="flex-end"
               alignItems="flex-end"
             >
-              <Grid item sm={10} md={7}>
-                <Stack direction="row" spacing={2}>
-                  <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">
-                      Sort by
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={sort}
-                      label="Sort by"
-                      onChange={handleChange}
-                      sx={{
-                        backgroundColor: "#A5E6AC",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
-                        },
-                        "& .MuiSelect-root": {
-                          zIndex: 1,
-                        },
-                      }}
-                    >
-                      <MenuItem value="all">All</MenuItem>
-                      <MenuItem value="name">Name</MenuItem>
-                      <MenuItem value="date">Date</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <Grid item sm={15} md={10}>
-                    <Button
-                      sx={{
-                        fontSize: "13px",
-                        color: "red",
-                        textTransform: "none",
-                        mt: 1,
-                      }}
-                      variant="text"
-                    >
-                      Clear Filters
-                    </Button>
-                  </Grid>
-                </Stack>
-              </Grid>
             </Grid>
           </>
         ) : (
@@ -436,46 +433,6 @@ export default function DeletedFiles() {
                 <Typography variant="body2" color="error" ml={2}>
                   {deleteError || restoreError}
                 </Typography>
-                <MenuItem>
-                  <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">
-                      Sort by
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={sort}
-                      label="Sort by"
-                      onChange={handleChange}
-                      sx={{
-                        backgroundColor: "#A5E6AC",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
-                        },
-                        "& .MuiSelect-root": {
-                          zIndex: 1,
-                        },
-                      }}
-                    >
-                      <MenuItem value="all">All</MenuItem>
-                      <MenuItem value="name">Name</MenuItem>
-                      <MenuItem value="date">Date</MenuItem>
-                    </Select>
-                  </FormControl>
-                </MenuItem>
-                <MenuItem>
-                  <Button
-                    fullWidth
-                    sx={{
-                      fontSize: "13px",
-                      color: "red",
-                      textTransform: "none",
-                    }}
-                    variant="text"
-                  >
-                    Clear Filters
-                  </Button>
-                </MenuItem>
               </Menu>
             </Grid>
           </Box>
@@ -491,7 +448,7 @@ export default function DeletedFiles() {
         }}
       >
         <DataGrid
-          rows={deletedFiles}
+          rows={filteredFiles}
           columns={columns}
           getRowId={(row) => row.fileId}
           isRowSelectable={(params) => true}
@@ -509,6 +466,7 @@ export default function DeletedFiles() {
             setSelectedRows(newSelection.map((id) => id.toString()));
           }}
           disableRowSelectionOnClick
+          localeText={customLocaleText}
         />
       </Box>
 
