@@ -172,7 +172,7 @@ const FileService = {
   getDeletedFilesById: async (userId: number): Promise<FileEntity[]> => {
     try {
       const response: AxiosResponse<FileEntity[]> = await axios.get(
-        `${API_BASE_URL}/deletedFilesByUserId?userId=${userId}`
+        `${FILE_BASE_URL}/deletedFilesByUserId?userId=${userId}`
       );
 
       return response.data;

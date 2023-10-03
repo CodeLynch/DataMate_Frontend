@@ -223,9 +223,9 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    setSearchResult(filteredFiles);
-  }, [searchQuery, filteredFiles]);
+  // useEffect(() => {
+  //   setSearchResult(filteredFiles);
+  // }, [searchQuery, filteredFiles]);
 
   const navigate = useNavigate();
   return (

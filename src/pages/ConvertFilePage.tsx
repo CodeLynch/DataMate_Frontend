@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import FileService from "../services/FileService"
 import { useLocation } from "react-router-dom";
 import * as XLSX from 'xlsx'
-import { Box, Button, CircularProgress, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs} from "@mui/material";
+import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Paper, Select,} from "@mui/material";
 import { start } from "repl";
 import styled from "@emotion/styled";
 import axios from "axios";
 import ReactDataGrid from "@inovua/reactdatagrid-community";
+import '@inovua/reactdatagrid-community/index.css'
+import '@inovua/reactdatagrid-community/index.css'
+import '@inovua/reactdatagrid-community/theme/green-light.css'
 
 // type ConvertProps = {
 //     stopLoading: () => void,
@@ -30,7 +33,9 @@ export default function ConvertFilePage() {
     const [isLoading, setLoading] = useState(true);
     const gridstyle = {
         fontSize:"10px",
+        height:"50vh",
     }
+
 
 
     // Sheet Data functions -----------------------------------------------------------------------
@@ -168,16 +173,28 @@ export default function ConvertFilePage() {
           name: 'firstName',
           header: 'First Name',
           defaultFlex: 1,
+          headerProps:{
+            style: { backgroundColor: '#71C887', color:"white", fontWeight: 'bold' 
+          },
+          }
         },
         {
           name: 'lastName',
           header: 'Last Name',
           defaultFlex: 1,
+          headerProps:{
+            style: { backgroundColor: '#71C887', color:"white", fontWeight: 'bold' 
+          },
+          }
         },
         {
           name: 'country',
           header: 'Country',
           defaultFlex: 1,
+          headerProps:{
+            style: { backgroundColor: '#71C887', color:"white", fontWeight: 'bold' 
+          },
+          }
         },
       ]
     
@@ -202,37 +219,62 @@ export default function ConvertFilePage() {
 
     return(
         <>
-        {HeaderArr !== undefined && BodyArr !== undefined? <>
-            <div style={{marginRight:'50px', marginLeft:'50px', height:'80vh'}}>
-            <h1>Convert Spreadsheet to Database?</h1>
+            <div style={{marginRight:'50px', marginLeft:'50px', height:'80vh', marginTop:'50px'}}>
+            <h1 style={{textAlign:'center'}}>Convert Spreadsheet to Database?</h1>
                 <div style={{marginTop:"1em"}}>
-                    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                    <div style={{width: '80%'}}>
-                    {/* for table preview */}
-                     {HeaderArr !== undefined && BodyArr !== undefined? <>
-                        <Paper elevation={0} sx={{ maxHeight:'500px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
-                          {/* //code for the table */}
-                        <ReactDataGrid
-                            idProperty="id"
-                            style={gridstyle}
-                            columns={columns}
-                            dataSource={dataSource}
-                        />
-                        </Paper>     
-                        </>:
-                        <><CircularProgress size="10rem" 
-                        color="success" />
-                        </>}
+                    <div style={{marginLeft:"10%"}}>
+                        <FormControl fullWidth>
+                            <InputLabel id="input-label0id">Table</InputLabel>
+                                <Select
+                                labelId="select-table"
+                                id="select-table-id"
+                                value={0}
+                                label="Table"
+                                sx={{width: 200, color:"black"}}
+                                >
+                                    <MenuItem value={0}>Table 1</MenuItem>
+                                    <MenuItem value={1}>Table 2</MenuItem>
+                                    <MenuItem value={2}>Table 3</MenuItem>
+                                </Select>
+                        </FormControl>
                     </div>
-                    </Paper>
-                    <div style={{display:"flex", flexDirection:'row'}}>
-                            <Button variant="contained" sx={{fontWeight: 'bold', backgroundColor: '#347845', color:'white', paddingInline: 4, margin:'5px'}}>Confirm</Button>
+                    <Box sx={{ width: '100%', display:"flex", justifyContent:"center"}}>
+                        <Paper style={{width: '80%'}}>
+                        <div style={{width: '100%'}}>
+                        {/* for table preview */}
+                        {HeaderArr !== undefined && BodyArr !== undefined? <>
+                            <Paper elevation={0} sx={{ maxHeight:'500px', overflow: 'auto', border:"5px", borderRadius: 0}}>
+                            {/* //code for the table */}
+                            <ReactDataGrid
+                                idProperty="id"
+                                style={gridstyle}
+                                columns={columns}
+                                dataSource={dataSource}
+                                theme="green-light"
+                            />
+                            </Paper>     
+                            </>:
+                            <><CircularProgress size="10rem" 
+                            color="success" />
+                            </>}
+                        </div>
+                        </Paper>
+                    </Box>
+                    <div>
+                        <p style={{fontStyle:"italic", fontSize:"14px", textAlign:"center"}}>Preview</p>
+                    </div>
+                    <div style={{display:"flex", flexDirection:'row', justifyContent:"space-around"}}>
                             <Button
-                            sx={{fontWeight: 'bold', color:'black', paddingInline: 4, margin:'5px'}}>Back</Button>
+                            sx={{fontWeight: 'bold', color:'black', paddingInline: 4, margin:'5px', boxShadow:5, borderRadius:5}}>
+                                Back
+                            </Button>
+                            <Button variant="contained" 
+                            sx={{fontWeight: 'bold', backgroundColor: '#347845', color:'white', paddingInline: 4, margin:'5px', boxShadow:5, borderRadius:5}}>
+                                Confirm
+                            </Button>
                     </div>            
                 </div>
             </div>
-        </>:<></>}
         </> 
     )
 }
