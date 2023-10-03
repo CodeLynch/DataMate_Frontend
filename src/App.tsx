@@ -32,6 +32,7 @@ import SuccessPrompt from "./prompts/SuccessPrompt";
 import ProcessingPage from "./pages/ProcessingPage";
 import DeleteProfile from "./components/DeleteProfile";
 import NormalizePrompt from './prompts/NormalizePrompt';
+import ConvertFilePage from "./pages/ConvertFilePage";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -462,11 +463,14 @@ function App() {
                   path="/file/"
                   element={<Filepage stopLoading={StopLoading} />}
                 />
+                <Route
+                path ="/convert"
+                element={<ConvertFilePage/>}
+                />
                 <Route path="/templates" element={<TemplatesPage />} />
-                <Route path="/files" element={<FileScreenPage />} />
+                <Route path="/files" element={<FileScreenPage setFileId={setFileId} />} />
                 <Route path="/databases" element={<DatabaseScreenPage />} />
                 <Route path="/delete-profile/:id" element={<DeleteProfile />} />
-
                 {/* Add your other routes here */}
               </Routes>
             </Box>

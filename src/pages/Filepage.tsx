@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import FileService from "../services/FileService"
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as XLSX from 'xlsx'
 import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs} from "@mui/material";
 import { start } from "repl";
@@ -24,6 +24,7 @@ type FilePageProps = {
 
 export default function Filepage({stopLoading}:FilePageProps) {
     const loc = useLocation();
+    const nav = useNavigate();
     const fileId = loc.state.fileid;
     const [tblCtr, setTblCtr] = useState<number>(0)
     const [workbook, setWB] = useState<XLSX.WorkBook | null>()
@@ -195,6 +196,14 @@ export default function Filepage({stopLoading}:FilePageProps) {
         }
         console.log("BArr",BodyArr)
     },[HeaderArr])
+
+    const handleConvert = () => {
+        nav('/convert',{
+            state:{
+              fileid: fileId
+            }
+        });
+    }
     
 
     return(
@@ -269,10 +278,12 @@ export default function Filepage({stopLoading}:FilePageProps) {
                     </Tabs>
                     </Box>
                         <div style={{display:"flex", flexDirection:'row'}}>
-                            <Button variant="contained" sx={{fontWeight: 'bold', backgroundColor: '#347845', color:'white', paddingInline: 4, margin:'5px'}}>Convert to Database</Button>
+                            <Button variant="contained" 
+                            onClick={handleConvert}
+                            sx={{fontWeight: 'bold', backgroundColor: '#347845', color:'white', paddingInline: 4, margin:'5px'}}>Convert to Database</Button>
                             <Button
                             onClick={downloadFile} 
-                            sx={{fontWeight: 'bold', color:'black', paddingInline: 4, margin:'5px'}}>Download</Button>
+                            sx={{fontWeight: 'bold', color:'black', paddingInline: 4, margin:'5px'}} >Download</Button>
                         </div>            
                 </div>
             </div>

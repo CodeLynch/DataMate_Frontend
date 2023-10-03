@@ -28,8 +28,11 @@ import { ResponseFile } from "../api/dataTypes";
 import ImportFile from "../prompts/ImportFile";
 
 type FileId = string;
+type FileListProp = {
+  setFileId: (num:number) => void
+};
 
-const FileList: React.FC<{}> = () => {
+const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const openImportModal = () => {
@@ -231,7 +234,7 @@ const FileList: React.FC<{}> = () => {
             <ImportFile
               toggleImport={closeImportModal}
               startLoading={() => {}}
-              setFileId={(num: number) => {}}
+              setFileId={setFileId}
             />
           )}
           {isLargeScreen && (

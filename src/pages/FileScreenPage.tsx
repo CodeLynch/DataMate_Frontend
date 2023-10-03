@@ -1,9 +1,14 @@
 import FileScreen from "../components/FileScreen";
 
-export default function FilePage() {
+
+type FilePageProp = {
+  setFileId: (num:number) => void,
+}
+
+export default function FilePage({setFileId}:FilePageProp) {
   return (
     <div>
-      <FileScreen></FileScreen>
+      <FileScreen setFileId={setFileId}></FileScreen>
     </div>
   );
 }
