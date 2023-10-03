@@ -7,8 +7,8 @@ export interface FileEntity {
   uploadDate: string;
   latestDateModified: string;
   isdeleted: boolean;
-  data: Uint8Array;
-  // thumbnailUrl: string;
+  data?: Uint8Array; // Make 'data' property optional
+  userId: number;
 }
 
 export interface ResponseFile {
@@ -19,5 +19,18 @@ export interface ResponseFile {
   latestDateModified: string;
   isdeleted: boolean;
   fileDownloadUri: string;
+  userId: number;
   // thumbnailUrl: string;
+}
+
+export interface User {
+  userId: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  address: string;
+  username: string;
+  password: string;
+  businessName: string;
+  businessType: string;
 }

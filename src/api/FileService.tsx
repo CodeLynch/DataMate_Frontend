@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { FileEntity, ResponseFile } from "./dataTypes";
 
-const API_BASE_URL = "http://localhost:8080"; // Update with your backend URL
+const FILE_BASE_URL = "http://localhost:8080"; // Update with your backend URL
 
 const FileService = {
   //upload FIle
@@ -11,7 +11,7 @@ const FileService = {
       formData.append("file", file);
 
       const response: AxiosResponse<FileEntity> = await axios.post(
-        `${API_BASE_URL}/upload`,
+        `${FILE_BASE_URL}/upload`,
         formData,
         {
           headers: {
@@ -34,7 +34,7 @@ const FileService = {
       formData.append("file", file);
 
       const response: AxiosResponse<string> = await axios.put(
-        `${API_BASE_URL}/updateFile/${id}`,
+        `${FILE_BASE_URL}/updateFile/${id}`,
         formData,
         {
           headers: {
@@ -54,7 +54,7 @@ const FileService = {
   downloadFile: async (id: number): Promise<void> => {
     try {
       const response: AxiosResponse<ArrayBuffer> = await axios.get(
-        `${API_BASE_URL}/downloadFile/${id}`,
+        `${FILE_BASE_URL}/downloadFile/${id}`,
         {
           responseType: "arraybuffer",
         }
@@ -72,11 +72,25 @@ const FileService = {
     }
   },
 
+  // fetch files by user ID
+  getFilesByUserId: async (userId: number): Promise<ResponseFile[]> => {
+    try {
+      const response: AxiosResponse<ResponseFile[]> = await axios.get(
+        `${FILE_BASE_URL}/filesByUserId?userId=${userId}`
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Get files by user ID error:", error);
+      return [];
+    }
+  },
+
   // fetch file by ID
   getFile: async (id: number): Promise<FileEntity | null> => {
     try {
       const response: AxiosResponse<FileEntity> = await axios.get(
-        `${API_BASE_URL}/file?id=${id}`
+        `${FILE_BASE_URL}/file?id=${id}`
       );
 
       return response.data;
@@ -90,7 +104,7 @@ const FileService = {
   getAllFiles: async (): Promise<ResponseFile[]> => {
     try {
       const response: AxiosResponse<ResponseFile[]> = await axios.get(
-        `${API_BASE_URL}/files`
+        `${FILE_BASE_URL}/files`
       );
 
       return response.data;
@@ -104,13 +118,53 @@ const FileService = {
   deleteFile: async (id: number): Promise<string> => {
     try {
       const response: AxiosResponse<string> = await axios.delete(
-        `${API_BASE_URL}/deleteFile/${id}`
+        `${FILE_BASE_URL}/deleteFile/${id}`
       );
 
       return response.data;
     } catch (error) {
       console.error("Delete error:", error);
       return "Delete Failed!";
+    }
+  },
+
+  //get all deleted files
+  getDeletedFiles: async (): Promise<FileEntity[]> => {
+    try {
+      const response: AxiosResponse<FileEntity[]> = await axios.get(
+        `${FILE_BASE_URL}/getAllDeletedFiles`
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Get deleted files error:", error);
+      return [];
+    }
+  },
+
+  // restore file by id
+  restoreFile: async (id: number): Promise<string> => {
+    try {
+      const response: AxiosResponse<string> = await axios.put(
+        `${FILE_BASE_URL}/restoreFile/${id}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Restore error:", error);
+      return "Restore Failed!";
+    }
+  },
+
+  // permanent delete by id
+  permanentDeleteFile: async (id: number): Promise<string> => {
+    try {
+      const response: AxiosResponse<string> = await axios.delete(
+        `${FILE_BASE_URL}/deleteFilePermanent/${id}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Permanent delete error:", error);
+      return "Permanent Delete Failed!";
     }
   },
 };

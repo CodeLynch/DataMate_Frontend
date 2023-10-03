@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import trashBinImage from "../images/Trashbin.png";
 import {
   Button,
@@ -13,6 +13,7 @@ import {
   IconButton,
   SelectChangeEvent,
   Link,
+  Modal,
 } from "@mui/material";
 import Popover from "@mui/material/Popover";
 import List from "@mui/material/List";
@@ -24,25 +25,81 @@ import SearchIcon from "@mui/icons-material/Search";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import FileService from "../api/FileService";
-import { ResponseFile } from "../api/dataTypes";
+import { FileEntity, ResponseFile, User } from "../api/dataTypes";
 import ImportFile from "../prompts/ImportFile";
 
-type FileId = string;
-type FileListProp = {
-  setFileId: (num:number) => void
-};
+import { useNavigate } from "react-router-dom";
+import FileDetails from "./FileDetails";
 
-const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
+type FileId = string;
+
+//Importfile
+type FileListProp = {
+  setFileId: (num: number) => void;
+};
+const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const [files, setFiles] = useState<ResponseFile[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("All");
+  const [selectedMenuOption, setSelectedMenuOption] = useState("");
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [selectedFileId, setSelectedFileId] = useState<FileId | null>(null);
+  const [anchorE2, setAnchorE2] = useState<null | HTMLElement>(null);
+  const [selectedOptionPopMenu, setSelectedOptionPopMenu] = useState("All");
+  const open = Boolean(anchorE2);
+  const isPopoverOpen = Boolean(anchorEl);
+  const [searchQuery, setSearchQuery] = useState(""); // State for the search query
+  const [searchResult, setSearchResult] = useState<ResponseFile[]>([]);
+  const [currentSortOption, setCurrentSortOption] = useState("All");
+  const [selectedFile, setSelectedFile] = useState<ResponseFile | null>(null);
+  const [file, setFile] = useState<FileEntity | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const anchorRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const nav = useNavigate();
+
+  // const itemsPerRow = Math.min(searchResult.length, 3); // Maximum 3 items per row
+  const itemsPerRow = Math.min(files.length, 3);
+  const lgValue = Math.floor(12 / itemsPerRow);
+  const xlValue = Math.floor(12 / itemsPerRow);
+
+  const handleClickFileName = (file: any) => {
+    let id = file?.fileId;
+
+    nav("/file", {
+      state: {
+        fileid: id,
+      },
+    });
+  };
+
+  const toggleUpload = () => {
+    setShowUpload(!showUpload);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
+  const handleOptionSelectPop = (option: string, file: ResponseFile | null) => {
+    setSelectedMenuOption(option);
+    setSelectedFile(file);
+    setIsOpen(!!file);
+  };
 
   const openImportModal = () => {
     setIsImportModalOpen(true);
+    document.body.style.overflow = "hidden"; // Prevent scrolling
   };
 
   const closeImportModal = () => {
     setIsImportModalOpen(false);
+    document.body.style.overflow = "auto"; // Allow scrolling
   };
-  const [isLargeScreen, setIsLargeScreen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -56,21 +113,17 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
     };
   }, []);
 
-  const [files, setFiles] = useState<ResponseFile[]>([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("All");
-  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-  const [selectedMenuOption, setSelectedMenuOption] = useState("");
-
-  //fetch all files
   useEffect(() => {
+    //dynamic fetching
     const fetchData = async () => {
-      const files = await FileService.getAllFiles();
-      setFiles(files.filter((file) => !file.isdeleted));
+      if (userId !== null) {
+        const files = await FileService.getFilesByUserId(userId);
+        setFiles(files.filter((file) => !file.isdeleted));
+      }
     };
 
     fetchData();
-  }, []);
+  }, [userId]);
 
   //delete specific file
   const handleDelete = async (id: number) => {
@@ -79,7 +132,6 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
       setFiles((prevFiles) => prevFiles.filter((file) => file.fileId !== id));
     } catch (error) {
       console.error("Delete error:", error);
-      // Handle error
     }
   };
 
@@ -88,17 +140,38 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
     setIsDropdownOpen((prev) => !prev);
   };
 
-  const handleOptionSelect = (option: any) => {
-    setSelectedOption(option);
+  // Sort your files function
+  const handleOptionSelect = (option: string) => {
     setIsDropdownOpen(false);
+
+    let sortedFiles = [...files];
+    setSelectedOption(option);
+
+    if (option === "Name") {
+      sortedFiles.sort((a, b) => a.fileName.localeCompare(b.fileName));
+    } else if (option === "Date") {
+      sortedFiles.sort(
+        (a, b) =>
+          new Date(b.latestDateModified).getTime() -
+          new Date(a.latestDateModified).getTime()
+      );
+    } else if (option === "Size") {
+      sortedFiles.sort((a, b) => a.fileSize - b.fileSize);
+    }
+
+    setFiles(sortedFiles);
   };
 
-  //file menu
+  const handleClearFilter = () => {
+    setSearchQuery(""); // Clear the search query
+    setCurrentSortOption("All"); // Clear the sort option
+    setSelectedOption("All"); // Clear the selected option in the dropdown
+
+    const originalFiles = [...files];
+    setFiles(originalFiles);
+  };
 
   //to fully get
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [selectedFileId, setSelectedFileId] = useState<FileId | null>(null);
-
   const handleIconButtonClick = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
@@ -116,18 +189,7 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
     setSelectedFileId(null);
   };
 
-  const handleOptionSelectPop = (option: string) => {
-    setSelectedMenuOption(option);
-    handlePopoverClose();
-  };
-
-  const isPopoverOpen = Boolean(anchorEl);
-
   //smallscreen menu
-  const [anchorE2, setAnchorE2] = useState<null | HTMLElement>(null);
-  const [selectedOptionPopMenu, setSelectedOptionPopMenu] = useState("All");
-  const open = Boolean(anchorE2);
-
   const handleOptionSelectPopMenu = (option: string) => {
     setSelectedOptionPopMenu(option);
     setAnchorE2(null);
@@ -141,17 +203,7 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
     setAnchorE2(null);
   };
 
-  const [showAdditionalButtons, setShowAdditionalButtons] = useState(false);
-  const toggleAdditionalButtons = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event.preventDefault();
-    setShowAdditionalButtons(!showAdditionalButtons);
-  };
-
   //search funtion
-  const [searchQuery, setSearchQuery] = useState(""); // State for the search query
-
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -159,6 +211,23 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
   const filteredFiles = files.filter((file) =>
     file.fileName.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const userId = 1;
+
+      const files = await FileService.getFilesByUserId(userId);
+      setFiles(files.filter((file) => !file.isdeleted));
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    setSearchResult(filteredFiles);
+  }, [searchQuery, filteredFiles]);
+
+  const navigate = useNavigate();
   return (
     <Grid
       paddingLeft={{ lg: 2, xl: 2 }}
@@ -184,7 +253,7 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
             style={{
               display: "flex",
               alignItems: "center",
-              flex: 1, // Set flex to 0.5 for half width
+              flex: 1,
               borderRadius: "40px",
               height: "30px",
               boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.1)",
@@ -212,8 +281,8 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
               type="text"
               placeholder="Search"
               aria-label="Search"
-              // value={searchQuery}
-              // onChange={handleSearchInputChange}
+              value={searchQuery}
+              onChange={handleSearchInputChange}
             />
           </Grid>
           {isLargeScreen && (
@@ -231,26 +300,45 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
             </IconButton>
           )}
           {isImportModalOpen && (
-            <ImportFile
-              toggleImport={closeImportModal}
-              startLoading={() => {}}
-              setFileId={setFileId}
-            />
-          )}
-          {isLargeScreen && (
-            <IconButton
+            <div
               style={{
-                marginLeft: "24px",
-                fontSize: "20px",
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                zIndex: 999,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
               }}
+              // onClick={closeImportModal}
             >
-              <img
-                src={trashBinImage}
-                alt="Bin"
-                style={{ width: "28px", height: "28px", marginRight: "12px" }}
+              <ImportFile
+                toggleImport={closeImportModal}
+                startLoading={() => {}}
+                setFileId={setFileId}
               />
-              <span style={{ color: "black" }}>Bin</span>
-            </IconButton>
+            </div>
+          )}
+
+          {isLargeScreen && (
+            <Link underline="none" href="/deleted-files" color={"black"}>
+              <IconButton
+                style={{
+                  marginLeft: "24px",
+                  fontSize: "20px",
+                }}
+              >
+                <img
+                  src={trashBinImage}
+                  alt="Bin"
+                  style={{ width: "28px", height: "28px", marginRight: "12px" }}
+                />
+                <span style={{ color: "black" }}>Bin</span>
+              </IconButton>
+            </Link>
           )}
           {isLargeScreen && (
             <Link underline="none" href="/" color={"black"}>
@@ -286,7 +374,7 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                     display: "flex",
                     alignItems: "center",
                     padding: "8px 16px",
-                    width: "fit-content", // Add this line to adjust the width
+                    width: "fit-content",
                   }}
                 >
                   <span
@@ -313,7 +401,7 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                       marginTop: "8px",
                       padding: "8px",
                       fontSize: "20px",
-                      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Optional: Add a shadow for better visibility
+                      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
                     }}
                   >
                     <MenuItem
@@ -321,6 +409,12 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                       style={{ cursor: "pointer", color: "#000" }}
                     >
                       All
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => handleOptionSelect("Name")}
+                      style={{ cursor: "pointer", color: "#000" }}
+                    >
+                      Name
                     </MenuItem>
                     <MenuItem
                       onClick={() => handleOptionSelect("Date")}
@@ -338,6 +432,7 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                 )}
               </FormControl>
               <Button
+                onClick={handleClearFilter}
                 style={{
                   marginLeft: "24px",
                   cursor: "pointer",
@@ -449,7 +544,7 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                         display: "flex",
                         alignItems: "center",
                         padding: "8px 16px",
-                        width: "fit-content", // Add this line to adjust the width
+                        width: "fit-content",
                       }}
                     >
                       <span
@@ -476,7 +571,7 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                           marginTop: "8px",
                           padding: "8px",
                           fontSize: "20px",
-                          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Optional: Add a shadow for better visibility
+                          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
                         }}
                       >
                         <MenuItem
@@ -517,149 +612,20 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
           </div>
         </Grid>
       </section>
-
-      <section style={{ display: "flex", justifyContent: "center" }}>
+      <section
+        style={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <Grid
           container
-          spacing={{ md: 3, lg: 0, xl: 1 }}
-          style={{ margin: "auto" }} // Use auto margins
+          spacing={{ md: 3, lg: 3, xl: 3 }}
+          style={{ margin: "auto", maxWidth: "1200px" }}
           paddingY={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
-          paddingLeft={{ lg: 10, xl: 12 }}
           paddingRight={{ xs: 2, sm: 2 }}
         >
-          {/* {files.map((file) => (
-            <Grid
-              key={file.fileId}
-              item
-              paddingLeft={2}
-              //12 is the w-full
-              xs={12}
-              sm={6}
-              md={4}
-              lg={4}
-              xl={4}
-              paddingBottom={2}
-            >
-              <Grid
-                maxWidth={{ xs: "100%", sm: "100%", xl: "80%", lg: "60%" }}
-                paddingX={"20px"}
-                paddingY={{ lg: "10px" }}
-                style={{
-                  backgroundColor: "#71C887",
-                  borderRadius: "8px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center", // Align items vertically in the center
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <div style={{ flex: "1" }}>
-                    <Link
-                      underline="none"
-                      href={file.fileDownloadUri}
-                      target="_blank"
-                      color="black"
-                    >
-                      {file.fileName}
-                    </Link>
-                  </div>
-                  <IconButton
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                    onClick={handleIconButtonClick}
-                  >
-                    <MoreHorizIcon
-                      style={{ fill: "black", width: "1em", height: "1em" }}
-                    />
-                  </IconButton>
-
-                  <Popover
-                    open={isPopoverOpen}
-                    anchorEl={anchorEl}
-                    onClose={handlePopoverClose}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "center",
-                    }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "center",
-                    }}
-                  >
-                    <List>
-                      <ListItem
-                        button
-                        onClick={() => handleOptionSelectPop("details")}
-                      >
-                        <ListItemText primary="Details" />
-                      </ListItem>
-                      <ListItem
-                        button
-                        onClick={() => handleOptionSelectPop("delete")}
-                      >
-                        <ListItemText primary="Delete" />
-                      </ListItem>
-                      <ListItem
-                        button
-                        onClick={() => handleOptionSelectPop("open")}
-                      >
-                        <ListItemText primary="Open" />
-                      </ListItem>
-                    </List>
-                  </Popover>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "100%",
-                  }}
-                >
-                  <Link href="/FilePage">
-                    <Box
-                      component="img"
-                      // src={file.thumbnailUrl}
-                      alt="Thumbnail preview of a Drive item"
-                      style={{
-                        width: "100%",
-                        height: "200px",
-                        paddingTop: "3px",
-                        paddingBottom: "10px",
-                        borderRadius: "8px",
-                        display: "block",
-                        margin: "0 auto", // Center the image horizontally
-                      }}
-                    />
-                  </Link>
-                </div>
-              </Grid>
-              <Grid
-                style={{
-                  textAlign: "center",
-                  marginTop: "0.5rem",
-                  fontSize: "14px",
-                  color: "#888",
-                  fontStyle: "italic",
-                }}
-                paddingRight={{ lg: 15 }}
-              >
-                Last Modified: {file.latestDateModified}
-              </Grid>
-            </Grid>
-          ))} */}
-          {files.map((file) => (
+          {searchResult.map((file) => (
             <Grid
               key={file.fileId}
               item
@@ -667,17 +633,20 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
               xs={12}
               sm={6}
               md={4}
-              lg={4}
-              xl={4}
+              lg={lgValue}
+              xl={xlValue}
               paddingBottom={2}
+              width={{ lg: "450px", xl: "450px" }}
             >
               <Grid
-                maxWidth={{ xs: "100%", sm: "100%", xl: "80%", lg: "60%" }}
+                maxWidth="100%"
+                width={{ xs: "full", sm: "full", lg: "320px" }}
                 paddingX={"20px"}
                 paddingY={{ lg: "10px" }}
                 style={{
                   backgroundColor: "#71C887",
                   borderRadius: "8px",
+                  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
                 }}
               >
                 <div
@@ -690,13 +659,12 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                   }}
                 >
                   <div style={{ flex: "1" }}>
-                    <Link
-                      underline="none"
-                      href={`/file/${file.fileName}`}
-                      color="black"
+                    <div
+                      key={file.fileId}
+                      onClick={() => handleClickFileName(file)}
                     >
                       {file.fileName}
-                    </Link>
+                    </div>
                   </div>
                   <IconButton
                     style={{
@@ -707,7 +675,7 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                       alignItems: "center",
                     }}
                     onClick={handleIconButtonClick}
-                    data-file-id={file.fileId} // Add this line
+                    data-file-id={file.fileId}
                   >
                     <MoreHorizIcon
                       style={{ fill: "black", width: "1em", height: "1em" }}
@@ -737,11 +705,32 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                           console.log(
                             `Details option selected for fileId: ${file.fileId}`
                           );
-                          handleOptionSelectPop("details");
+                          handleOptionSelectPop("Details", file);
                         }}
                       >
                         <ListItemText primary="Details" />
                       </ListItem>
+
+                      <FileDetails
+                        open={isOpen}
+                        anchorEl={anchorRef.current}
+                        onClose={handleClose}
+                        file={file}
+                        user={
+                          user || {
+                            userId: 0,
+                            firstName: "",
+                            lastName: "",
+                            email: "",
+                            address: "",
+                            username: "",
+                            password: "",
+                            businessName: "",
+                            businessType: "",
+                          }
+                        }
+                      />
+
                       <ListItem
                         button
                         onClick={() => {
@@ -753,7 +742,7 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                       >
                         <ListItemText primary="Delete" />
                       </ListItem>
-                      <ListItem
+                      {/* <ListItem
                         button
                         onClick={() => {
                           console.log(
@@ -763,7 +752,7 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                         }}
                       >
                         <ListItemText primary="Open" />
-                      </ListItem>
+                      </ListItem> */}
                     </List>
                   </Popover>
                 </div>
@@ -776,8 +765,10 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                     height: "100%",
                   }}
                 >
-                  <Link href={`/file/${file.fileId}`}>
-                    {" "}
+                  <div
+                    key={file.fileId}
+                    onClick={() => handleClickFileName(file)}
+                  >
                     <img
                       src="https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png"
                       alt="Thumbnail preview of a Drive item"
@@ -791,9 +782,10 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                         margin: "0 auto",
                       }}
                     />
-                  </Link>
+                  </div>
                 </div>
               </Grid>
+
               <Grid
                 style={{
                   textAlign: "center",
@@ -802,7 +794,11 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
                   color: "#888",
                   fontStyle: "italic",
                 }}
-                paddingRight={{ lg: 15 }}
+                paddingRight={
+                  searchResult.length <= 2
+                    ? { lg: "100px", xl: "100px" }
+                    : { lg: "50px", xl: "50px" }
+                }
               >
                 Last Modified: {file.latestDateModified}
               </Grid>
@@ -810,6 +806,11 @@ const FileList: React.FC<FileListProp> = ({setFileId}: FileListProp) => {
           ))}
         </Grid>
       </section>
+      {searchResult.length === 0 && (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          {searchQuery && `No files found for "${searchQuery}"`}
+        </div>
+      )}
     </Grid>
   );
 };
