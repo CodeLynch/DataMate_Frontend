@@ -167,6 +167,21 @@ const FileService = {
       return "Permanent Delete Failed!";
     }
   },
+
+  // get deleted files by user id
+  getDeletedFilesById: async (userId: number): Promise<FileEntity[]> => {
+    try {
+      const response: AxiosResponse<FileEntity[]> = await axios.get(
+        `${API_BASE_URL}/deletedFilesByUserId?userId=${userId}`
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Get deleted files by user ID error:", error);
+      return [];
+    }
+  },
+
 };
 
 export default FileService;
