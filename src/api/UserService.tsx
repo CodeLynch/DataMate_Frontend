@@ -1,4 +1,5 @@
 import axios from "axios";
+import { User } from "./dataTypes";
 
 const USER_BASE_URL = "http://localhost:8080/user"
 
@@ -8,17 +9,6 @@ const config = {
     }
 }
 
-type User = {
-    userId: number,
-    firstName: string,
-    lastName: string,
-    email: string,
-    address: string,
-    username: string,
-    password: string,
-    businessName: string,
-    businessType: string,
-  }
 
 class UserService {
 
