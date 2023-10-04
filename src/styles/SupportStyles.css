@@ -408,6 +408,13 @@ h3{
   margin-top: 8rem;
 }
 
+.templateDownloadBtn .MuiButton-root{
+  display: flex;
+  margin: 4rem;
+  height: 58px;
+  width: 170px;
+}
+
 .import-intro {
   padding: 112px 0px 32px 0px;
   text-align: center;
