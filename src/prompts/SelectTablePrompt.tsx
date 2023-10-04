@@ -304,11 +304,9 @@ function createColumns(strings: string[]): HeaderConfig[] {
       if (targetObject) {
         if(name === "" || name === " "){
           targetObject.name = "Table " + targetObject.id;
-          // tabsRef.current[targetObject.id - 1].textContent = "Table " + targetObject.id;
           setCSheets(tablelist);
         }else{
         targetObject.name = name;
-        // tabsRef.current[targetObject.id - 1].textContent = name;
         setCSheets(tablelist);  
         }
         }

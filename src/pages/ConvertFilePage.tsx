@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import FileService from "../services/FileService"
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as XLSX from 'xlsx'
-import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Paper, Select,} from "@mui/material";
+import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Paper, Select, SelectChangeEvent,} from "@mui/material";
 import { start } from "repl";
 import styled from "@emotion/styled";
 import axios from "axios";
@@ -14,10 +14,26 @@ import '@inovua/reactdatagrid-community/theme/green-light.css'
 // type ConvertProps = {
 //     stopLoading: () => void,
 // }
+interface HeaderConfig {
+    name: string;
+    header: string;
+    defaultVisible?: boolean,
+    defaultFlex: number,
+    headerProps?: {
+        style: {
+        backgroundColor: string;
+        color: string;
+        fontWeight: string;
+    };},
+}
 
+interface TableRow {
+    [key: string]: string | number;
+}
 
 export default function ConvertFilePage() {
     const loc = useLocation();
+    const nav = useNavigate();
     const fileId = loc.state.fileid;
     const [tblCtr, setTblCtr] = useState<number>(0)
     const [workbook, setWB] = useState<XLSX.WorkBook | null>()
@@ -25,15 +41,19 @@ export default function ConvertFilePage() {
     const [visibleSheetNames, setVSheets] = useState<string[]>([]);
     const [sheetData, setSData] = useState<Object>({});
     const [currentSheet, setCurrentSheet] = useState("");
+    const [currSheetID, setCurrSheetID] = useState("");
     const [startCount, setStart] = useState(false);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [HeaderArr, setHArr] = useState<[][] | undefined>(undefined)
     const [BodyArr, setBArr] = useState<[][] | undefined>(undefined)
     const [isLoading, setLoading] = useState(true);
+    const [convertToDS, setConvertToDS] = useState(false);
+    const [dataCols, setDataCols] = useState<HeaderConfig[]>();
+    const [dataSrc, setDataSrc] = useState<Object[]>();
     const gridstyle = {
         fontSize:"10px",
-        height:"50vh",
+        maxHeight:"50vh",
     }
 
 
@@ -57,9 +77,10 @@ export default function ConvertFilePage() {
      }
 
     const readData = (wb: XLSX.WorkBook) => {
+        console.log("and this workbook is passed ", wb);
         setSheetNames(wb.SheetNames)
         let sheetdata:Object = {}
-        sheetNames.map((sheet, i) => 
+        wb.SheetNames.map((sheet, i) => 
         {
             const worksheet = wb.Sheets[sheet];
             const jsondata = XLSX.utils.sheet_to_json(worksheet,{
@@ -71,15 +92,8 @@ export default function ConvertFilePage() {
             const js = sd as Object
             sheetdata = {...sheetdata, [sheet]: js}            
         })
+        console.log("sheetdata on readData: ",sheetdata)
         setSData(sheetdata)
-         //typing currentSheet as key of sheetData
-         const currSheet = currentSheet as keyof typeof sheetData
-         //typing object value as unknown before converting to row
-         const row =  sheetData[currSheet] as unknown
-         let rowArr = row as [][]
-         setHArr(rowArr)
-         console.log(sheetNames);
-         console.log(visibleSheetNames);
     }
 
 
@@ -102,45 +116,31 @@ export default function ConvertFilePage() {
     
 
     //read workbook and toggle start count if workbook state and sheetnames state is changed
-    //only start count if sheetname is more than 0 
     useEffect(()=>{
         if(workbook !== undefined){
-           readData(workbook!) 
+            console.log("this is called");
+           readData(workbook!); 
         }
-        if(sheetNames.length > 0){
-            setStart(true);
-        }
-       
-    },[workbook, sheetNames])
+    },[workbook])
 
-    //start counting sheet amount once start count boolean is changed
     useEffect(()=>{
-        if(startCount){
-            let ctr = 0
-            sheetNames.map((sheet, i) => {
-                const sheetAttr = sheet as keyof typeof sheetData
-                const row =  sheetData[sheetAttr] as unknown
-                let rowArr = row as [][]
-                ctr++;
-            })
-            setTblCtr(ctr)
+        if(sheetNames !== undefined && sheetNames !== null){
             sheetNames.map((name) => {
-                visibleSheetNames.push(name);    
+                if(!visibleSheetNames.includes(name)){
+                   visibleSheetNames.push(name);     
+                }
             })
             setCurrentSheet(visibleSheetNames[0]);
+            console.log("sheetData state: ",sheetData);
         }
-    }, [startCount])
+    }, [sheetData])
 
-    //alert once table counter is changed and start count is true
-    useEffect(()=>{
-        if(startCount){
-            //stop loading
-        }
-    },[tblCtr])
     
 
-    const changeSheet = (stringevent: React.SyntheticEvent, newValue: string) =>{
-        setCurrentSheet(newValue);
+    const changeSheet = (event: SelectChangeEvent) =>{
+        setCurrSheetID(event.target.value);
+        let SheetName = workbook!.SheetNames[event.target.value as unknown as number];
+        setCurrentSheet(SheetName!);
     }
 
     useEffect(()=>{
@@ -154,72 +154,104 @@ export default function ConvertFilePage() {
 
     useEffect(()=>{
         if(HeaderArr !== undefined){
-            let rowsArr = []
+            let rowsArr = [];
             //copy rowArr
             rowsArr = HeaderArr.slice(0); 
-            console.log("Before", rowsArr)
+            console.log("Before", rowsArr);
             //remove header values
             rowsArr.splice(1 - 1, 1);
-            console.log("After", rowsArr)
-            setBArr(rowsArr)
+            console.log("After", rowsArr);
+            setBArr(rowsArr);
         }
-        console.log("BArr",BodyArr)
     },[HeaderArr])
+
+    useEffect(()=>{
+        if(HeaderArr !== undefined && BodyArr !== undefined){            
+            setConvertToDS(true);
+        }
+    }, [BodyArr])
     //-----------------------------------------------------------------------------------------------------
 
     //Data Grid Functions----------------------------------------------------------------------------------
-    const columns = [
-        {
-          name: 'firstName',
-          header: 'First Name',
-          defaultFlex: 1,
-          headerProps:{
-            style: { backgroundColor: '#71C887', color:"white", fontWeight: 'bold' 
-          },
-          }
-        },
-        {
-          name: 'lastName',
-          header: 'Last Name',
-          defaultFlex: 1,
-          headerProps:{
-            style: { backgroundColor: '#71C887', color:"white", fontWeight: 'bold' 
-          },
-          }
-        },
-        {
-          name: 'country',
-          header: 'Country',
-          defaultFlex: 1,
-          headerProps:{
-            style: { backgroundColor: '#71C887', color:"white", fontWeight: 'bold' 
-          },
-          }
-        },
-      ]
-    
-    const dataSource = [
-        {"id": 1, "firstName": "Alice", "lastName": "Johnson", "country": "USA"},
-        {"id": 2, "firstName": "Bob", "lastName": "Smith", "country": "Canada"},
-        {"id": 3, "firstName": "Charlie", "lastName": "Brown", "country": "UK"},
-        {"id": 4, "firstName": "David", "lastName": "Wilson", "country": "Australia"},
-        {"id": 5, "firstName": "Eva", "lastName": "Lee", "country": "New Zealand"},
-        {"id": 6, "firstName": "Frank", "lastName": "Williams", "country": "Germany"},
-        {"id": 7, "firstName": "Grace", "lastName": "Davis", "country": "France"},
-        {"id": 8, "firstName": "Henry", "lastName": "Moore", "country": "Spain"},
-        {"id": 9, "firstName": "Isabel", "lastName": "Clark", "country": "Italy"},
-        {"id": 10, "firstName": "Jack", "lastName": "Anderson", "country": "Netherlands"},
-        {"id": 11, "firstName": "Katherine", "lastName": "Young", "country": "Sweden"},
-        {"id": 12, "firstName": "Liam", "lastName": "Miller", "country": "Norway"},
-        {"id": 13, "firstName": "Mia", "lastName": "Thompson", "country": "Denmark"},
-        {"id": 14, "firstName": "Noah", "lastName": "Martinez", "country": "Brazil"},
-        {"id": 15, "firstName": "Olivia", "lastName": "Hernandez", "country": "Mexico"}
-    ]
-    //-----------------------------------------------------------------------------------------------------
+    useEffect(()=>{
+        if(convertToDS){
+            let sdata = JSON.parse(JSON.stringify(sheetData[currentSheet as keyof typeof sheetData] as unknown as [][]));
+            console.log("Setting data columns to ", createColumns(sdata[0]));
+            setDataCols([]);
+            setDataCols(createColumns(sdata[0]));
+        }
+    }, [convertToDS, currentSheet])
 
+    useEffect(()=>{
+        if(dataCols !== null && dataCols !== undefined){
+            let sdata = JSON.parse(JSON.stringify(sheetData[currentSheet as keyof typeof sheetData] as unknown as [][]));
+            sdata.shift();
+            let datasrc = createDataSrc(dataCols, sdata);
+            console.log("setting dataSrc to ", datasrc);
+            setDataSrc([]);
+            setDataSrc(datasrc);
+        }
+    },[dataCols])
+    
+    
+    function createDataSrc(headerConfigs: HeaderConfig[], values:[][]): TableRow[]{
+        const table:TableRow[] = [];
+        const headers: string[] = headerConfigs.map(config => config.name);
+    
+        values.forEach(rowValues => {
+          if (rowValues.length !== headers.length) {
+            throw new Error('Number of values does not match number of headers.');
+          }
+          const row: TableRow = {};
+          
+          headers.forEach((header, index) => {
+              if(typeof rowValues[index] === "boolean"){
+                let strval = rowValues[index] as string;
+                row[header] = strval.toString();
+              }else{
+                row[header] = rowValues[index]; 
+              }          
+          });
+    
+          table.push(row);
+        });
+        return table;
+      }
+    
+    function createColumns(strings: string[]): HeaderConfig[] {
+        let strArr:HeaderConfig[] = [];
+    
+        strings.map((str, i)=>
+        {
+          strArr.push({
+            name: str,
+            header: str,
+            defaultFlex: 1,
+            headerProps:{
+              style: { backgroundColor: '#71C887', color:"white", fontWeight: 'bold' 
+            },
+            }
+          } 
+          );
+        });
+      
+        return strArr;
+    }
+    
+    //-----------------------------------------------------------------------------------------------------
+    //Button functions ------------------------------------------------------------------------------------
+    function handleBack(){
+        nav('/file',{
+            state:{
+              fileid: fileId
+            }
+        });
+    }
+
+    //-----------------------------------------------------------------------------------------------------
     return(
         <>
-            <div style={{marginRight:'50px', marginLeft:'50px', height:'80vh', marginTop:'50px'}}>
+            <div style={{marginRight:'50px', marginLeft:'50px', maxHeight:'80vh', marginTop:'50px'}}>
             <h1 style={{textAlign:'center'}}>Convert Spreadsheet to Database?</h1>
                 <div style={{marginTop:"1em"}}>
                     <div style={{marginLeft:"10%"}}>
@@ -228,13 +260,16 @@ export default function ConvertFilePage() {
                                 <Select
                                 labelId="select-table"
                                 id="select-table-id"
-                                value={0}
+                                value={currSheetID}
                                 label="Table"
+                                onChange={changeSheet}
                                 sx={{width: 200, color:"black"}}
                                 >
-                                    <MenuItem value={0}>Table 1</MenuItem>
-                                    <MenuItem value={1}>Table 2</MenuItem>
-                                    <MenuItem value={2}>Table 3</MenuItem>
+                                {visibleSheetNames.length > 0? 
+                                visibleSheetNames.map((sheet, i) =>{
+                                    return <MenuItem value={i} key={i}>{sheet}</MenuItem>
+                                }):<MenuItem value={0} key={0}>None</MenuItem>   
+                                }
                                 </Select>
                         </FormControl>
                     </div>
@@ -242,14 +277,14 @@ export default function ConvertFilePage() {
                         <Paper style={{width: '80%'}}>
                         <div style={{width: '100%'}}>
                         {/* for table preview */}
-                        {HeaderArr !== undefined && BodyArr !== undefined? <>
+                        {dataCols !== undefined && dataSrc !== undefined? <>
                             <Paper elevation={0} sx={{ maxHeight:'500px', overflow: 'auto', border:"5px", borderRadius: 0}}>
                             {/* //code for the table */}
                             <ReactDataGrid
                                 idProperty="id"
                                 style={gridstyle}
-                                columns={columns}
-                                dataSource={dataSource}
+                                columns={dataCols}
+                                dataSource={dataSrc}
                                 theme="green-light"
                             />
                             </Paper>     
@@ -265,6 +300,7 @@ export default function ConvertFilePage() {
                     </div>
                     <div style={{display:"flex", flexDirection:'row', justifyContent:"space-around"}}>
                             <Button
+                            onClick={handleBack}
                             sx={{fontWeight: 'bold', color:'black', paddingInline: 4, margin:'5px', boxShadow:5, borderRadius:5}}>
                                 Back
                             </Button>
