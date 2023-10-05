@@ -469,50 +469,95 @@ export default function DeletedFiles() {
           localeText={customLocaleText}
         />
       </Box>
-
+      
+      {/* for restore and delete prompt */}
       <Dialog
-        open={isRestoreDialogOpen}
-        onClose={handleRestoreDialogClose}
-        aria-labelledby="restore-dialog-title"
-        aria-describedby="restore-dialog-description"
-      >
-        <DialogTitle id="restore-dialog-title">Restore Files</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="restore-dialog-description">
-            Are you sure you want to restore these files?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleRestoreDialogClose} color="primary">
-            Back
-          </Button>
-          <Button onClick={handleRestore} color="primary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      open={isRestoreDialogOpen}
+      onClose={handleRestoreDialogClose}
+      aria-labelledby="restore-dialog-title"
+      aria-describedby="restore-dialog-description"
+    >
+      <DialogTitle id="restore-dialog-title">Restore Files</DialogTitle>
+      <DialogContent>
+        <DialogContentText id="restore-dialog-description">
+          Are you sure you want to restore these files?
+        </DialogContentText>
 
-      <Dialog
-        open={isDeleteDialogOpen}
-        onClose={handleDeleteDialogClose}
-        aria-labelledby="delete-dialog-title"
-        aria-describedby="delete-dialog-description"
-      >
-        <DialogTitle id="delete-dialog-title">Delete Forever</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete these files?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDeleteDialogClose} color="primary">
-            Back
-          </Button>
-          <Button onClick={handleDelete} color="primary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+        {/* display selected files for restore */}
+        {selectedRows.length > 0 && (
+          <div>
+            <Typography fontSize='13px' mt={2}>Selected Files:</Typography>
+            <ul style={{ fontSize: '15px' }}>
+              {selectedRows.map((fileId) => {
+                const selectedFile = deletedFiles.find(
+                  (file) => file.fileId.toString() === fileId
+                );
+                if (selectedFile) {
+                  return (
+                    <li key={selectedFile.fileId}>{selectedFile.fileName}</li>
+                  );
+                }
+                return null;
+              })}
+            </ul>
+          </div>
+        )}
+       
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleRestoreDialogClose} color="primary">
+          Back
+        </Button>
+        <Button onClick={handleRestore} color="primary">
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+
+
+    <Dialog
+      open={isDeleteDialogOpen}
+      onClose={handleDeleteDialogClose}
+      aria-labelledby="delete-dialog-title"
+      aria-describedby="delete-dialog-description"
+    >
+      <DialogTitle id="delete-dialog-title">Delete Forever</DialogTitle>
+      <DialogContent>
+        <DialogContentText id="delete-dialog-description">
+          Are you sure you want to delete these files?
+        </DialogContentText>
+
+        {/* display selected files for delete */}
+        {selectedRows.length > 0 && (
+          <div>
+            <Typography fontSize='13px' mt={2}>Selected Files:</Typography>
+            <ul style={{ fontSize: '15px' }}>
+              {selectedRows.map((fileId) => {
+                const selectedFile = deletedFiles.find(
+                  (file) => file.fileId.toString() === fileId
+                );
+                if (selectedFile) {
+                  return (
+                    <li key={selectedFile.fileId}>{selectedFile.fileName}</li>
+                  );
+                }
+                return null;
+              })}
+            </ul>
+          </div>
+        )}
+
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleDeleteDialogClose} color="primary">
+          Back
+        </Button>
+        <Button onClick={handleDelete} color="primary">
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+
     </div>
   );
 }
