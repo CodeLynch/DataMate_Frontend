@@ -20,6 +20,7 @@ import {
   SelectChangeEvent,
   Stack,
   TextField,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
@@ -169,10 +170,12 @@ export default function DeletedFiles() {
       sortable: false,
       renderCell: (params) => (
         <div>
-          <RestoreIcon
-          sx={{ color: "#14847C", cursor: "pointer" }}
-          onClick={() => handleRestore(params.row.fileId)}
-        />
+          <Tooltip title="Restore" arrow>
+            <RestoreIcon
+            sx={{ color: "#14847C", cursor: "pointer" }}
+            onClick={() => handleRestore(params.row.fileId)}
+          />
+        </Tooltip>
         </div>
       ),
       disableColumnMenu: true,
