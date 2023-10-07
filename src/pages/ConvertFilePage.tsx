@@ -10,6 +10,7 @@ import ReactDataGrid from "@inovua/reactdatagrid-community";
 import '@inovua/reactdatagrid-community/index.css'
 import '@inovua/reactdatagrid-community/index.css'
 import '@inovua/reactdatagrid-community/theme/green-light.css'
+import ConvertService from "../services/ConvertService";
 
 // type ConvertProps = {
 //     stopLoading: () => void,
@@ -28,7 +29,7 @@ interface HeaderConfig {
 }
 
 interface TableRow {
-    [key: string]: string | number;
+    [key: string]: string | number | boolean | Date;
 }
 
 export default function ConvertFilePage() {
@@ -51,10 +52,12 @@ export default function ConvertFilePage() {
     const [convertToDS, setConvertToDS] = useState(false);
     const [dataCols, setDataCols] = useState<HeaderConfig[]>();
     const [dataSrc, setDataSrc] = useState<Object[]>();
+    const [SQLCommands, setSQLCmds] = useState<String[]>([]);
     const gridstyle = {
         fontSize:"10px",
-        maxHeight:"50vh",
+        height:"50vh",
     }
+    const [fileName, setFileName] = useState("");
 
 
 
@@ -101,6 +104,7 @@ export default function ConvertFilePage() {
     const fetchData = async () =>{
         FileService.getFile(fileId).then((res)=>{
             const wb = XLSX.read(res.data);
+            setFileName(res.fileName);
             setWB(wb);
         }).catch((err)=>{
             console.log(err);
@@ -195,22 +199,30 @@ export default function ConvertFilePage() {
     
     
     function createDataSrc(headerConfigs: HeaderConfig[], values:[][]): TableRow[]{
+        console.log("values are ", values);
         const table:TableRow[] = [];
         const headers: string[] = headerConfigs.map(config => config.name);
     
+
         values.forEach(rowValues => {
+            console.log("rowvalues: ", rowValues.length, " === headers:", headers.length);
           if (rowValues.length !== headers.length) {
             throw new Error('Number of values does not match number of headers.');
           }
           const row: TableRow = {};
           
           headers.forEach((header, index) => {
-              if(typeof rowValues[index] === "boolean"){
-                let strval = rowValues[index] as string;
-                row[header] = strval.toString();
-              }else{
-                row[header] = rowValues[index]; 
-              }          
+            const value = rowValues[index] as string;
+            if (!isNaN(value as unknown as number) && !isNaN(parseFloat(value))) {
+                // Check if the value is a valid number
+                row[header] = parseFloat(value);
+            } else if (!isNaN(Date.parse(value))) {
+                // Check if the value is a valid date
+                row[header] = new Date(value);
+            }else {
+                // If not a number, date, or boolean, keep it as a string
+                row[header] = value;
+            }       
           });
     
           table.push(row);
@@ -248,6 +260,122 @@ export default function ConvertFilePage() {
         });
     }
 
+    function getFileType(filename:string){
+        var re = /(?:\.([^.]+))?$/;
+        var res = re.exec(filename) as unknown;
+        return res as string;
+    }
+
+    //workbook to Array Buffer method
+    function s2ab(s:String) { 
+    var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
+    var view = new Uint8Array(buf);  //create uint8array as viewer
+    for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; //convert to octet
+    return buf;    
+    }
+
+    function getColumnType(value: any): string {
+    console.log("Type of ", value, " is ", typeof value);
+    if (typeof value === "string") {
+        return "VARCHAR(255)";
+    } else if (typeof value === "number") {
+        if (Number.isInteger(value)) {
+            return "INTEGER";
+        } else {
+            return "DOUBLE";
+        }
+    } else if (typeof value === "boolean") {
+        return "BOOLEAN";
+    } else if (value instanceof Date) {
+        return "DATE";
+    } else {
+        throw new Error(`Unsupported data type: ${typeof value}`);
+    }}
+
+    function generateSqlStatements(jsonData: TableRow[], tableName: string): string {
+        if (jsonData.length === 0) {
+            throw new Error("JSON array is empty.");
+        }
+    
+        const columns: string[] = Object.keys(jsonData[0]);
+        const createTableQuery = `CREATE TABLE ${tableName} (${columns.map(col => `${col.replace(/\s+/g, '_')} ${getColumnType(jsonData[0][col])}`).join(', ')});`;
+    
+        const insertValues = jsonData.map(record => `(${columns.map(col => {
+            const value = record[col];
+            if (typeof value === "string") {
+                return `'${value}'`;
+            } else if (value instanceof Date) {
+                // Format date as 'YYYY-MM-DD'
+                return `'${value.toISOString().split('T')[0]}'`;
+            } else {
+                return value;
+            }
+        }).join(', ')})`).join(', ');
+    
+        let SQLcolumns: string[] = Object.keys(jsonData[0]).map(key => key.replace(/\s+/g, '_'));
+        console.log("join: ", SQLcolumns.join(', '));
+        const insertTableQuery = `INSERT INTO ${tableName} (${SQLcolumns.join(', ')}) VALUES ${insertValues};`;
+    
+        return `${createTableQuery} ${insertTableQuery}`;
+    }
+
+    function getSQLQuery(){
+        if(dataCols !== undefined && sheetData !== undefined){
+            let sql2dArr:String[] = [...SQLCommands];
+            visibleSheetNames.map((sheet, i) =>{
+                let sheetSD = JSON.parse(JSON.stringify(sheetData[sheet as keyof typeof sheetData] as unknown as [][]));
+                let headers = sheetSD.shift();
+                let dataCols = createColumns(headers);
+                let dataSrc = createDataSrc(dataCols, sheetSD);
+                dataSrc.shift();
+                console.log("dataSrc val is ", dataSrc);
+                sql2dArr.push(generateSqlStatements(dataSrc as TableRow[], sheet));
+            })
+            setSQLCmds(sql2dArr);
+    }
+        // using SQLizer API
+        // if(workbook !== undefined && workbook !== null){
+        //     let type = getFileType(fileName);
+        //     var wopts:XLSX.WritingOptions = { bookType:getFileType(fileName)? 'xlsx': getFileType(fileName) as XLSX.BookType, type:'binary' };
+        //     const wbString = XLSX.write(workbook, wopts);
+        //     var blob = new Blob([s2ab(wbString)],{type:"application/octet-stream"});
+
+        //     let dataID = "";
+        //     ConvertService.postFileEntity(fileName, type)
+        //     .then((res)=>{
+        //         console.log("postFileEntity RES:", res);
+        //         ConvertService.uploadFile(blob as File, res.ID)
+        //         .then((res)=>{
+        //             console.log("uploadFile RES:", res);
+        //             if(res.Status === "Ok"){
+        //                 ConvertService.putFileEntity(dataID)
+        //                 .then((res)=>{
+        //                     console.log("putFileEntity RES:", res);
+        //                     //set state of doneUploading to true
+        //                 }).catch((err)=>{
+        //                     console.log("PuFE",err);
+        //                 })
+        //             }else{
+        //                 alert("API Error in uploading file!");
+        //                 nav("/");
+        //             }
+        //         }).catch((err)=>{
+        //             console.log("UF", err);
+        //         })
+        //     }).catch((err)=>{
+        //         console.log("PFE",err);
+        //     })
+        //   }else{
+        //     alert("ERROR: Workbook is NULL or undefined");
+        // }
+        
+    }
+
+    useEffect(()=>{
+        if(SQLCommands !== null){
+            console.log("SQL Commands are: ", SQLCommands);
+        }
+    }, [SQLCommands])
     //-----------------------------------------------------------------------------------------------------
     return(
         <>
@@ -305,6 +433,7 @@ export default function ConvertFilePage() {
                                 Back
                             </Button>
                             <Button variant="contained" 
+                            onClick={getSQLQuery}
                             sx={{fontWeight: 'bold', backgroundColor: '#347845', color:'white', paddingInline: 4, margin:'5px', boxShadow:5, borderRadius:5}}>
                                 Confirm
                             </Button>

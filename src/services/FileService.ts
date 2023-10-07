@@ -1,9 +1,7 @@
 import axios from "axios";
 
-
-
 class FileService {
-
+    
     async uploadFile(file: File) {
         let fd = new FormData();
         fd.append('file',file)
@@ -83,7 +81,6 @@ class FileService {
             console.log(err);
         });
     }
-
  
 
     // async deletePost(postId:number){
