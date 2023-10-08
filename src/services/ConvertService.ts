@@ -4,6 +4,15 @@ import axios from "axios";
 const API_KEY = 'KowVpR9gEn3n3ga0ORmZEgVHS2Z3mMslTP3jj6v6AdTwtohxfPrSuglg77zXP17rEAHS4FwtwMdsB2dwZBz5A';
 class ConvertService{
 
+    async postCommand(cmd:string){
+        return axios.post(`http://localhost:8080/convert?sql=${cmd}`)
+        .then((res)=>{
+            return res.data
+        }).catch((err)=>{
+            console.log(err);
+        })
+    }
+
     async postFileEntity(filename:string, filetype:string){
         return axios.post('https://sqlizer.io/api/files', {
             "FileType": filetype,

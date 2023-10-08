@@ -32,6 +32,11 @@ interface TableRow {
     [key: string]: string | number | boolean | Date;
 }
 
+type ConvertCommand = {
+    createTable: string;
+    insertValues: string;
+}
+
 export default function ConvertFilePage() {
     const loc = useLocation();
     const nav = useNavigate();
@@ -52,7 +57,7 @@ export default function ConvertFilePage() {
     const [convertToDS, setConvertToDS] = useState(false);
     const [dataCols, setDataCols] = useState<HeaderConfig[]>();
     const [dataSrc, setDataSrc] = useState<Object[]>();
-    const [SQLCommands, setSQLCmds] = useState<String[]>([]);
+    const [SQLCommands, setSQLCmds] = useState<ConvertCommand[]>([]);
     const gridstyle = {
         fontSize:"10px",
         height:"50vh",
@@ -292,13 +297,13 @@ export default function ConvertFilePage() {
         throw new Error(`Unsupported data type: ${typeof value}`);
     }}
 
-    function generateSqlStatements(jsonData: TableRow[], tableName: string): string {
+    function generateConvertCommandObject(jsonData: TableRow[], tableName: string): ConvertCommand {
         if (jsonData.length === 0) {
             throw new Error("JSON array is empty.");
         }
-    
+
         const columns: string[] = Object.keys(jsonData[0]);
-        const createTableQuery = `CREATE TABLE ${tableName} (${columns.map(col => `${col.replace(/\s+/g, '_')} ${getColumnType(jsonData[0][col])}`).join(', ')});`;
+        const createTableQuery = `CREATE TABLE IF NOT EXISTS ${tableName} (${columns.map(col => `${col.replace(/[^a-zA-Z0-9]/g,'_')} ${getColumnType(jsonData[0][col])}`).join(', ')});`;
     
         const insertValues = jsonData.map(record => `(${columns.map(col => {
             const value = record[col];
@@ -312,16 +317,19 @@ export default function ConvertFilePage() {
             }
         }).join(', ')})`).join(', ');
     
-        let SQLcolumns: string[] = Object.keys(jsonData[0]).map(key => key.replace(/\s+/g, '_'));
+        let SQLcolumns: string[] = Object.keys(jsonData[0]).map(key => key.replace(/[^a-zA-Z0-9]/g,'_'));
         console.log("join: ", SQLcolumns.join(', '));
         const insertTableQuery = `INSERT INTO ${tableName} (${SQLcolumns.join(', ')}) VALUES ${insertValues};`;
-    
-        return `${createTableQuery} ${insertTableQuery}`;
+        
+        return {
+            createTable:`${createTableQuery}`,
+            insertValues: `${insertTableQuery}`
+        };
     }
 
     function getSQLQuery(){
         if(dataCols !== undefined && sheetData !== undefined){
-            let sql2dArr:String[] = [...SQLCommands];
+            let sql2dArr:ConvertCommand[] = [...SQLCommands];
             visibleSheetNames.map((sheet, i) =>{
                 let sheetSD = JSON.parse(JSON.stringify(sheetData[sheet as keyof typeof sheetData] as unknown as [][]));
                 let headers = sheetSD.shift();
@@ -329,7 +337,7 @@ export default function ConvertFilePage() {
                 let dataSrc = createDataSrc(dataCols, sheetSD);
                 dataSrc.shift();
                 console.log("dataSrc val is ", dataSrc);
-                sql2dArr.push(generateSqlStatements(dataSrc as TableRow[], sheet));
+                sql2dArr.push(generateConvertCommandObject(dataSrc as TableRow[], sheet));
             })
             setSQLCmds(sql2dArr);
     }
@@ -372,8 +380,21 @@ export default function ConvertFilePage() {
     }
 
     useEffect(()=>{
-        if(SQLCommands !== null){
+        if(SQLCommands !== null && SQLCommands.length > 0){
             console.log("SQL Commands are: ", SQLCommands);
+            SQLCommands.map((com, i)=>{
+                ConvertService.postCommand(com.createTable)
+                .then((res)=>{
+                    ConvertService.postCommand(com.insertValues)
+                    .then((res)=>{
+                        nav("/");
+                    }).catch((err)=>{
+                        console.log(err);
+                    })
+                }).catch((err)=>{
+                    console.log(err);
+                })
+            })
         }
     }, [SQLCommands])
     //-----------------------------------------------------------------------------------------------------
