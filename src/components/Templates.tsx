@@ -1,19 +1,7 @@
 import * as React from 'react';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, Card, Container, IconButton, InputAdornment, Stack, TextField } from '@mui/material';
-import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
-import SampleTemp from '../images/samplethumb.png';
-import DownloadOpen from '../images/download.png';
-import NavigateImg from '../images/navigate.png';
-import InputImg from '../images/input.png';
-import spreadsheet from '../images/spreadsheet1.png';
 import noRecentFiles from '../images/noRecentFiless.png';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import SpecificTemplate from '../pages/SpecificTemplatePage';
 import { useNavigate } from 'react-router-dom';
 import TemplateItem, { TemplateItemType } from './TemplateItem';
 import axios from 'axios';
@@ -22,6 +10,7 @@ import axios from 'axios';
 
 export default function Templates(){
     const [templateList,setTemplateList] = React.useState<TemplateItemType[]>([]);
+    const [recentDownloads, setRecentDownloads] = React.useState<TemplateItemType[]>([]);
 
     React.useEffect(()=>{
       axios.get("http://localhost:8080/templates"
@@ -34,6 +23,19 @@ export default function Templates(){
           console.log(err);
       })
     },[])
+
+    React.useEffect(() => {
+      axios.get("http://localhost:8080/recentDownloads"
+      ).then((res) => {
+        console.log(res.data);
+        if (res.data) {
+          setRecentDownloads(res.data);
+          console.log("Recent downloads:", recentDownloads);
+        }
+      }).catch(err => {
+        console.log(err);
+      })
+    }, [])
 
     React.useEffect(()=>{
       console.log("TL",templateList)
@@ -55,11 +57,20 @@ export default function Templates(){
         /><br></br><br></br><br></br>
           </Stack>
 
-          <h3 style={{marginLeft: '11rem', marginTop: '3rem', fontSize: 30}}>Recent downloads</h3>
-
-          <Box sx={{margin: '3rem', justifyContent: 'center', display: 'flex'}}>
-            <img src={noRecentFiles} style={{width: 200, height: 200}}/>
-          </Box>
+          <h3 style={{ marginLeft: '11rem', marginTop: '3rem', fontSize: 30 }}>Recent downloads</h3>
+          {recentDownloads.length === 0 ? (
+            <Box sx={{ margin: '3rem', justifyContent: 'center', display: 'flex' }}>
+              <img src={noRecentFiles} style={{ width: 200, height: 200 }} />
+            </Box>
+          ) : (
+            <div style={{ display: 'flex', justifyContent: "left", paddingLeft: "10em", paddingRight: "10em" }}>
+              {recentDownloads.map((template, i) => {
+                return (
+                  <TemplateItem key={i} templateId={template.templateId} templateName={template.templateName} />
+                );
+              })}
+            </div>
+          )}
 
           <h3 style={{marginLeft: '11rem', marginTop: '3rem', fontSize: 30}}>All Templates</h3>
           
