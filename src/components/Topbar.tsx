@@ -31,7 +31,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
       <Toolbar
         sx={{
           backgroundColor:
-            location.pathname === "/file" || location.pathname === "/convert" ? "#71C887" : "#FFFFFF",
+            location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database" ? "#71C887" : "#FFFFFF",
         }}
       >
         <IconButton
@@ -51,7 +51,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
         <Box sx={{ width: "100%" }}>
           <a href="/">
             <img
-              src={location.pathname === "/file" || location.pathname === "/convert"?  WLogo : Logo}
+              src={location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database"?  WLogo : Logo}
               alt={"datamate logo"}
               style={{
                 width: "100px",
@@ -64,7 +64,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
         </Box>
 
         <IconButton
-          sx={{ color: location.pathname === "/file" ? "#FFFFFF" : "#000000" }}
+          sx={{ color: location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database"? "#FFFFFF" : "#000000" }}
           onClick={handleProfileClick}
         >
           <AccountCircleIcon />
