@@ -11,6 +11,9 @@ import '@inovua/reactdatagrid-community/index.css'
 import '@inovua/reactdatagrid-community/index.css'
 import '@inovua/reactdatagrid-community/theme/green-light.css'
 import ConvertService from "../services/ConvertService";
+import DatabaseService from "../services/DatabaseService";
+import TableService from "../services/TableService";
+import path from "node:path/win32";
 
 // type ConvertProps = {
 //     stopLoading: () => void,
@@ -35,6 +38,19 @@ interface TableRow {
 type ConvertCommand = {
     createTable: string;
     insertValues: string;
+}
+
+type DatabaseResponse ={
+    databaseId: number;
+    databaseName: string;
+    user: Object;
+}
+
+type TableResponse ={
+    tableId: number;
+    tableName: string;
+    database: Object;
+    user: Object;
 }
 
 export default function ConvertFilePage() {
@@ -63,6 +79,7 @@ export default function ConvertFilePage() {
         height:"50vh",
     }
     const [fileName, setFileName] = useState("");
+    const [databaseId, setDatabaseId] = useState(-1);
 
 
 
@@ -327,19 +344,41 @@ export default function ConvertFilePage() {
         };
     }
 
+    const uid = function(){
+        return Date.now().toString(36) + Math.floor(Math.pow(10, 12) + Math.random() * 9*Math.pow(10, 12)).toString(36);
+    }
+
     function getSQLQuery(){
         if(dataCols !== undefined && sheetData !== undefined){
             let sql2dArr:ConvertCommand[] = [...SQLCommands];
-            visibleSheetNames.map((sheet, i) =>{
-                let sheetSD = JSON.parse(JSON.stringify(sheetData[sheet as keyof typeof sheetData] as unknown as [][]));
-                let headers = sheetSD.shift();
-                let dataCols = createColumns(headers);
-                let dataSrc = createDataSrc(dataCols, sheetSD);
-                dataSrc.shift();
-                console.log("dataSrc val is ", dataSrc);
-                sql2dArr.push(generateConvertCommandObject(dataSrc as TableRow[], sheet));
+            let dbname = fileName.replace(/\.[^/.]+$/, "");
+            console.log("dbname val: ", dbname)
+            DatabaseService.postDatabase(dbname, 1)
+            .then((res)=>{
+                    console.log("post res:", res);
+                    let dbres = res as unknown as DatabaseResponse;
+                    let dbId = dbres.databaseId;
+                    setDatabaseId(dbId);
+                    visibleSheetNames.map((sheet, i) =>{
+                        let sheetSD = JSON.parse(JSON.stringify(sheetData[sheet as keyof typeof sheetData] as unknown as [][]));
+                        let headers = sheetSD.shift();
+                        let dataCols = createColumns(headers);
+                        let dataSrc = createDataSrc(dataCols, sheetSD);
+                        let uniquetblName = sheet + "_" + uid();
+                        dataSrc.shift();
+                        TableService.postTable(uniquetblName, dbId, 1)
+                        .then((res)=>{
+                            console.log("post table res:", res);
+                        }).catch((err)=>{
+                            console.log(err);
+                        })
+                        sql2dArr.push(generateConvertCommandObject(dataSrc as TableRow[], uniquetblName));
+                    })
+                    setSQLCmds(sql2dArr);
+            }).catch((err)=>{
+                console.log(err);
             })
-            setSQLCmds(sql2dArr);
+            
     }
         // using SQLizer API
         // if(workbook !== undefined && workbook !== null){
@@ -383,18 +422,24 @@ export default function ConvertFilePage() {
         if(SQLCommands !== null && SQLCommands.length > 0){
             console.log("SQL Commands are: ", SQLCommands);
             SQLCommands.map((com, i)=>{
-                ConvertService.postCommand(com.createTable)
+            ConvertService.postCommand(com.createTable)
+            .then((res)=>{
+                console.log("Table Created!");
+                ConvertService.postCommand(com.insertValues)
                 .then((res)=>{
-                    ConvertService.postCommand(com.insertValues)
-                    .then((res)=>{
-                        nav("/");
-                    }).catch((err)=>{
-                        console.log(err);
-                    })
+                    console.log("Values Inserted!");            
                 }).catch((err)=>{
                     console.log(err);
                 })
+            }).catch((err)=>{
+                console.log(err);
             })
+            })
+            nav('/database',{
+                state:{
+                  dbid: databaseId
+                }
+            });
         }
     }, [SQLCommands])
     //-----------------------------------------------------------------------------------------------------
