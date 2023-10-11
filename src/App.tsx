@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import SnackbarContextProvider from "./helpers/SnackbarContext";
 import Topbar from "./components/Topbar";
 import { ThemeProvider } from "@mui/material/styles";
@@ -32,13 +31,21 @@ import InconsistentDetectPrompt from "./prompts/InconsistentDetectPrompt";
 import SuccessPrompt from "./prompts/SuccessPrompt";
 import ProcessingPage from "./pages/ProcessingPage";
 import DeleteProfile from "./components/DeleteProfile";
-import NormalizePrompt from "./prompts/NormalizePrompt";
-import DeletedFiles from "./components/DeletedFiles";
+import { Provider, useSelector } from 'react-redux';
+import { RootState, store } from './helpers/Store';
 import Login from "./components/Login";
 import FileScreen from "./components/FileScreen";
 import FilePage from "./pages/FileScreenPage";
 import ConvertFilePage from "./pages/ConvertFilePage";
 import DatabasePage from "./pages/DatabasePage";
+import Registration from "./components/Registration";
+import EditProfile from "./components/EditProfile";
+import DeletedFiles from "./components/DeletedFiles";
+import HomeInit from "./components/HomeInit";
+import NormalizePrompt from "./prompts/NormalizePrompt";
+import SpecificTemplatePageTwo from "./components/SpecificTemplatePageTwo";
+import SpecificTemplatePageThree from "./components/SpecificTemplatePageThree";
+import HomeInitial from "./pages/HomeInitial";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -110,7 +117,7 @@ function App() {
   //object state for the sheet data of the uploaded file
   const [sheetData, setSData] = useState<Object>({});
   //number state for the index of the sheet to be displayed in select table
-  const [sheetIndex, setSIndex] = useState(0);
+  const [sheetIndex, setSIndex] = useState(0); 
 
   // const handleDrawerOpen = () => {
   //   setOpen(true);
@@ -226,7 +233,10 @@ function App() {
     resetVariables();
   }, []);
 
+  const isLoggedIn = useSelector((state:RootState) => state.auth.isLoggedIn);
+
   return (
+    <Provider store={store}>
     <ThemeProvider theme={theme}>
       <SnackbarContextProvider>
         <Backdrop
@@ -239,12 +249,13 @@ function App() {
           <Modal open={open} onClose={toggleDrawerOpen}>
             <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
           </Modal>
-          <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
+          {/* <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} /> */}
           <Box sx={{ display: "flex", marginTop: "50px" }}>
             <Box sx={{ flexGrow: 1 }}>
               <Routes>
                 {/* Add your routes here */}
-                <Route path="/">
+                <Route path="/" element={<HomeInitial />} />
+                <Route path="/home">
                   <Route
                     index
                     element={
@@ -488,6 +499,26 @@ function App() {
                     }
                   />
                 </Route>
+                <Route path="/template/2">
+                  <Route
+                    index
+                    element={
+                      <Box sx={{ padding: "1px" }}>
+                        <SpecificTemplatePageTwo />
+                      </Box>
+                    }
+                  />
+                </Route>
+                <Route path="/template/3">
+                  <Route
+                    index
+                    element={
+                      <Box sx={{ padding: "1px" }}>
+                        <SpecificTemplatePageThree />
+                      </Box>
+                    }
+                  />
+                </Route>
                 <Route
                   path="/file"
                   element={
@@ -508,7 +539,13 @@ function App() {
                 <Route path="/templates" element={<TemplatesPage />} />
                 <Route
                   path="/files"
-                  element={<FileScreenPage setFileId={setFileId} />}
+                  element={
+                    isLoggedIn ? (
+                      <FileScreenPage setFileId={setFileId}/>
+                    ) : (
+                      <Navigate to="/login" replace={true} />
+                    )
+                  }
                 />
                 <Route path="/database" element={
                 <DatabasePage stopLoading={StopLoading} />
@@ -516,7 +553,11 @@ function App() {
                 <Route path="/databases" element={<DatabaseScreenPage />} />
                 <Route path="/delete-profile/:id" element={<DeleteProfile />} />
                 <Route path="/deleted-files" element={<DeletedFiles />} />
-                <Route path="/log-in" element={<Login />} />
+                <Route path="/log-in" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
+                <Route path="/login" element={<Login/>}></Route>
+                <Route path="/registration" element={<Registration/>}></Route>
+                <Route path="/edit-profile/:id" element={<EditProfile/>}></Route>
+                <Route path="/deleted-files" element={<DeletedFiles/>}></Route>
 
                 {/* Add your other routes here */}
               </Routes>
@@ -525,6 +566,7 @@ function App() {
         </Router>
       </SnackbarContextProvider>
     </ThemeProvider>
+    </Provider>
   );
 }
 
