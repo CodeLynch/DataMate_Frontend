@@ -534,7 +534,7 @@ function App() {
                 />
                 <Route
                 path ="/convert"
-                element={<ConvertFilePage/>}
+                element={<ConvertFilePage startLoading={StartLoading}/>}
                 />
                 <Route path="/templates" element={<TemplatesPage />} />
                 <Route

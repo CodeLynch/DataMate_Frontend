@@ -15,9 +15,9 @@ import DatabaseService from "../services/DatabaseService";
 import TableService from "../services/TableService";
 import path from "node:path/win32";
 
-// type ConvertProps = {
-//     stopLoading: () => void,
-// }
+type ConvertProps = {
+    startLoading: () => void,
+}
 interface HeaderConfig {
     name: string;
     header: string;
@@ -53,7 +53,7 @@ type TableResponse ={
     user: Object;
 }
 
-export default function ConvertFilePage() {
+export default function ConvertFilePage({startLoading}:ConvertProps) {
     const loc = useLocation();
     const nav = useNavigate();
     const fileId = loc.state.fileid;
@@ -80,6 +80,7 @@ export default function ConvertFilePage() {
     }
     const [fileName, setFileName] = useState("");
     const [databaseId, setDatabaseId] = useState(-1);
+    const [isDone, setDone] = useState(false);
 
 
 
@@ -355,6 +356,7 @@ export default function ConvertFilePage() {
             let sql2dArr:ConvertCommand[] = [...SQLCommands];
             let dbname = fileName.replace(/\.[^/.]+$/, "");
             console.log("dbname val: ", dbname)
+            startLoading();
             DatabaseService.postDatabase(dbname, 1)
             .then((res)=>{
                     console.log("post res:", res);
@@ -422,13 +424,18 @@ export default function ConvertFilePage() {
     useEffect(()=>{
         if(SQLCommands !== null && SQLCommands.length > 0){
             console.log("SQL Commands are: ", SQLCommands);
+            let i = 0;
             SQLCommands.map((com, i)=>{
             ConvertService.postCommand(com.createTable)
             .then((res)=>{
                 console.log("Table Created!");
                 ConvertService.postCommand(com.insertValues)
                 .then((res)=>{
-                    console.log("Values Inserted!");            
+                    i++;
+                    console.log("Values Inserted!");
+                    if(i === SQLCommands.length){
+                        setDone(true);
+                    }            
                 }).catch((err)=>{
                     console.log(err);
                 })
@@ -436,13 +443,19 @@ export default function ConvertFilePage() {
                 console.log(err);
             })
             })
-            nav('/database',{
-                state:{
-                  dbid: databaseId
-                }
-            });
         }
     }, [SQLCommands])
+
+    useEffect(()=>{
+        if(isDone){
+           nav('/database',{
+            state:{
+              dbid: databaseId
+            }
+            }); 
+        }
+        
+    }, [isDone])
     //-----------------------------------------------------------------------------------------------------
     return(
         <>

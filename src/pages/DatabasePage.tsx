@@ -46,6 +46,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
     const [currentTblID, setCurrentTblID] = useState(0);
     const [colsData, setColsData] = useState<HeaderConfig[]>([]);
     const [Database, setDBName] = useState('');
+    let FirstColumns:string[] = [];
 
 
     function createColumns(strings: string[]): HeaderConfig[] {
@@ -93,6 +94,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                 let tblResponse = res as TableType[];
                 let tableArr = [...Tables];
                 setDBName(tblResponse[0].database.databaseName);
+                FirstColumns = tblResponse[0].columns;
                 tblResponse.map((tbl, i)=>{
                   if(!tableArr.includes(tbl.tableName)){
                     tableArr.push(tbl.tableName);
@@ -102,13 +104,6 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                 setCurrentTbl(Tables[0]);
                 setCurrentTblID(0);
                 setColsData(createColumns(tblResponse[0].columns))
-                TableService.getTblData(Tables[0])
-                .then((res)=>{
-                  console.log("get tbl data res:",res);
-                  setTblData(createObjects(tblResponse[0].columns, res as [][]));
-                }).catch((err)=>{
-                  console.log(err);
-                })
               }
         ).catch((err)=>{
           console.log(err);
@@ -124,6 +119,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
       TableService.getTblByName(Tables[currentTblID])
       .then((res)=>{
         let tblRes:TableType = res as TableType;
+        console.log("tbl res:", res);
         setColsData(createColumns(tblRes.columns));
         if(Tables[currentTblID] !== undefined){
           TableService.getTblData(Tables[currentTblID])
@@ -143,6 +139,18 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
         };
     }
 
+    useEffect(()=>{
+      if(Tables.length > 0){
+        TableService.getTblData(Tables[0])
+        .then((res)=>{
+          console.log("get tbl data res:",res);
+          setTblData(createObjects(FirstColumns, res as [][]));
+          stopLoading();
+        }).catch((err)=>{
+          console.log(err);
+        })
+      }
+    },[Tables])
     useEffect(()=>{
       console.log("current table is ", currentTbl);
     }, [currentTbl])
@@ -195,7 +203,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                               <div style={{width:"20px", height:"20px", margin:"2px"}}>
                                 <TblIcon/>
                               </div>
-                              <div style={{margin:"4px",  maxWidth:200}}>
+                              <div style={{margin:"4px",  maxWidth:200, textOverflow:"ellipsis"}}>
                               {tbl}
                               </div>
                             </span> 

@@ -747,7 +747,7 @@ useEffect(()=>{
                     >
                     {vsheets.length > 0? vsheets.map((sheet,i) =>{
                         return(                                
-                          <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left"}}  value={sheet} label={sheet} />
+                          <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left", textOverflow:"ellipsis"}}  value={sheet} label={sheet} />
                         )
                     }):<p></p>}
                   </Tabs>

@@ -737,7 +737,7 @@ function canBeNormalized(rows: (string | number)[][]): boolean {
                           value={sheet.id} 
                           label={
                             <span style={{display:"flex", flexDirection:"row", maxHeight:"20px"}}>
-                              <div style={{fontSize:"16px", textAlign:"center",display:"flex", alignItems:"center", width:"70px"}}>
+                              <div style={{fontSize:"16px", textAlign:"center",display:"flex", alignItems:"center", width:"70px", textOverflow:"ellipsis"}}>
                               {isEditing && currentTabID === sheet.id ? <TextField variant="standard" onChange={(e)=>{handleNameChange(e, e.target.value)}} placeholder="Table Name"></TextField>:sheet.name}
                               </div>
 

@@ -506,9 +506,7 @@ const DatabaseList: React.FC<{}> = () => {
                   }}
                 >
                   <div style={{ flex: "1" }}>
-                    <Link underline="none" href="/FilePage" color={"black"}>
                       {file.name}
-                    </Link>
                   </div>
                   <IconButton
                     style={{
