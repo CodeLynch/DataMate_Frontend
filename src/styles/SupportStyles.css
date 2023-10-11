@@ -197,7 +197,7 @@ h3{
   position: absolute;
   width: 581px;
   height: 49px;
-  left: 550px;
+  /* left: 550px; */
   top: 10px;
 
   background: #FFFFFF;
