@@ -1,28 +1,14 @@
-import {
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Typography,
-} from "@mui/material";
-import { NavbarLink } from "./NavbarLink";
-import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
-import { UserContext, UserContextType } from "../helpers/Context";
+import { List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
+import { NavbarLink } from './NavbarLink';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../helpers/AuthAction';
+import { useDispatch } from 'react-redux';
 
 type NavbarListProps = {
   open: boolean;
 };
 
 const NavbarList = ({ open }: NavbarListProps) => {
-  // const navigate = useNavigate();
-
-  // const handleLogout = () => {
-  //   navigate("/", { replace: true });
-  // }
-  // const { user, handleSetUser } = useContext(UserContext) as UserContextType;
-  const navigate = useNavigate();
-
   const navlist: { text: string; link: string; end: boolean }[] = [
     { text: "Home", link: "/home", end: true },
     { text: "Templates", link: "/templates", end: true },
@@ -31,9 +17,12 @@ const NavbarList = ({ open }: NavbarListProps) => {
     { text: "About Us", link: "/about-us", end: true },
     { text: "Contact Us", link: "/contact-us", end: true },
   ];
+ 
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    // handleSetUser(null);
+    dispatch(logout());
     navigate("/", { replace: true });
   };
 
