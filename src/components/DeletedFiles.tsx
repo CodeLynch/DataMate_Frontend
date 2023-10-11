@@ -37,6 +37,8 @@ import FileService from "../api/FileService";
 import { useNavigate } from "react-router-dom";
 import Topbar from "./Topbar";
 import Navbar from "./Navbar";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../helpers/Store";
 
 
 export default function DeletedFiles() {
@@ -53,6 +55,8 @@ export default function DeletedFiles() {
   const [deletedFiles, setDeletedFiles] = useState<FileEntity[]>([]);
   const [filteredFiles, setFilteredFiles] = useState<FileEntity[]>([]);
   const nav = useNavigate();
+  const userId = useSelector((state: RootState) => state.auth.userId);
+  const dispatch = useDispatch();
 
   const customLocaleText = {
     ...enUS,
@@ -83,7 +87,6 @@ export default function DeletedFiles() {
 
   useEffect(() => {
     const fetchDeletedFiles = async () => {
-      const userId = 1; // to be changed
       try {
         const files = await FileService.getDeletedFilesById(userId);
         setDeletedFiles(files);
@@ -93,7 +96,7 @@ export default function DeletedFiles() {
     };
 
     fetchDeletedFiles();
-  }, []);
+  }, [userId]);
 
  // hook for search function
   useEffect(() => {
@@ -286,7 +289,6 @@ export default function DeletedFiles() {
   };
 
   const handleRestore = async (fileId:any) => {
-    const userId = 1; // to be changed
     if (selectedRows.length > 0) {
       const restoreResults = await Promise.all(
         selectedRows.map(async (id) => {
