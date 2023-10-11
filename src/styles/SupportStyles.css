@@ -421,6 +421,33 @@ h3{
   font-weight: bold;
 }
 
+.editBtn .MuiButton-root {
+  font-weight: bold; 
+  background-color: #71C887;
+  color: white;
+  border-radius: 50px;
+  margin-top: 2.2rem;
+  padding: 10px 43px 10px 43px;
+}
+
+.deleteBtn .MuiButton-root {
+  font-weight: bold; 
+  background-color: #71C887;
+  color: white;
+  border-radius: 50px;
+  margin-top: 2.2rem;
+  padding: 10px 43px 10px 43px;
+}
+
+.logoutBtn .MuiButton-root {
+  font-weight: bold; 
+  background-color: #71C887;
+  color: white;
+  border-radius: 50px;
+  margin-top: 2.2rem;
+  padding: 10px 43px 10px 43px;
+}
+
 
 /* Responsive */
 @media screen and (max-width: 1530px){
