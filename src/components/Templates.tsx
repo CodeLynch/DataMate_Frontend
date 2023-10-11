@@ -5,6 +5,7 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { useNavigate } from 'react-router-dom';
 import TemplateItem, { TemplateItemType } from './TemplateItem';
 import axios from 'axios';
+import { useState } from 'react';
 
 
 
@@ -40,6 +41,17 @@ export default function Templates(){
     React.useEffect(()=>{
       console.log("TL",templateList)
     }, [templateList])
+
+    const [searchQuery, setSearchQuery] = useState(""); // State for the search query
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(event.target.value);
+    };
+  
+    const filteredTemplates = templateList.filter((template) => {
+      return template.templateName.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+
     return(
         <div>
           <Stack direction="column" className='gradientbg' sx={{paddingBottom:"2em"}}>
@@ -64,8 +76,8 @@ export default function Templates(){
             </Box>
           ) : (
             <div style={{ display: 'flex', justifyContent: "left", paddingLeft: "10em", paddingRight: "10em" }}>
-              {recentDownloads.map((template, i) => {
-                return (
+              {filteredTemplates.map((template, i) => {
+          return (
                   <TemplateItem key={i} templateId={template.templateId} templateName={template.templateName} />
                 );
               })}
