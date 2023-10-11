@@ -1,11 +1,16 @@
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Box, Button, Grid, IconButton, InputAdornment, TextField, Typography } from '@mui/material';
 import * as React from 'react';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import TopbarInit from './TopbarInit';
 import UserService from '../api/UserService';
 import { SnackbarContext, SnackbarContextType } from '../helpers/SnackbarContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginFailure, loginSuccess } from '../helpers/AuthAction';
+import { RootState } from '../helpers/Store';
+
+
 
 export default function Login(){
 
@@ -14,6 +19,8 @@ export default function Login(){
     const [usernameError, setUsernameError] = useState<string | null>(null);
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const { handleSetMessage } = useContext(SnackbarContext) as SnackbarContextType;
+    const dispatch = useDispatch();
+    // const { user, handleSetUser } = useContext(UserContext) as UserContextType;
 
     const [loginData, setLoginData] = useState({
         username: "",
@@ -28,34 +35,75 @@ export default function Login(){
         setLoginData({ ...loginData, [e.target.name]: e.target.value });
         console.log(e.target.name)
     }
+    
 
-    const validateDetails = async (event: { preventDefault: () => void; }) => {
+    // const validateDetails = async (event: { preventDefault: () => void; }) => {
+    //     event.preventDefault();
+    //     setUsernameError(null);
+    //     setPasswordError(null);
+
+    //     UserService.getUserByUsernameDetails(loginData.username).then((res) => {
+    //         console.log(res.data)
+    //         if(res.data !== "") {
+    //             console.log(res.data)
+    //             if(res.data.password === loginData.password){
+    //                 UserService.getUserById(res.data.userId).then((user) => {
+    //                     if(user.data.length !== 0){
+    //                         console.log('success')
+    //                         navigate('/', { replace: true })
+    //                     }else{ 
+    //                         setUsernameError("User does not exist.") 
+    //                     }
+    //                 }).catch((error) => handleSetMessage(error.message + ". Failed to login."))
+    //             }else{ 
+    //                 setPasswordError("Password is incorrect.") 
+    //             }
+                
+    //         }else { 
+    //             setUsernameError("Username does not exists.") 
+    //         }
+    //     })
+    // }
+
+    const validateDetails = async (event:any) => {
         event.preventDefault();
         setUsernameError(null);
         setPasswordError(null);
-
-        UserService.getUserByUsernameDetails(loginData.username).then((res) => {
-            console.log(res.data)
-            if(res.data !== "") {
-                console.log(res.data)
-                if(res.data.password === loginData.password){
-                    UserService.getUserById(res.data.userId).then((user) => {
-                        if(user.data.length !== 0){
-                            console.log('success')
-                            navigate('/', { replace: true })
-                        }else{ 
-                            setUsernameError("User does not exist.") 
-                        }
-                    }).catch((error) => handleSetMessage(error.message + ". Failed to login."))
-                }else{ 
-                    setPasswordError("Password is incorrect.") 
-                }
-                
-            }else { 
-                setUsernameError("Username does not exists.") 
+      
+        UserService.getUserByUsernameDetails(loginData.username)
+          .then((res) => {
+            if (res.data !== "") {
+              if (res.data.password === loginData.password) {
+                UserService.getUserById(res.data.userId)
+                  .then((user) => {
+                    if (user.data.length !== 0) {
+                      dispatch(loginSuccess(res.data.userId));
+                      console.log('success')
+                      console.log(loginSuccess)
+                      navigate('/home', { replace: true });
+                    } else {
+                      setUsernameError("User does not exist.");
+                    }
+                  })
+                  .catch((error) => {
+                    dispatch(loginFailure(error.message + ". Failed to login."));
+                  });
+              } else {
+                setPasswordError("Password is incorrect.");
+              }
+            } else {
+              setUsernameError("Username does not exist.");
             }
-        })
-    }
+          });
+      };
+
+    
+    //   useEffect(() => {
+    //     if (userData) {
+    //       console.log('User Data:', userData);
+    //     }
+    //   }, [userData]);
+
     
 
     return(
