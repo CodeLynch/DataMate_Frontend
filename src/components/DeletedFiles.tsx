@@ -16,6 +16,7 @@ import {
   InputLabel,
   Menu,
   MenuItem,
+  Modal,
   Select,
   SelectChangeEvent,
   Stack,
@@ -34,6 +35,8 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import { FileEntity } from "../api/dataTypes";
 import FileService from "../api/FileService";
 import { useNavigate } from "react-router-dom";
+import Topbar from "./Topbar";
+import Navbar from "./Navbar";
 
 
 export default function DeletedFiles() {
@@ -317,15 +320,23 @@ export default function DeletedFiles() {
       
     }
   };
+
+  const [open, setOpen] = useState(false);
+  const toggleDrawerOpen = () => {
+    setOpen(!open);
+  };
   
 
   return (
     <div>
+      <Modal open={open} onClose={toggleDrawerOpen}>
+          <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
+      </Modal>
+      <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
       <Box m={4}>
         <Stack direction="row">
           <ArrowBackIosNewIcon sx={{ fontSize: '30px', color: '#374248', cursor: 'pointer', mr: 2, mt: .8 }} onClick={() => { nav('/files'); }}/>
           <Typography variant="h4" fontWeight="bold" color="#374248">
-            {/* {" "} */}
             Deleted Files
           </Typography>
         </Stack>

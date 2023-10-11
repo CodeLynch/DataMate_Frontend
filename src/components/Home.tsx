@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Button, Stack, Typography } from "@mui/material"
+import { Box, Button, Modal, Stack, Typography } from "@mui/material"
 import GirlImg from '../images/girl.png';
 import DownArrow from '../images/downarrow.png';
 import TemplateInstructions from '../images/instructions_one.gif';
@@ -9,6 +9,12 @@ import NumTwoIcon from '../images/twonum.png';
 import NumThreeIcon from '../images/threenum.png';
 import ImportFile from '../prompts/ImportFile';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
+import Topbar from './Topbar';
+import Navbar from './Navbar';
+// import { RootState } from '../helpers/Store';
+// import { getStoredUserData } from '../helpers/AuthAction';
 
 type HomeProps = {
     toggleImport: () => void,
@@ -17,6 +23,7 @@ type HomeProps = {
 export default function Home({toggleImport}:HomeProps){
     const [importFile, setImportFile] = React.useState(false);
     const nav = useNavigate();
+    // const userData = useSelector((state: RootState) => state.auth.user);
   
     const helpSectionRef = React.useRef<HTMLDivElement | null>(null);
     const handleGetStartedClick = () => {
@@ -33,13 +40,37 @@ export default function Home({toggleImport}:HomeProps){
     const handleTemplatesClick =()=>{
         nav('/templates')
     }
+
+    
+
+    // useEffect(() => {
+    //     if (userData) {
+    //       console.log('User Data:', userData);
+    //     }
+    //   }, [userData]);
+
+    // const storedUserData = getStoredUserData('your-secret-key');
+    // if (storedUserData) {
+    //     // Use the decrypted user data
+    //     console.log('Stored User Data:', storedUserData);
+    // }
+
+    const [open, setOpen] = useState(false);
+    const toggleDrawerOpen = () => {
+        setOpen(!open);
+      };
     
 
     return(
         <Box>
+            <Modal open={open} onClose={toggleDrawerOpen}>
+                <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
+            </Modal>
+            <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
             <section className='gradientbg hero-banner'>
                 <Box className='wrapper'>
                     <Box>
+                        {/* <h2>Welcome, {user?.email}</h2> */}
                         <h1 className='h1-container'>Streamline Your <br></br>Data Management</h1> 
                         <p className='subheading1'>Download templates or import your <br></br>spreadsheet today!</p>
                         <Box className='btnstyle'>

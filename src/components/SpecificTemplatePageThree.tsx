@@ -4,7 +4,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Button, Dialog, DialogContent, Grid, IconButton, ImageList, ImageListItem, Stack } from '@mui/material';
+import { Box, Button, Dialog, DialogContent, Grid, IconButton, ImageList, ImageListItem, Modal, Stack } from '@mui/material';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import DownloadOpen from '../images/download.png';
 import NavigateImg from '../images/navigate.png';
@@ -26,6 +26,9 @@ import EmployeeDepartmentID from '../images/employee/employeeDepartmentID.png';
 import DepartmentDepartmentID from '../images/employee/departmentDepartmentID.png';
 import DepartmentName from '../images/employee/departmentName.png';
 import axios from 'axios';
+import { useState } from 'react';
+import Navbar from './Navbar';
+import Topbar from './Topbar';
 
 
 export default function SpecificTemplate(){
@@ -62,8 +65,17 @@ export default function SpecificTemplate(){
       });
     }
 
+    const [openNav, setOpenNav] = useState(false);
+    const toggleDrawerOpen = () => {
+      setOpenNav(!open);
+    };
+
     return(
       <Grid>
+        <Modal open={openNav} onClose={toggleDrawerOpen}>
+          <Navbar open={openNav} handleDrawerClose={toggleDrawerOpen} />
+      </Modal>
+      <Topbar open={openNav} handleDrawerOpen={toggleDrawerOpen} />
         <Grid className="gradientbg">
           <Grid container direction="row" justifyContent="space-between" sx={{p: {xs: '40px 60px 20px 60px', sm: '40px 60px 20px 60px', md: '40px 60px 20px 60px'} }}>  
             <Typography sx={{ color: 'white', fontWeight: 'bold', fontSize: {xs: '20px', sm: '25px', md: '32px'}, mt: {xs: 1.3, md: .2}}}>

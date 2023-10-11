@@ -30,6 +30,8 @@ import ImportFile from "../prompts/ImportFile";
 
 import { useNavigate } from "react-router-dom";
 import FileDetails from "./FileDetails";
+import Navbar from "./Navbar";
+import Topbar from "./Topbar";
 
 type FileId = string;
 
@@ -228,6 +230,12 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   }, [searchQuery, filteredFiles]);
 
   const navigate = useNavigate();
+
+  const [openNav, setOpenNav] = useState(false);
+  const toggleDrawerOpen = () => {
+    setOpenNav(!openNav);
+  };
+
   return (
     <Grid
       paddingLeft={{ lg: 2, xl: 2 }}
@@ -240,6 +248,10 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
         justifyContent: "center",
       }}
     >
+      <Modal open={openNav} onClose={toggleDrawerOpen}>
+        <Navbar open={openNav} handleDrawerClose={toggleDrawerOpen} />
+      </Modal>
+      <Topbar open={openNav} handleDrawerOpen={toggleDrawerOpen} />
       <section>
         <Grid
           style={{

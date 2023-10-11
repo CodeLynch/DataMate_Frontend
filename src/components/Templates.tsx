@@ -1,10 +1,13 @@
 import * as React from 'react';
-import { Box, Button, Card, Container, IconButton, InputAdornment, Stack, TextField } from '@mui/material';
+import { Box, Button, Card, Container, IconButton, InputAdornment, Modal, Stack, TextField } from '@mui/material';
 import noRecentFiles from '../images/noRecentFiless.png';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { useNavigate } from 'react-router-dom';
 import TemplateItem, { TemplateItemType } from './TemplateItem';
 import axios from 'axios';
+import { useState } from 'react';
+import Navbar from './Navbar';
+import Topbar from './Topbar';
 
 
 
@@ -40,8 +43,18 @@ export default function Templates(){
     React.useEffect(()=>{
       console.log("TL",templateList)
     }, [templateList])
+
+    const [open, setOpen] = useState(false);
+    const toggleDrawerOpen = () => {
+      setOpen(!open);
+    };
+
     return(
         <div>
+          <Modal open={open} onClose={toggleDrawerOpen}>
+            <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
+          </Modal>
+        <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
           <Stack direction="column" className='gradientbg' sx={{paddingBottom:"2em"}}>
             <h1 style={{color: 'white', fontSize: 60, textAlign: 'center'}}>Download Template</h1>
             <p style={{color: 'white', fontSize: 22, paddingLeft: 5, textAlign:'center'}}> 

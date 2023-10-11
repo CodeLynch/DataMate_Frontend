@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import FileService from "../services/FileService"
 import { useLocation } from "react-router-dom";
 import * as XLSX from 'xlsx'
-import { Box, Button, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs} from "@mui/material";
+import { Box, Button, Modal, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs} from "@mui/material";
 import { start } from "repl";
 import styled from "@emotion/styled";
 import axios from "axios";
+import Topbar from "../components/Topbar";
+import Navbar from "../components/Navbar";
 
 // type FileResponseType = {
 //     fileId: number,
@@ -196,9 +198,17 @@ export default function Filepage({stopLoading}:FilePageProps) {
         console.log("BArr",BodyArr)
     },[HeaderArr])
     
+    const [openNav, setOpenNav] = useState(false);
+    const toggleDrawerOpen = () => {
+      setOpenNav(!openNav);
+    };
 
     return(
         <>
+        <Modal open={openNav} onClose={toggleDrawerOpen}>
+          <Navbar open={openNav} handleDrawerClose={toggleDrawerOpen} />
+        </Modal>
+        <Topbar open={openNav} handleDrawerOpen={toggleDrawerOpen} />
         {HeaderArr !== undefined && BodyArr !== undefined? <>
             <div style={{marginRight:'50px', marginLeft:'50px', height:'80vh'}}>
             <h1>{fileName}</h1>

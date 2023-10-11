@@ -13,6 +13,7 @@ import {
   IconButton,
   SelectChangeEvent,
   Link,
+  Modal,
 } from "@mui/material";
 import Popover from "@mui/material/Popover";
 import List from "@mui/material/List";
@@ -23,6 +24,8 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchIcon from "@mui/icons-material/Search";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import Navbar from "./Navbar";
+import Topbar from "./Topbar";
 
 const DatabaseList: React.FC<{}> = () => {
   const [isLargeScreen, setIsLargeScreen] = useState(false);
@@ -137,6 +140,11 @@ const DatabaseList: React.FC<{}> = () => {
     setShowAdditionalButtons(!showAdditionalButtons);
   };
 
+  const [openNav, setOpenNav] = useState(false);
+  const toggleDrawerOpen = () => {
+    setOpenNav(!openNav);
+  };
+
   return (
     <Grid
       paddingLeft={{ lg: 2, xl: 2 }}
@@ -149,6 +157,10 @@ const DatabaseList: React.FC<{}> = () => {
         justifyContent: "center",
       }}
     >
+      <Modal open={openNav} onClose={toggleDrawerOpen}>
+          <Navbar open={openNav} handleDrawerClose={toggleDrawerOpen} />
+      </Modal>
+      <Topbar open={openNav} handleDrawerOpen={toggleDrawerOpen} />
       <section>
         <Grid
           style={{
