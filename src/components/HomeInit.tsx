@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Button, Modal, Stack, Typography } from "@mui/material"
+import { Box, Button, Stack, Typography } from "@mui/material"
 import GirlImg from '../images/girl.png';
 import DownArrow from '../images/downarrow.png';
 import TemplateInstructions from '../images/instructions_one.gif';
@@ -10,20 +10,12 @@ import NumThreeIcon from '../images/threenum.png';
 import ImportFile from '../prompts/ImportFile';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
-import Topbar from './Topbar';
-import Navbar from './Navbar';
-// import { RootState } from '../helpers/Store';
-// import { getStoredUserData } from '../helpers/AuthAction';
+import { useEffect } from 'react';
+import TopbarInit from './TopbarInit';
 
-type HomeProps = {
-    toggleImport: () => void,
-}
 
-export default function Home({toggleImport}:HomeProps){
-    const [importFile, setImportFile] = React.useState(false);
+export default function HomeInit(){
     const nav = useNavigate();
-    // const userData = useSelector((state: RootState) => state.auth.user);
   
     const helpSectionRef = React.useRef<HTMLDivElement | null>(null);
     const handleGetStartedClick = () => {
@@ -37,40 +29,16 @@ export default function Home({toggleImport}:HomeProps){
         }
     };
 
-    const handleTemplatesClick =()=>{
-        nav('/templates')
+    const handleLoginNav =()=>{
+        nav('/login')
     }
-
-    
-
-    // useEffect(() => {
-    //     if (userData) {
-    //       console.log('User Data:', userData);
-    //     }
-    //   }, [userData]);
-
-    // const storedUserData = getStoredUserData('your-secret-key');
-    // if (storedUserData) {
-    //     // Use the decrypted user data
-    //     console.log('Stored User Data:', storedUserData);
-    // }
-
-    const [open, setOpen] = useState(false);
-    const toggleDrawerOpen = () => {
-        setOpen(!open);
-      };
-    
 
     return(
         <Box>
-            <Modal open={open} onClose={toggleDrawerOpen}>
-                <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
-            </Modal>
-            <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
+            <TopbarInit/>
             <section className='gradientbg hero-banner'>
                 <Box className='wrapper'>
                     <Box>
-                        {/* <h2>Welcome, {user?.email}</h2> */}
                         <h1 className='h1-container'>Streamline Your <br></br>Data Management</h1> 
                         <p className='subheading1'>Download templates or import your <br></br>spreadsheet today!</p>
                         <Box className='btnstyle'>
@@ -118,7 +86,7 @@ export default function Home({toggleImport}:HomeProps){
                     </div>
                 </div>
                 <Box className='templateBtn' sx={{display: 'flex', justifyContent: 'center'}}>
-                    <Button onClick={handleTemplatesClick} variant="contained">
+                    <Button onClick={handleLoginNav} variant="contained">
                         GO TO TEMPLATES
                     </Button>
                 </Box>
@@ -151,7 +119,7 @@ export default function Home({toggleImport}:HomeProps){
                     </div>
                 </div>
                 <Box className='importBtn templateBtn' sx={{display: 'flex', justifyContent: 'center'}}>
-                     <Button  onClick={toggleImport} variant="contained">IMPORT SPREADSHEET</Button>
+                     <Button  onClick={handleLoginNav} variant="contained">IMPORT SPREADSHEET</Button>
                 </Box>
             </section>
 

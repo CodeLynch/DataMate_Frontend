@@ -197,7 +197,7 @@ h3{
   position: absolute;
   width: 581px;
   height: 49px;
-  left: 550px;
+  /* left: 550px; */
   top: 10px;
 
   background: #FFFFFF;
@@ -406,6 +406,13 @@ h3{
   height: 60px;
   margin-bottom: 100px;
   margin-top: 8rem;
+}
+
+.templateDownloadBtn .MuiButton-root{
+  display: flex;
+  margin: 4rem;
+  height: 58px;
+  width: 170px;
 }
 
 .import-intro {

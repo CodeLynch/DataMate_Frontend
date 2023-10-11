@@ -16,10 +16,12 @@ import {
   InputLabel,
   Menu,
   MenuItem,
+  Modal,
   Select,
   SelectChangeEvent,
   Stack,
   TextField,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
@@ -33,6 +35,10 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import { FileEntity } from "../api/dataTypes";
 import FileService from "../api/FileService";
 import { useNavigate } from "react-router-dom";
+import Topbar from "./Topbar";
+import Navbar from "./Navbar";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../helpers/Store";
 
 
 export default function DeletedFiles() {
@@ -49,6 +55,8 @@ export default function DeletedFiles() {
   const [deletedFiles, setDeletedFiles] = useState<FileEntity[]>([]);
   const [filteredFiles, setFilteredFiles] = useState<FileEntity[]>([]);
   const nav = useNavigate();
+  const userId = useSelector((state: RootState) => state.auth.userId);
+  const dispatch = useDispatch();
 
   const customLocaleText = {
     ...enUS,
@@ -79,7 +87,6 @@ export default function DeletedFiles() {
 
   useEffect(() => {
     const fetchDeletedFiles = async () => {
-      const userId = 1; // to be changed
       try {
         const files = await FileService.getDeletedFilesById(userId);
         setDeletedFiles(files);
@@ -89,7 +96,7 @@ export default function DeletedFiles() {
     };
 
     fetchDeletedFiles();
-  }, []);
+  }, [userId]);
 
  // hook for search function
   useEffect(() => {
@@ -169,10 +176,12 @@ export default function DeletedFiles() {
       sortable: false,
       renderCell: (params) => (
         <div>
-          <RestoreIcon
-          sx={{ color: "#14847C", cursor: "pointer" }}
-          onClick={() => handleRestore(params.row.fileId)}
-        />
+          <Tooltip title="Restore" arrow>
+            <RestoreIcon
+            sx={{ color: "#14847C", cursor: "pointer" }}
+            onClick={() => handleRestore(params.row.fileId)}
+          />
+        </Tooltip>
         </div>
       ),
       disableColumnMenu: true,
@@ -280,7 +289,6 @@ export default function DeletedFiles() {
   };
 
   const handleRestore = async (fileId:any) => {
-    const userId = 1; // to be changed
     if (selectedRows.length > 0) {
       const restoreResults = await Promise.all(
         selectedRows.map(async (id) => {
@@ -314,15 +322,23 @@ export default function DeletedFiles() {
       
     }
   };
+
+  const [open, setOpen] = useState(false);
+  const toggleDrawerOpen = () => {
+    setOpen(!open);
+  };
   
 
   return (
     <div>
+      <Modal open={open} onClose={toggleDrawerOpen}>
+          <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
+      </Modal>
+      <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
       <Box m={4}>
         <Stack direction="row">
           <ArrowBackIosNewIcon sx={{ fontSize: '30px', color: '#374248', cursor: 'pointer', mr: 2, mt: .8 }} onClick={() => { nav('/files'); }}/>
           <Typography variant="h4" fontWeight="bold" color="#374248">
-            {/* {" "} */}
             Deleted Files
           </Typography>
         </Stack>
@@ -469,50 +485,95 @@ export default function DeletedFiles() {
           localeText={customLocaleText}
         />
       </Box>
-
+      
+      {/* for restore and delete prompt */}
       <Dialog
-        open={isRestoreDialogOpen}
-        onClose={handleRestoreDialogClose}
-        aria-labelledby="restore-dialog-title"
-        aria-describedby="restore-dialog-description"
-      >
-        <DialogTitle id="restore-dialog-title">Restore Files</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="restore-dialog-description">
-            Are you sure you want to restore these files?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleRestoreDialogClose} color="primary">
-            Back
-          </Button>
-          <Button onClick={handleRestore} color="primary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      open={isRestoreDialogOpen}
+      onClose={handleRestoreDialogClose}
+      aria-labelledby="restore-dialog-title"
+      aria-describedby="restore-dialog-description"
+    >
+      <DialogTitle id="restore-dialog-title">Restore Files</DialogTitle>
+      <DialogContent>
+        <DialogContentText id="restore-dialog-description">
+          Are you sure you want to restore these files?
+        </DialogContentText>
 
-      <Dialog
-        open={isDeleteDialogOpen}
-        onClose={handleDeleteDialogClose}
-        aria-labelledby="delete-dialog-title"
-        aria-describedby="delete-dialog-description"
-      >
-        <DialogTitle id="delete-dialog-title">Delete Forever</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete these files?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDeleteDialogClose} color="primary">
-            Back
-          </Button>
-          <Button onClick={handleDelete} color="primary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+        {/* display selected files for restore */}
+        {selectedRows.length > 0 && (
+          <div>
+            <Typography fontSize='13px' mt={2}>Selected Files:</Typography>
+            <ul style={{ fontSize: '15px' }}>
+              {selectedRows.map((fileId) => {
+                const selectedFile = deletedFiles.find(
+                  (file) => file.fileId.toString() === fileId
+                );
+                if (selectedFile) {
+                  return (
+                    <li key={selectedFile.fileId}>{selectedFile.fileName}</li>
+                  );
+                }
+                return null;
+              })}
+            </ul>
+          </div>
+        )}
+       
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleRestoreDialogClose} color="primary">
+          Back
+        </Button>
+        <Button onClick={handleRestore} color="primary">
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+
+
+    <Dialog
+      open={isDeleteDialogOpen}
+      onClose={handleDeleteDialogClose}
+      aria-labelledby="delete-dialog-title"
+      aria-describedby="delete-dialog-description"
+    >
+      <DialogTitle id="delete-dialog-title">Delete Forever</DialogTitle>
+      <DialogContent>
+        <DialogContentText id="delete-dialog-description">
+          Are you sure you want to delete these files?
+        </DialogContentText>
+
+        {/* display selected files for delete */}
+        {selectedRows.length > 0 && (
+          <div>
+            <Typography fontSize='13px' mt={2}>Selected Files:</Typography>
+            <ul style={{ fontSize: '15px' }}>
+              {selectedRows.map((fileId) => {
+                const selectedFile = deletedFiles.find(
+                  (file) => file.fileId.toString() === fileId
+                );
+                if (selectedFile) {
+                  return (
+                    <li key={selectedFile.fileId}>{selectedFile.fileName}</li>
+                  );
+                }
+                return null;
+              })}
+            </ul>
+          </div>
+        )}
+
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleDeleteDialogClose} color="primary">
+          Back
+        </Button>
+        <Button onClick={handleDelete} color="primary">
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+
     </div>
   );
 }

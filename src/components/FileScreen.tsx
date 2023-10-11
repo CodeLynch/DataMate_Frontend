@@ -30,6 +30,8 @@ import ImportFile from "../prompts/ImportFile";
 
 import { useNavigate } from "react-router-dom";
 import FileDetails from "./FileDetails";
+import Navbar from "./Navbar";
+import Topbar from "./Topbar";
 
 type FileId = string;
 
@@ -113,17 +115,17 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     };
   }, []);
 
-  useEffect(() => {
-    //dynamic fetching
-    const fetchData = async () => {
-      if (userId !== null) {
-        const files = await FileService.getFilesByUserId(userId);
-        setFiles(files.filter((file) => !file.isdeleted));
-      }
-    };
+  // useEffect(() => {
+  //   //dynamic fetching
+  //   const fetchData = async () => {
+  //     if (userId !== null) {
+  //       const files = await FileService.getFilesByUserId(userId);
+  //       setFiles(files.filter((file) => !file.isdeleted));
+  //     }
+  //   };
 
-    fetchData();
-  }, [userId]);
+  //   fetchData();
+  // }, [userId]);
 
   //delete specific file
   const handleDelete = async (id: number) => {
@@ -212,22 +214,37 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     file.fileName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const userId = 1;
-
-      const files = await FileService.getFilesByUserId(userId);
-      setFiles(files.filter((file) => !file.isdeleted));
-    };
-
-    fetchData();
-  }, []);
-
   // useEffect(() => {
-  //   setSearchResult(filteredFiles);
-  // }, [searchQuery, filteredFiles]);
+  //   const fetchData = async () => {
+  //     const userId = 1;
+  //     const files = await FileService.getFilesByUserId(userId);
+  //     setFiles(files.filter((file) => !file.isdeleted));
+  //   };
+  //   console.log("These are the files:" , files)
+  //   fetchData();
+  // }, []);
+
+  useEffect(()=>{
+    FileService.getFilesByUserId(1)
+    .then((res)=>{
+      console.log(res);
+      setFiles(res);
+    }).catch((err)=>{
+      console.log(err);
+    })
+  },[])
+
+  useEffect(() => {
+    setSearchResult(filteredFiles);
+  }, [searchQuery, filteredFiles]);
 
   const navigate = useNavigate();
+
+  const [openNav, setOpenNav] = useState(false);
+  const toggleDrawerOpen = () => {
+    setOpenNav(!openNav);
+  };
+
   return (
     <Grid
       paddingLeft={{ lg: 2, xl: 2 }}
@@ -240,6 +257,10 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
         justifyContent: "center",
       }}
     >
+      <Modal open={openNav} onClose={toggleDrawerOpen}>
+        <Navbar open={openNav} handleDrawerClose={toggleDrawerOpen} />
+      </Modal>
+      <Topbar open={openNav} handleDrawerOpen={toggleDrawerOpen} />
       <section>
         <Grid
           style={{

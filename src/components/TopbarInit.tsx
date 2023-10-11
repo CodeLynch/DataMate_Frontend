@@ -30,7 +30,9 @@ export default function TopbarInit() {
             justifyContent="space-between"
             alignItems="center"
           >
-            {/* <img src={Logo} alt={"datamate-logo"} style={{ width: '150px', height: 'auto', paddingTop: "4px" }} /> */}
+            <a href="/">
+              <img src={Logo} alt={"datamate-logo"} style={{ width: '150px', height: 'auto', paddingTop: "4px" }} />
+            </a>
             <Stack direction="row" spacing={2}>
               {navItems.map((listItem, index) => (
                 <NavLink key={index} to={listItem.link}>

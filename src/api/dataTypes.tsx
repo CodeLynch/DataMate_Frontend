@@ -1,16 +1,16 @@
 /*add your dataTypes here*/
 
-// export type User = {
-//   userId: number,
-//   firstName: string,
-//   lastName: string,
-//   email: string,
-//   address: string,
-//   username: string,
-//   password: string,
-//   businessName: string,
-//   businessType: string,
-// }
+export type User = {
+  userId: number,
+  firstName: string,
+  lastName: string,
+  email: string,
+  address: string,
+  username: string,
+  password: string,
+  businessName: string,
+  businessType: string,
+}
 
 export interface FileEntity {
   fileId: number;
@@ -33,16 +33,4 @@ export interface ResponseFile {
   fileDownloadUri: string;
   userId: number;
   // thumbnailUrl: string;
-}
-
-export interface User {
-  userId: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  address: string;
-  username: string;
-  password: string;
-  businessName: string;
-  businessType: string;
 }

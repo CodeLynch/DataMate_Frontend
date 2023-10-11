@@ -1,27 +1,19 @@
 import * as React from 'react';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Button, Card, Container, IconButton, InputAdornment, Stack, TextField } from '@mui/material';
-import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
-import SampleTemp from '../images/samplethumb.png';
-import DownloadOpen from '../images/download.png';
-import NavigateImg from '../images/navigate.png';
-import InputImg from '../images/input.png';
-import spreadsheet from '../images/spreadsheet1.png';
+import { Box, Button, Card, Container, Grid, IconButton, InputAdornment, Modal, Stack, TextField } from '@mui/material';
 import noRecentFiles from '../images/noRecentFiless.png';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import SpecificTemplate from '../pages/SpecificTemplatePage';
 import { useNavigate } from 'react-router-dom';
 import TemplateItem, { TemplateItemType } from './TemplateItem';
 import axios from 'axios';
+import { useState } from 'react';
+import Navbar from './Navbar';
+import Topbar from './Topbar';
 
 
 
 export default function Templates(){
     const [templateList,setTemplateList] = React.useState<TemplateItemType[]>([]);
+    const [recentDownloads, setRecentDownloads] = React.useState<TemplateItemType[]>([]);
 
     React.useEffect(()=>{
       axios.get("http://localhost:8080/templates"
@@ -35,31 +27,77 @@ export default function Templates(){
       })
     },[])
 
+    React.useEffect(() => {
+      axios.get("http://localhost:8080/recentDownloads"
+      ).then((res) => {
+        console.log(res.data);
+        if (res.data) {
+          setRecentDownloads(res.data);
+          console.log("Recent downloads:", recentDownloads);
+        }
+      }).catch(err => {
+        console.log(err);
+      })
+    }, [])
+
     React.useEffect(()=>{
       console.log("TL",templateList)
     }, [templateList])
+
+    const [open, setOpen] = useState(false);
+    const toggleDrawerOpen = () => {
+      setOpen(!open);
+    };
+
+    const [searchQuery, setSearchQuery] = useState(""); // State for the search query
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(event.target.value);
+
+    };
+
+    const filteredTemplates = templateList.filter((template) => {
+      return template.templateName.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+    console.log("template: List", filteredTemplates)
+    
     return(
         <div>
+          <Modal open={open} onClose={toggleDrawerOpen}>
+            <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
+          </Modal>
+        <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
           <Stack direction="column" className='gradientbg' sx={{paddingBottom:"2em"}}>
             <h1 style={{color: 'white', fontSize: 60, textAlign: 'center'}}>Download Template</h1>
             <p style={{color: 'white', fontSize: 22, paddingLeft: 5, textAlign:'center'}}> 
               Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
-      
-          <TextField className='search'
-          hiddenLabel
-          size="medium"  
-          placeholder="Search"
-          sx={{border: 'none', "& fieldset": { border: 'none' },}}
-          InputProps={{ startAdornment: (<InputAdornment position="start"> <SearchOutlinedIcon /> </InputAdornment>),
-          disableUnderline: true, }} 
-        /><br></br><br></br><br></br>
+          <Grid container sx={{ justifyContent:"center", alignItems:"center" }}>
+            <TextField className='search'
+            hiddenLabel
+            size="medium"  
+            placeholder="Search"
+            sx={{border: 'none', "& fieldset": { border: 'none' },}}
+            onChange={handleSearchChange}
+            InputProps={{ startAdornment: (<InputAdornment position="start"> <SearchOutlinedIcon /> </InputAdornment>),
+            disableUnderline: true, }} 
+          /><br></br><br></br><br></br>
+          </Grid>
           </Stack>
 
-          <h3 style={{marginLeft: '11rem', marginTop: '3rem', fontSize: 30}}>Recent downloads</h3>
-
-          <Box sx={{margin: '3rem', justifyContent: 'center', display: 'flex'}}>
-            <img src={noRecentFiles} style={{width: 200, height: 200}}/>
-          </Box>
+          <h3 style={{ marginLeft: '11rem', marginTop: '3rem', fontSize: 30 }}>Recent downloads</h3>
+          {recentDownloads.length === 0 ? (
+            <Box sx={{ margin: '3rem', justifyContent: 'center', display: 'flex' }}>
+              <img src={noRecentFiles} style={{ width: 200, height: 200 }} />
+            </Box>
+          ) : (
+            <div style={{ display: 'flex', justifyContent: "left", paddingLeft: "10em", paddingRight: "10em" }}>
+              {filteredTemplates.map((template, i) => {
+                return (
+                  <TemplateItem key={i} templateId={template.templateId} templateName={template.templateName} />
+                );
+              })}
+            </div>
+          )}
 
           <h3 style={{marginLeft: '11rem', marginTop: '3rem', fontSize: 30}}>All Templates</h3>
           
