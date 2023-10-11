@@ -34,15 +34,3 @@ export interface ResponseFile {
   userId: number;
   // thumbnailUrl: string;
 }
-
-export interface User {
-  userId: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  address: string;
-  username: string;
-  password: string;
-  businessName: string;
-  businessType: string;
-}
