@@ -78,7 +78,7 @@ const FileService = {
       const response: AxiosResponse<ResponseFile[]> = await axios.get(
         `${FILE_BASE_URL}/filesByUserId?userId=${userId}`
       );
-
+      console.log("res:",response);
       return response.data;
     } catch (error) {
       console.error("Get files by user ID error:", error);
