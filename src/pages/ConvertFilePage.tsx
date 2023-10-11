@@ -318,10 +318,12 @@ export default function ConvertFilePage() {
         if (jsonData.length === 0) {
             throw new Error("JSON array is empty.");
         }
-
         const columns: string[] = Object.keys(jsonData[0]);
-        const createTableQuery = `CREATE TABLE IF NOT EXISTS ${tableName} (${columns.map(col => `${col.replace(/[^a-zA-Z0-9]/g,'_')} ${getColumnType(jsonData[0][col])}`).join(', ')});`;
+        let newTblName = tableName.replace(/[^a-zA-Z0-9]/g,'_'); 
+        console.log("new name: ",newTblName)
+        const createTableQuery = `CREATE TABLE IF NOT EXISTS ${newTblName} (${columns.map(col => `${col.replace(/[^a-zA-Z0-9]/g,'_')} ${getColumnType(jsonData[0][col])}`).join(', ')});`;
     
+
         const insertValues = jsonData.map(record => `(${columns.map(col => {
             const value = record[col];
             if (typeof value === "string") {
@@ -336,7 +338,7 @@ export default function ConvertFilePage() {
     
         let SQLcolumns: string[] = Object.keys(jsonData[0]).map(key => key.replace(/[^a-zA-Z0-9]/g,'_'));
         console.log("join: ", SQLcolumns.join(', '));
-        const insertTableQuery = `INSERT INTO ${tableName} (${SQLcolumns.join(', ')}) VALUES ${insertValues};`;
+        const insertTableQuery = `INSERT INTO ${tableName.replace(/[^a-zA-Z0-9]/g,'_')} (${SQLcolumns.join(', ')}) VALUES ${insertValues};`;
         
         return {
             createTable:`${createTableQuery}`,
@@ -364,9 +366,8 @@ export default function ConvertFilePage() {
                         let headers = sheetSD.shift();
                         let dataCols = createColumns(headers);
                         let dataSrc = createDataSrc(dataCols, sheetSD);
-                        let uniquetblName = sheet + "_" + uid();
-                        dataSrc.shift();
-                        TableService.postTable(uniquetblName, dbId, 1)
+                        let uniquetblName = sheet.replace(/[^a-zA-Z0-9]/g,'_') + "_" + uid();
+                        TableService.postTable(uniquetblName, dbId, 1, headers)
                         .then((res)=>{
                             console.log("post table res:", res);
                         }).catch((err)=>{
