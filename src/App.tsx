@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+
 import SnackbarContextProvider from "./helpers/SnackbarContext";
 import Topbar from "./components/Topbar";
 import { ThemeProvider } from "@mui/material/styles";
@@ -34,6 +35,8 @@ import DeleteProfile from "./components/DeleteProfile";
 import NormalizePrompt from "./prompts/NormalizePrompt";
 import DeletedFiles from "./components/DeletedFiles";
 import Login from "./components/Login";
+import FileScreen from "./components/FileScreen";
+import FilePage from "./pages/FileScreenPage";
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
   interface PaletteOptions {
@@ -104,7 +107,7 @@ function App() {
   //object state for the sheet data of the uploaded file
   const [sheetData, setSData] = useState<Object>({});
   //number state for the index of the sheet to be displayed in select table
-  const [sheetIndex, setSIndex] = useState(0); 
+  const [sheetIndex, setSIndex] = useState(0);
 
   // const handleDrawerOpen = () => {
   //   setOpen(true);
@@ -496,7 +499,11 @@ function App() {
                   element={<Filepage stopLoading={StopLoading} />}
                 />
                 <Route path="/templates" element={<TemplatesPage />} />
-                <Route path="/files" element={<FileScreenPage />} />
+                <Route
+                  path="/files"
+                  element={<FileScreenPage setFileId={setFileId} />}
+                />
+
                 <Route path="/databases" element={<DatabaseScreenPage />} />
                 <Route path="/delete-profile/:id" element={<DeleteProfile />} />
                 <Route path="/deleted-files" element={<DeletedFiles />} />
