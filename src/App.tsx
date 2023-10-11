@@ -37,6 +37,9 @@ import DeletedFiles from "./components/DeletedFiles";
 import Login from "./components/Login";
 import FileScreen from "./components/FileScreen";
 import FilePage from "./pages/FileScreenPage";
+import ConvertFilePage from "./pages/ConvertFilePage";
+import DatabasePage from "./pages/DatabasePage";
+
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
   interface PaletteOptions {
@@ -498,12 +501,18 @@ function App() {
                   path="/file/"
                   element={<Filepage stopLoading={StopLoading} />}
                 />
+                <Route
+                path ="/convert"
+                element={<ConvertFilePage/>}
+                />
                 <Route path="/templates" element={<TemplatesPage />} />
                 <Route
                   path="/files"
                   element={<FileScreenPage setFileId={setFileId} />}
                 />
-
+                <Route path="/database" element={
+                <DatabasePage stopLoading={StopLoading} />
+                } />
                 <Route path="/databases" element={<DatabaseScreenPage />} />
                 <Route path="/delete-profile/:id" element={<DeleteProfile />} />
                 <Route path="/deleted-files" element={<DeletedFiles />} />
