@@ -556,7 +556,7 @@ function App() {
                 <Route path="/log-in" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
                 <Route path="/login" element={<Login/>}></Route>
                 <Route path="/registration" element={<Registration/>}></Route>
-                <Route path="/edit-profile/:id" element={<EditProfile/>}></Route>
+                <Route path="/edit-profile" element={<EditProfile/>}></Route>
                 <Route path="/deleted-files" element={<DeletedFiles/>}></Route>
 
                 {/* Add your other routes here */}
