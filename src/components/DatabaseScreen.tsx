@@ -58,10 +58,10 @@ const DatabaseList: React.FC<{}> = () => {
       lastModified: "07-24-2023",
     },
     {
-      id: "17eKuW",
-      name: "3minVideo- Mariel Genodiala.mp4",
+      id: "3",
+      name: "data3",
       thumbnailUrl:
-        "https://lh3.google.com/u/0/d/17eKuWffSREjjJWVIgoSrvB0icBBIcByh=w494-h370-p-k-nu-iv3",
+        "https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png",
       lastModified: "07-24-2023",
     },
     {
@@ -70,12 +70,6 @@ const DatabaseList: React.FC<{}> = () => {
       thumbnailUrl:
         "https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png",
       lastModified: "07-24-2023",
-    },
-    {
-      id: "vB0icBBIcByh",
-      name: "3minVideo- Mariel Genodiala.mp4",
-      thumbnailUrl:
-        "https://lh3.google.com/u/0/d/17eKuWffSREjjJWVIgoSrvB0icBBIcByh=w494-h370-p-k-nu-iv3",
     },
   ];
 
