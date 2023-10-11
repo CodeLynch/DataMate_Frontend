@@ -193,13 +193,12 @@ h3{
 
 .search{
   box-sizing: border-box;
-
-  position: absolute;
   width: 581px;
   height: 49px;
-  left: 550px;
+  left: 470px;
   top: 10px;
-
+  display: flex;
+  justify-self: center;
   background: #FFFFFF;
   border: 1px solid #FFFFFF;
   border-radius: 30px;

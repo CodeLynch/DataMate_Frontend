@@ -34,6 +34,9 @@ import DeleteProfile from "./components/DeleteProfile";
 import NormalizePrompt from "./prompts/NormalizePrompt";
 import DeletedFiles from "./components/DeletedFiles";
 import Login from "./components/Login";
+import Profile from "./components/Profile";
+import EditProfile from "./components/EditProfile";
+import SpecificTemplatePageThree from "./components/SpecificTemplatePageThree";
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
   interface PaletteOptions {
@@ -501,6 +504,9 @@ function App() {
                 <Route path="/delete-profile/:id" element={<DeleteProfile />} />
                 <Route path="/deleted-files" element={<DeletedFiles />} />
                 <Route path="/log-in" element={<Login />} />
+                <Route path="/profile" element={<Profile />}/>
+                <Route path="/editprofile" element={<EditProfile />}/>
+                <Route path="/specifictemplate3" element={<SpecificTemplatePageThree/>}/>
 
                 {/* Add your other routes here */}
               </Routes>
