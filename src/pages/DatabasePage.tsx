@@ -87,7 +87,6 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
   }
 
     useEffect(()=>{
-        
         TableService.getTblByDB(dbId).then(
             (res)=>{
                 console.log("get res:", res);
@@ -126,10 +125,12 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
       .then((res)=>{
         let tblRes:TableType = res as TableType;
         setColsData(createColumns(tblRes.columns));
-        TableService.getTblData(Tables[currentTblID])
-        .then((res)=>{
-          setTblData(createObjects(tblRes.columns, res as [][]));
-        })
+        if(Tables[currentTblID] !== undefined){
+          TableService.getTblData(Tables[currentTblID])
+          .then((res)=>{
+            setTblData(createObjects(tblRes.columns, res as [][]));
+          })
+        }
       }).catch((err)=>{
         console.log(err);
       })
@@ -142,57 +143,10 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
         };
     }
 
-    //Sample Data Source-------------------------------------------------------------
+    useEffect(()=>{
+      console.log("current table is ", currentTbl);
+    }, [currentTbl])
 
-    const columns = [
-        {
-          name: 'firstName',
-          header: 'First Name',
-          defaultFlex: 1,
-          headerProps:{
-            style: { backgroundColor: '#71C887', color:"white", fontWeight: 'bold' 
-          },
-          }
-        },
-        {
-          name: 'lastName',
-          header: 'Last Name',
-          defaultFlex: 1,
-          headerProps:{
-            style: { backgroundColor: '#71C887', color:"white", fontWeight: 'bold' 
-          },
-          }
-        },
-        {
-          name: 'country',
-          header: 'Country',
-          defaultFlex: 1,
-          headerProps:{
-            style: { backgroundColor: '#71C887', color:"white", fontWeight: 'bold' 
-          },
-          }
-        },
-      ]
-    
-    const dataSource = [
-        {"id": 1, "firstName": "Alice", "lastName": "Johnson", "country": "USA"},
-        {"id": 2, "firstName": "Bob", "lastName": "Smith", "country": "Canada"},
-        {"id": 3, "firstName": "Charlie", "lastName": "Brown", "country": "UK"},
-        {"id": 4, "firstName": "David", "lastName": "Wilson", "country": "Australia"},
-        {"id": 5, "firstName": "Eva", "lastName": "Lee", "country": "New Zealand"},
-        {"id": 6, "firstName": "Frank", "lastName": "Williams", "country": "Germany"},
-        {"id": 7, "firstName": "Grace", "lastName": "Davis", "country": "France"},
-        {"id": 8, "firstName": "Henry", "lastName": "Moore", "country": "Spain"},
-        {"id": 9, "firstName": "Isabel", "lastName": "Clark", "country": "Italy"},
-        {"id": 10, "firstName": "Jack", "lastName": "Anderson", "country": "Netherlands"},
-        {"id": 11, "firstName": "Katherine", "lastName": "Young", "country": "Sweden"},
-        {"id": 12, "firstName": "Liam", "lastName": "Miller", "country": "Norway"},
-        {"id": 13, "firstName": "Mia", "lastName": "Thompson", "country": "Denmark"},
-        {"id": 14, "firstName": "Noah", "lastName": "Martinez", "country": "Brazil"},
-        {"id": 15, "firstName": "Olivia", "lastName": "Hernandez", "country": "Mexico"}
-        ]
-
-    //-------------------------------------------------------------------------------
     return(
         <>
         {tblData !== undefined? <>
@@ -214,7 +168,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                     <Box sx={{width:"20%", display:"flex", flexDirection:"column", margin:".5em"}}>
                         <TextField
                         hiddenLabel
-                        placeholder="Search"
+                        placeholder="Search Tables"
                         sx={{border: 'none', "& fieldset": { border: 'none' }, backgroundColor:"white", borderRadius:5
                         , marginBottom:".3em"}}
                         InputProps={{ startAdornment: (<InputAdornment position="start"> <SearchOutlinedIcon /> </InputAdornment>),
@@ -251,7 +205,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                     </Box>
                     <Box sx={{width:"80%", display:"flex", flexDirection:"column", margin:".5em"}}>
                         <Box sx={{backgroundColor:"#347845",maxWidth: '40%', padding:".3em", display:"flex", justifyContent:"center", color:"white"}}>
-                            {currentTbl}
+                            {currentTbl === "" || currentTbl == undefined? "Table" : currentTbl}
                         </Box>
                         <Box sx={{ width: '100%', display:"flex", justifyContent:"center", marginTop:0}}>
                             <Box style={{backgroundColor:"#347845",width: '100%', height:"100%", display:"flex" }}>
