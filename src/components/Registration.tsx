@@ -87,10 +87,21 @@ export default function Registration() {
         setUserImage(e.target.files[0])
     };
 
+    const [emailError, setEmailError] = useState(false);
+
+    const handleEmailChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const email = e.target.value;
+        setData({ ...data, email });
+
+        const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+        const isEmailValid = emailRegex.test(email);
+        setEmailError(!isEmailValid);
+    };
+
     const postUser = async (event: { preventDefault: () => void; }) =>{
         event.preventDefault();
 
-        if (passwordMatchError || passwordLengthError) { 
+        if (passwordMatchError || passwordLengthError || emailError) { 
             return;
         }
         
@@ -139,6 +150,7 @@ export default function Registration() {
             });
     };
 
+
     return (
         <div className='gradientbg edit-spacing' style={{ width: '100%', height: '100%'}}>
             <TopbarInit/>
@@ -179,10 +191,15 @@ export default function Registration() {
                                     label="Email"
                                     variant="outlined"
                                     value={data.email}
-                                    onChange={handleChange}
+                                    onChange={handleEmailChange}
                                     fullWidth
                                     sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
                                 />
+                                {emailError && (
+                                    <Typography variant="caption" color="error" sx={{mb: 1, mt: -1}}>
+                                        Please enter a valid email address.
+                                    </Typography>
+                                )}
                                 <TextField
                                     size="small"
                                     required 
