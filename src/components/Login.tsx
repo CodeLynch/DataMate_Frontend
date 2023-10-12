@@ -7,7 +7,7 @@ import TopbarInit from './TopbarInit';
 import UserService from '../api/UserService';
 import { SnackbarContext, SnackbarContextType } from '../helpers/SnackbarContext';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginFailure, loginSuccess } from '../helpers/AuthAction';
+import { loginFailure, loginSuccess, logout } from '../helpers/AuthAction';
 import { RootState } from '../helpers/Store';
 
 
@@ -20,7 +20,36 @@ export default function Login(){
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const { handleSetMessage } = useContext(SnackbarContext) as SnackbarContextType;
     const dispatch = useDispatch();
-    // const { user, handleSetUser } = useContext(UserContext) as UserContextType;
+    const [inactivityTimer, setInactivityTimer] = useState<NodeJS.Timeout | undefined>(undefined);
+
+    // inactivity timer, auto logout after 12 hours of inactivity
+    const resetInactivityTimer = () => {
+        clearTimeout(inactivityTimer);
+        const newTimer = setTimeout(() => {
+        dispatch(logout());
+        navigate('/', { replace: true });
+        }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds
+        setInactivityTimer(newTimer);
+    };
+
+    useEffect(() => {
+        resetInactivityTimer();
+
+        window.addEventListener('mousemove', resetInactivityTimer);
+        window.addEventListener('keydown', resetInactivityTimer);
+        window.addEventListener('mousedown', resetInactivityTimer);
+        window.addEventListener('touchstart', resetInactivityTimer);
+        window.addEventListener('scroll', resetInactivityTimer);
+
+        return () => {
+            clearTimeout(inactivityTimer);
+            window.removeEventListener('mousemove', resetInactivityTimer);
+            window.removeEventListener('keydown', resetInactivityTimer);
+            window.removeEventListener('mousedown', resetInactivityTimer);
+            window.removeEventListener('touchstart', resetInactivityTimer);
+            window.removeEventListener('scroll', resetInactivityTimer);
+        };
+    }, []);
 
     const [loginData, setLoginData] = useState({
         username: "",
@@ -36,34 +65,6 @@ export default function Login(){
         console.log(e.target.name)
     }
     
-
-    // const validateDetails = async (event: { preventDefault: () => void; }) => {
-    //     event.preventDefault();
-    //     setUsernameError(null);
-    //     setPasswordError(null);
-
-    //     UserService.getUserByUsernameDetails(loginData.username).then((res) => {
-    //         console.log(res.data)
-    //         if(res.data !== "") {
-    //             console.log(res.data)
-    //             if(res.data.password === loginData.password){
-    //                 UserService.getUserById(res.data.userId).then((user) => {
-    //                     if(user.data.length !== 0){
-    //                         console.log('success')
-    //                         navigate('/', { replace: true })
-    //                     }else{ 
-    //                         setUsernameError("User does not exist.") 
-    //                     }
-    //                 }).catch((error) => handleSetMessage(error.message + ". Failed to login."))
-    //             }else{ 
-    //                 setPasswordError("Password is incorrect.") 
-    //             }
-                
-    //         }else { 
-    //             setUsernameError("Username does not exists.") 
-    //         }
-    //     })
-    // }
 
     const validateDetails = async (event:any) => {
         event.preventDefault();
@@ -96,13 +97,6 @@ export default function Login(){
             }
           });
       };
-
-    
-    //   useEffect(() => {
-    //     if (userData) {
-    //       console.log('User Data:', userData);
-    //     }
-    //   }, [userData]);
 
     
 
