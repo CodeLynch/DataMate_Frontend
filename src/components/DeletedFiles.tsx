@@ -323,18 +323,8 @@ export default function DeletedFiles() {
     }
   };
 
-  const [open, setOpen] = useState(false);
-  const toggleDrawerOpen = () => {
-    setOpen(!open);
-  };
-  
-
   return (
     <div>
-      <Modal open={open} onClose={toggleDrawerOpen}>
-          <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
-      </Modal>
-      <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
       <Box m={4}>
         <Stack direction="row">
           <ArrowBackIosNewIcon sx={{ fontSize: '30px', color: '#374248', cursor: 'pointer', mr: 2, mt: .8 }} onClick={() => { nav('/files'); }}/>

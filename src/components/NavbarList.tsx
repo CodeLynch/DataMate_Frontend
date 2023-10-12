@@ -10,7 +10,7 @@ type NavbarListProps = {
 
 const NavbarList = ({ open }: NavbarListProps) => {
   const navlist: { text: string; link: string; end: boolean }[] = [
-    { text: "Home", link: "/home", end: true },
+    { text: "Home", link: "/", end: true },
     { text: "Templates", link: "/templates", end: true },
     { text: "Files", link: "/files", end: true },
     { text: "Databases", link: "/databases", end: true },

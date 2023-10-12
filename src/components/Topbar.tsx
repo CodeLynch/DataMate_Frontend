@@ -49,7 +49,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
         </IconButton>
 
         <Box sx={{ width: "100%" }}>
-          <a href="/home">
+          <a href="/">
             <img
               src={location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database"?  WLogo : Logo}
               alt={"datamate logo"}

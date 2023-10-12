@@ -63,17 +63,8 @@ export default function SpecificTemplate(){
       });
     }
 
-    const [openNav, setOpenNav] = useState(false);
-    const toggleDrawerOpen = () => {
-      setOpenNav(!open);
-    };
-
     return(
       <Grid>
-        <Modal open={openNav} onClose={toggleDrawerOpen}>
-          <Navbar open={openNav} handleDrawerClose={toggleDrawerOpen} />
-      </Modal>
-      <Topbar open={openNav} handleDrawerOpen={toggleDrawerOpen} />
         <Grid className="gradientbg">
           <Grid container direction="row" justifyContent="space-between" sx={{p: {xs: '40px 60px 20px 60px', sm: '40px 60px 20px 60px', md: '40px 60px 20px 60px'} }}>  
             <Typography variant="h4" sx={{ color: 'white', fontWeight: 'bold'}}>

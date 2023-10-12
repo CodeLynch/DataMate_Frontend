@@ -44,11 +44,6 @@ export default function Templates(){
       console.log("TL",templateList)
     }, [templateList])
 
-    const [open, setOpen] = useState(false);
-    const toggleDrawerOpen = () => {
-      setOpen(!open);
-    };
-
     const [searchQuery, setSearchQuery] = useState(""); // State for the search query
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,10 +58,6 @@ export default function Templates(){
     
     return(
         <div>
-          <Modal open={open} onClose={toggleDrawerOpen}>
-            <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
-          </Modal>
-        <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
           <Stack direction="column" className='gradientbg' sx={{paddingBottom:"2em"}}>
             <h1 style={{color: 'white', fontSize: 60, textAlign: 'center'}}>Download Template</h1>
             <p style={{color: 'white', fontSize: 22, paddingLeft: 5, textAlign:'center'}}> 

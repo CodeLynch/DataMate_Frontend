@@ -239,11 +239,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   }, [searchQuery, filteredFiles]);
 
   const navigate = useNavigate();
-
-  const [openNav, setOpenNav] = useState(false);
-  const toggleDrawerOpen = () => {
-    setOpenNav(!openNav);
-  };
+ 
 
   return (
     <Grid
@@ -257,10 +253,6 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
         justifyContent: "center",
       }}
     >
-      <Modal open={openNav} onClose={toggleDrawerOpen}>
-        <Navbar open={openNav} handleDrawerClose={toggleDrawerOpen} />
-      </Modal>
-      <Topbar open={openNav} handleDrawerOpen={toggleDrawerOpen} />
       <section>
         <Grid
           style={{

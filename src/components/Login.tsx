@@ -8,8 +8,8 @@ import UserService from '../api/UserService';
 import { SnackbarContext, SnackbarContextType } from '../helpers/SnackbarContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginFailure, loginSuccess, logout } from '../helpers/AuthAction';
-import { RootState } from '../helpers/Store';
-
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import PasswordIcon from '@mui/icons-material/Password';
 
 
 export default function Login(){
@@ -81,7 +81,7 @@ export default function Login(){
                       dispatch(loginSuccess(res.data.userId));
                       console.log('success')
                       console.log(loginSuccess)
-                      navigate('/home', { replace: true });
+                      navigate('/', { replace: true });
                     } else {
                       setUsernameError("User does not exist.");
                     }
@@ -98,13 +98,34 @@ export default function Login(){
           });
       };
 
+      const [isLabelShrunkUsername, setIsLabelShrunkUsername] = useState(false);
+      const [isLabelShrunkPass, setIsLabelShrunkPass] = useState(false);
+
+      const handleUsernameTextFieldFocus = () => {
+        setIsLabelShrunkUsername(true);
+      };
     
+      const handleUsernameTextFieldBlur = (event: any) => {
+        if (!event.target.value) {
+          setIsLabelShrunkUsername(false);
+        }
+      };
+
+      const handlePassTextFieldFocus = () => {
+        setIsLabelShrunkPass(true);
+      };
+    
+      const handlePassTextFieldBlur = (event: any) => {
+        if (!event.target.value) {
+          setIsLabelShrunkPass(false);
+        }
+      };
 
     return(
         <Grid className='gradientbg' sx={{ width: '100%', height: '100%' }}>
-            <TopbarInit/>
+            {/* <TopbarInit/> */}
             <Grid component='form' onSubmit={validateDetails} container justifyContent="center" alignItems="center" sx={{ width: '100%', height: '100vh' }}>
-                <Box sx={{ backgroundColor: 'white', margin: {xs: '30px'}, p: {xs: '50px 50px 50px 50px', md: '55px 60px 55px 60px'}, borderRadius: '20px', boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)', opacity: 0.85 }}>
+                <Box sx={{ maxWidth: 550 , backgroundColor: 'white', margin: {xs: '30px'}, p: {xs: '50px 50px 50px 50px', md: '55px 60px 55px 60px'}, borderRadius: '20px', boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)' }}>
                     <Grid direction='column' container>
                         <Typography variant='h4' fontWeight="bold" color='#374248'>
                             Log-in
@@ -118,10 +139,23 @@ export default function Login(){
                                 value={loginData.username}
                                 error={usernameError !== null}
                                 helperText={usernameError}
+                                onFocus={handleUsernameTextFieldFocus}
+                                onBlur={handleUsernameTextFieldBlur}
                                 onChange={(e) => onInputChange(e)}
                                 variant="outlined"
                                 fullWidth
                                 sx={{ marginBottom: { xs: 2, sm: 2, md: 2 }, marginTop: { xs: 2, sm: 2, md: 3 } }}
+                                InputProps={{
+                                    startAdornment: (
+                                      <InputAdornment position="start">
+                                        <PersonOutlineIcon />
+                                      </InputAdornment>
+                                    ),
+                                }}
+                                InputLabelProps={{
+                                  shrink: isLabelShrunkUsername,
+                                  sx: { ml: isLabelShrunkUsername ? 0 : 6 },
+                                }}
                             />
                             <TextField
                                 required
@@ -131,18 +165,29 @@ export default function Login(){
                                 label="Password"
                                 error={passwordError !== null}
                                 helperText={passwordError}
+                                onFocus={handlePassTextFieldFocus}
+                                onBlur={handlePassTextFieldBlur}
                                 onChange={(e) => onInputChange(e)}
                                 size="small"
                                 fullWidth
                                 sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
                                 InputProps={{
+                                    startAdornment: (
+                                      <InputAdornment position="start">
+                                        <PasswordIcon />
+                                      </InputAdornment>
+                                    ),
                                     endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton onClick={handlePasswordShow}>
-                                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    )
+                                      <InputAdornment position="end">
+                                        <IconButton onClick={handlePasswordShow}>
+                                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                      </InputAdornment>
+                                    ),
+                                }}
+                                InputLabelProps={{
+                                  shrink: isLabelShrunkPass,
+                                  sx: { ml: isLabelShrunkPass ? 0 : 6 },
                                 }}
                             />
                         </Grid>

@@ -207,17 +207,9 @@ export default function Filepage({stopLoading}:FilePageProps) {
         });
     }
     
-    const [openNav, setOpenNav] = useState(false);
-    const toggleDrawerOpen = () => {
-      setOpenNav(!openNav);
-    };
 
     return(
         <>
-        <Modal open={openNav} onClose={toggleDrawerOpen}>
-          <Navbar open={openNav} handleDrawerClose={toggleDrawerOpen} />
-        </Modal>
-        <Topbar open={openNav} handleDrawerOpen={toggleDrawerOpen} />
         {HeaderArr !== undefined && BodyArr !== undefined? <>
             <div style={{marginRight:'50px', marginLeft:'50px', height:'80vh'}}>
             <h1>{fileName}</h1>
