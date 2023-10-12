@@ -46,6 +46,7 @@ import NormalizePrompt from "./prompts/NormalizePrompt";
 import SpecificTemplatePageTwo from "./components/SpecificTemplatePageTwo";
 import SpecificTemplatePageThree from "./components/SpecificTemplatePageThree";
 import HomeInitial from "./pages/HomeInitial";
+import TopbarInit from "./components/TopbarInit";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -249,13 +250,12 @@ function App() {
           <Modal open={open} onClose={toggleDrawerOpen}>
             <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
           </Modal>
-          {/* <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} /> */}
+          {isLoggedIn ? <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} /> : <TopbarInit />}
           <Box sx={{ display: "flex", marginTop: "50px" }}>
             <Box sx={{ flexGrow: 1 }}>
               <Routes>
                 {/* Add your routes here */}
-                <Route path="/" element={<HomeInitial />} />
-                <Route path="/home">
+                <Route path="/">
                   <Route
                     index
                     element={
