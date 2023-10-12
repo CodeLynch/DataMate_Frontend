@@ -7,14 +7,9 @@ import UploadInstructions from '../images/instructions_two.gif';
 import NumOneIcon from '../images/onenum.png';
 import NumTwoIcon from '../images/twonum.png';
 import NumThreeIcon from '../images/threenum.png';
-import ImportFile from '../prompts/ImportFile';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
-import Topbar from './Topbar';
-import Navbar from './Navbar';
-// import { RootState } from '../helpers/Store';
-// import { getStoredUserData } from '../helpers/AuthAction';
+import { RootState } from '../helpers/Store';
 
 type HomeProps = {
     toggleImport: () => void,
@@ -23,7 +18,7 @@ type HomeProps = {
 export default function Home({toggleImport}:HomeProps){
     const [importFile, setImportFile] = React.useState(false);
     const nav = useNavigate();
-    // const userData = useSelector((state: RootState) => state.auth.user);
+    const isLoggedIn = useSelector((state:RootState) => state.auth.isLoggedIn);
   
     const helpSectionRef = React.useRef<HTMLDivElement | null>(null);
     const handleGetStartedClick = () => {
@@ -38,39 +33,19 @@ export default function Home({toggleImport}:HomeProps){
     };
 
     const handleTemplatesClick =()=>{
-        nav('/templates')
+        if(isLoggedIn) {
+            nav('/templates')
+        }else{
+            nav('/login')
+        }
     }
-
-    
-
-    // useEffect(() => {
-    //     if (userData) {
-    //       console.log('User Data:', userData);
-    //     }
-    //   }, [userData]);
-
-    // const storedUserData = getStoredUserData('your-secret-key');
-    // if (storedUserData) {
-    //     // Use the decrypted user data
-    //     console.log('Stored User Data:', storedUserData);
-    // }
-
-    const [open, setOpen] = useState(false);
-    const toggleDrawerOpen = () => {
-        setOpen(!open);
-      };
     
 
     return(
         <Box>
-            <Modal open={open} onClose={toggleDrawerOpen}>
-                <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
-            </Modal>
-            <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
             <section className='gradientbg hero-banner'>
                 <Box className='wrapper'>
                     <Box>
-                        {/* <h2>Welcome, {user?.email}</h2> */}
                         <h1 className='h1-container'>Streamline Your <br></br>Data Management</h1> 
                         <p className='subheading1'>Download templates or import your <br></br>spreadsheet today!</p>
                         <Box className='btnstyle'>
@@ -151,7 +126,7 @@ export default function Home({toggleImport}:HomeProps){
                     </div>
                 </div>
                 <Box className='importBtn templateBtn' sx={{display: 'flex', justifyContent: 'center'}}>
-                     <Button  onClick={toggleImport} variant="contained">IMPORT SPREADSHEET</Button>
+                     <Button  onClick={isLoggedIn ? toggleImport : () => nav('/login')} variant="contained">IMPORT SPREADSHEET</Button>
                 </Box>
             </section>
 
