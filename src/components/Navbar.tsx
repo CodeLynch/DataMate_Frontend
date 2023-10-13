@@ -11,7 +11,7 @@ type NavbarProps = {
   
   const Navbar = ({ open, handleDrawerClose }: NavbarProps) => {
     return (
-        <Drawer variant="permanent" open={open} sx={{ "& .MuiPaper-root": { backgroundColor: "tertiary.main" } }}>
+        <Drawer variant="permanent" open={open} sx={{ "& .MuiPaper-root": { backgroundColor: "white" } }}>
         <DrawerHeader onClick={handleDrawerClose} sx={{ display: 'flex', alignItems: 'center' }}>
           <Box sx={{ display: 'flex'}}>
             <img src={Logo} alt="datamate logo" style={{ width: '120px', height: '32px', marginRight: '58px', marginTop: '10px'}} />
