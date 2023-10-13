@@ -56,7 +56,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   const anchorRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
-  // const [userId, setUserId] = useState(null);
+  const userId = useSelector((state: RootState) => state.auth.userId);
   const nav = useNavigate();
 
   // const itemsPerRow = Math.min(searchResult.length, 3); // Maximum 3 items per row
@@ -147,13 +147,21 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     setFiles(sortedFiles);
   };
 
-  const handleClearFilter = () => {
+  const handleClearfilter = () => {
     setSearchQuery("");
     setCurrentSortOption("All");
     setSelectedOption("All");
 
-    const originalFiles = [...files];
-    setFiles(originalFiles);
+    if (userId) {
+      FileService.getFilesByUserId(userId)
+        .then((res) => {
+          console.log(res);
+          setFiles(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
   };
 
   //to fully get
@@ -196,8 +204,6 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   const filteredFiles = files.filter((file) =>
     file.fileName.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const userId = useSelector((state: RootState) => state.auth.userId);
 
   useEffect(() => {
     if (userId) {
@@ -419,7 +425,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
                 )}
               </FormControl>
               <Button
-                onClick={handleClearFilter}
+                onClick={handleClearfilter}
                 style={{
                   marginLeft: "24px",
                   cursor: "pointer",
