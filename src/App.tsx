@@ -251,7 +251,7 @@ function App() {
             <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
           </Modal>
           {isLoggedIn ? <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} /> : <TopbarInit />}
-          <Box sx={{ display: "flex", marginTop: "50px" }}>
+          <Box sx={{ display: "flex"}}>
             <Box sx={{ flexGrow: 1 }}>
               <Routes>
                 {/* Add your routes here */}
