@@ -13,9 +13,10 @@ import LogoutIcon from '../images/logout.png';
 
 type NavbarListProps = {
   open: boolean;
+  handleDrawerClose: () => void;
 };
 
-const NavbarList = ({ open }: NavbarListProps) => {
+const NavbarList = ({ open,  handleDrawerClose }: NavbarListProps) => {
   const navlist: { text: string; icon: React.ReactNode; link: string; end: boolean }[] = [
     { text: "Home", icon: <img src={HomeIcon} alt="Home" style={{width: 25, height: 25}}/>, link: "/", end: true },
     { text: "Templates", icon: <img src={TemplateIcon} alt="Templates" style={{width: 25, height: 25}}/>, link: "/templates", end: true },
@@ -31,6 +32,7 @@ const NavbarList = ({ open }: NavbarListProps) => {
   const handleLogout = () => {
     dispatch(logout());
     navigate("/login", { replace: true });
+    handleDrawerClose();
   };
 
   return (

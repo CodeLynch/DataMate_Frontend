@@ -20,7 +20,7 @@ type NavbarProps = {
             </IconButton>
           </Box>
         </DrawerHeader>
-        <NavbarList open={open} />
+        <NavbarList open={open} handleDrawerClose={handleDrawerClose}/>
       </Drawer>
     );
   }
