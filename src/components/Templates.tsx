@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Button, Card, Container, Grid, IconButton, InputAdornment, Modal, Stack, TextField } from '@mui/material';
+import { Box, Button, Card, Container, Grid, IconButton, InputAdornment, Modal, Stack, TextField, Typography } from '@mui/material';
 import noRecentFiles from '../images/noRecentFiless.png';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { useNavigate } from 'react-router-dom';
@@ -80,7 +80,7 @@ export default function Templates(){
             </Box>
           ) : (
             <div style={{ display: 'flex', justifyContent: "left", paddingLeft: "10em", paddingRight: "10em" }}>
-              {filteredTemplates.map((template, i) => {
+              {recentDownloads.map((template, i) => {
                 return (
                   <TemplateItem key={i} templateId={template.templateId} templateName={template.templateName} />
                 );
@@ -93,29 +93,24 @@ export default function Templates(){
           <div style={{ display:'flex', justifyContent:"left", 
           paddingLeft:"10em",
           paddingRight:"10em"}}>
-          {
+          {/* {
             templateList !== undefined ?
-            templateList.map((template, i)=>{
+            filteredTemplates.map((template, i)=>{
               return(<TemplateItem templateId={template.templateId} templateName={template.templateName}/>)
             }):<></>
-          }
-          </div>
-          {/* <Box onClick={handleSpecificTemplateClick} className='boxx'
-              sx={{
-                display: 'flex',
-                marginRight: 100,
-                '&:hover': {
-                  backgroundColor: 'primary.main',
-                  opacity: [0.9, 0.8, 0.7],
-                },
-              }}>
+          } */}
 
-          <Box className='boxxx' sx={{ justifyContent: 'center', display: 'flex'}}>
-          <img src={spreadsheet} style={{width: 50, height: 50, paddingTop: 40}}/>
-          </Box>
-          <p style={{color: 'white', fontSize: 16.5, paddingLeft: '3.5rem', paddingTop: 159, textAlign:'center'}}> 
-            SalesReportTemplate.xlsx</p>
-          </Box> */}
+            {templateList !== undefined && filteredTemplates.length === 0 ? (
+              <Grid container justifyContent="center" alignItems="center">
+                <Typography variant='body2' mb={5}>No templates found</Typography>
+              </Grid>
+            ) : (
+              filteredTemplates.map((template, i) => (
+                <TemplateItem key={i} templateId={template.templateId} templateName={template.templateName} />
+              ))
+            )}
+
+          </div>
           <br></br>
                   
         </div>
