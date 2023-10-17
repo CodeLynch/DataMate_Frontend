@@ -224,17 +224,20 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
 
   return (
     <Grid
-      paddingLeft={{ lg: 2, xl: 2 }}
+      // paddingLeft={{ lg: 2, xl: 2 }}
+      paddingX={{ xs: 5, sm: 5, lg: 10 }}
       style={{
         paddingTop: "5rem",
         width: "100%",
-        alignItems: "center",
-        display: "flex",
+        // alignItems: "center",
+        // display: "flex",
         flexDirection: "column",
       }}
     >
       <section style={{ marginTop: "50px" }}>
         <Grid
+          maxWidth={{ lg: "95%", xl: "80%" }}
+          marginX="auto"
           style={{
             display: "flex",
             alignItems: "center",
@@ -248,21 +251,12 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
               alignItems: "center",
               flex: 1,
               borderRadius: "40px",
-              height: "30px",
+              height: "50px",
               boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.1)",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "40px",
-                background: "#fff",
-              }}
-            >
-              <SearchIcon style={{ fontSize: "24px", color: "gray" }} />
-            </div>
+            <SearchIcon style={{ fontSize: "24px", color: "gray" }} />
+
             <input
               style={{
                 fontSize: "20px",
@@ -613,23 +607,28 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
       >
         <Grid
           container
-          spacing={{ md: 3, lg: 3, xl: 3 }}
-          style={{ margin: "auto", maxWidth: "1200px" }}
+          spacing={{ sm: 3, md: 2, lg: -10, xl: -50 }}
+          style={{ margin: "auto" }}
           paddingY={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
           paddingRight={{ xs: 2, sm: 2 }}
+          justifyContent="text-start"
         >
           {searchResult.map((file) => (
             <Grid
               key={file.fileId}
               item
-              paddingLeft={2}
+              // paddingLeft={2}
               xs={12}
               sm={6}
               md={4}
-              lg={lgValue}
+              lg={4}
               xl={xlValue}
               paddingBottom={2}
-              width={{ lg: "450px", xl: "450px" }}
+              // style={{
+              //   display: "flex",
+              //   flexDirection: "column",
+              //   alignItems: "center",
+              // }}
             >
               <Grid
                 maxWidth="100%"
@@ -782,17 +781,17 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
 
               <Grid
                 style={{
-                  textAlign: "center",
                   marginTop: "0.5rem",
                   fontSize: "14px",
                   color: "#888",
                   fontStyle: "italic",
                 }}
-                paddingRight={
-                  searchResult.length <= 2
-                    ? { lg: "100px", xl: "100px" }
-                    : { lg: "50px", xl: "50px" }
-                }
+                // paddingLeft={
+                //   searchResult.length <= 2
+                //     ? { lg: "100px", xl: "100px" }
+                //     : { lg: "50px", xl: "50px" }
+                // }
+                paddingLeft={{ xs: 6, sm: 5, md: 5, lg: 5 }}
               >
                 Last Modified: {file.latestDateModified}
               </Grid>
