@@ -19,9 +19,8 @@ export interface FileEntity {
   uploadDate: string;
   latestDateModified: string;
   isdeleted: boolean;
-  data: Uint8Array;
+  data?: Uint8Array; // Make 'data' property optional
   userId: number;
-  // thumbnailUrl: string;
 }
 
 export interface ResponseFile {

@@ -1,11 +1,13 @@
 import * as React from 'react';
-import { Box, Button, Card, Container, IconButton, InputAdornment, Stack, TextField } from '@mui/material';
+import { Box, Button, Card, Container, Grid, IconButton, InputAdornment, Modal, Stack, TextField } from '@mui/material';
 import noRecentFiles from '../images/noRecentFiless.png';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { useNavigate } from 'react-router-dom';
 import TemplateItem, { TemplateItemType } from './TemplateItem';
 import axios from 'axios';
 import { useState } from 'react';
+import Navbar from './Navbar';
+import Topbar from './Topbar';
 
 
 
@@ -58,15 +60,17 @@ export default function Templates(){
             <h1 style={{color: 'white', fontSize: 60, textAlign: 'center'}}>Download Template</h1>
             <p style={{color: 'white', fontSize: 22, paddingLeft: 5, textAlign:'center'}}> 
               Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
-      
-          <TextField className='search'
-          hiddenLabel
-          size="medium"  
-          placeholder="Search"
-          sx={{border: 'none', "& fieldset": { border: 'none' },}}
-          InputProps={{ startAdornment: (<InputAdornment position="start"> <SearchOutlinedIcon /> </InputAdornment>),
-          disableUnderline: true, }} 
-        /><br></br><br></br><br></br>
+          <Grid container sx={{ justifyContent:"center", alignItems:"center" }}>
+            <TextField className='search'
+            hiddenLabel
+            size="medium"  
+            placeholder="Search"
+            sx={{border: 'none', "& fieldset": { border: 'none' },}}
+            onChange={handleSearchChange}
+            InputProps={{ startAdornment: (<InputAdornment position="start"> <SearchOutlinedIcon /> </InputAdornment>),
+            disableUnderline: true, }} 
+          /><br></br><br></br><br></br>
+          </Grid>
           </Stack>
 
           <h3 style={{ marginLeft: '11rem', marginTop: '3rem', fontSize: 30 }}>Recent downloads</h3>

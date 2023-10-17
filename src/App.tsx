@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import SnackbarContextProvider from "./helpers/SnackbarContext";
 import Topbar from "./components/Topbar";
 import { ThemeProvider } from "@mui/material/styles";
@@ -37,6 +37,11 @@ import Login from "./components/Login";
 import Profile from "./components/Profile";
 import EditProfile from "./components/EditProfile";
 import SpecificTemplatePageThree from "./components/SpecificTemplatePageThree";
+import SpecificTemplatePageTwo from "./components/SpecificTemplatePageTwo";
+import SpecificTemplatePageThree from "./components/SpecificTemplatePageThree";
+import HomeInitial from "./pages/HomeInitial";
+import TopbarInit from "./components/TopbarInit";
+
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
   interface PaletteOptions {
@@ -223,7 +228,10 @@ function App() {
     resetVariables();
   }, []);
 
+  const isLoggedIn = useSelector((state:RootState) => state.auth.isLoggedIn);
+
   return (
+    <Provider store={store}>
     <ThemeProvider theme={theme}>
       <SnackbarContextProvider>
         <Backdrop
@@ -236,7 +244,7 @@ function App() {
           <Modal open={open} onClose={toggleDrawerOpen}>
             <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
           </Modal>
-          <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
+          {isLoggedIn ? <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} /> : <TopbarInit />}
           <Box sx={{ display: "flex", marginTop: "50px" }}>
             <Box sx={{ flexGrow: 1 }}>
               <Routes>
@@ -485,6 +493,26 @@ function App() {
                     }
                   />
                 </Route>
+                <Route path="/template/2">
+                  <Route
+                    index
+                    element={
+                      <Box sx={{ padding: "1px" }}>
+                        <SpecificTemplatePageTwo />
+                      </Box>
+                    }
+                  />
+                </Route>
+                <Route path="/template/3">
+                  <Route
+                    index
+                    element={
+                      <Box sx={{ padding: "1px" }}>
+                        <SpecificTemplatePageThree />
+                      </Box>
+                    }
+                  />
+                </Route>
                 <Route
                   path="/file"
                   element={
@@ -498,8 +526,24 @@ function App() {
                   path="/file/"
                   element={<Filepage stopLoading={StopLoading} />}
                 />
+                <Route
+                path ="/convert"
+                element={<ConvertFilePage/>}
+                />
                 <Route path="/templates" element={<TemplatesPage />} />
-                <Route path="/files" element={<FileScreenPage />} />
+                <Route
+                  path="/files"
+                  element={
+                    isLoggedIn ? (
+                      <FileScreenPage setFileId={setFileId}/>
+                    ) : (
+                      <Navigate to="/login" replace={true} />
+                    )
+                  }
+                />
+                <Route path="/database" element={
+                <DatabasePage stopLoading={StopLoading} />
+                } />
                 <Route path="/databases" element={<DatabaseScreenPage />} />
                 <Route path="/delete-profile/:id" element={<DeleteProfile />} />
                 <Route path="/deleted-files" element={<DeletedFiles />} />
@@ -515,6 +559,7 @@ function App() {
         </Router>
       </SnackbarContextProvider>
     </ThemeProvider>
+    </Provider>
   );
 }
 

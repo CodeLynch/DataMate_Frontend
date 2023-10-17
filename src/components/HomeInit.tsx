@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Button, Modal, Stack, Typography } from "@mui/material"
+import { Box, Button, Stack, Typography } from "@mui/material"
 import GirlImg from '../images/girl.png';
 import DownArrow from '../images/downarrow.png';
 import TemplateInstructions from '../images/instructions_one.gif';
@@ -7,18 +7,15 @@ import UploadInstructions from '../images/instructions_two.gif';
 import NumOneIcon from '../images/onenum.png';
 import NumTwoIcon from '../images/twonum.png';
 import NumThreeIcon from '../images/threenum.png';
+import ImportFile from '../prompts/ImportFile';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../helpers/Store';
+import { useEffect } from 'react';
+import TopbarInit from './TopbarInit';
 
-type HomeProps = {
-    toggleImport: () => void,
-}
 
-export default function Home({toggleImport}:HomeProps){
-    const [importFile, setImportFile] = React.useState(false);
+export default function HomeInit(){
     const nav = useNavigate();
-    const isLoggedIn = useSelector((state:RootState) => state.auth.isLoggedIn);
   
     const helpSectionRef = React.useRef<HTMLDivElement | null>(null);
     const handleGetStartedClick = () => {
@@ -32,17 +29,13 @@ export default function Home({toggleImport}:HomeProps){
         }
     };
 
-    const handleTemplatesClick =()=>{
-        if(isLoggedIn) {
-            nav('/templates')
-        }else{
-            nav('/login')
-        }
+    const handleLoginNav =()=>{
+        nav('/login')
     }
-    
 
     return(
         <Box>
+            <TopbarInit/>
             <section className='gradientbg hero-banner'>
                 <Box className='wrapper'>
                     <Box>
@@ -93,7 +86,7 @@ export default function Home({toggleImport}:HomeProps){
                     </div>
                 </div>
                 <Box className='templateBtn' sx={{display: 'flex', justifyContent: 'center'}}>
-                    <Button onClick={handleTemplatesClick} variant="contained">
+                    <Button onClick={handleLoginNav} variant="contained">
                         GO TO TEMPLATES
                     </Button>
                 </Box>
@@ -126,7 +119,7 @@ export default function Home({toggleImport}:HomeProps){
                     </div>
                 </div>
                 <Box className='importBtn templateBtn' sx={{display: 'flex', justifyContent: 'center'}}>
-                     <Button  onClick={isLoggedIn ? toggleImport : () => nav('/login')} variant="contained">IMPORT SPREADSHEET</Button>
+                     <Button  onClick={handleLoginNav} variant="contained">IMPORT SPREADSHEET</Button>
                 </Box>
             </section>
 

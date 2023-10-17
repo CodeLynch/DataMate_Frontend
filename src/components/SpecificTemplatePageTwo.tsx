@@ -4,7 +4,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Button, Dialog, DialogContent, Grid, IconButton, ImageList, ImageListItem, Stack } from '@mui/material';
+import { Box, Button, Dialog, DialogContent, Grid, IconButton, ImageList, ImageListItem, Modal, Stack } from '@mui/material';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import DownloadOpen from '../images/download.png';
 import NavigateImg from '../images/navigate.png';
@@ -36,6 +36,9 @@ import DateOrderedInvalid from '../images/orderedinvalid.png';
 import DateReceivedValid from '../images/receivedvalid.png';
 import DateReceivedInvalid from '../images/receivedinvalid.png';
 import axios from 'axios';
+import Navbar from './Navbar';
+import Topbar from './Topbar';
+import { useState } from 'react';
 
 
 export default function SpecificTemplate(){
