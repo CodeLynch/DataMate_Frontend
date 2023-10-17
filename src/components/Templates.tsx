@@ -6,8 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import TemplateItem, { TemplateItemType } from './TemplateItem';
 import axios from 'axios';
 import { useState } from 'react';
-import Navbar from './Navbar';
-import Topbar from './Topbar';
 
 
 

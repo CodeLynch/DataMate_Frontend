@@ -203,13 +203,12 @@ h3{
 
 .search{
   box-sizing: border-box;
-
-  position: absolute;
   width: 581px;
   height: 49px;
-  /* left: 550px; */
+  left: 470px;
   top: 10px;
-
+  display: flex;
+  justify-self: center;
   background: #FFFFFF;
   border: 1px solid #FFFFFF;
   border-radius: 30px;
@@ -430,6 +429,33 @@ h3{
   text-align: center;
   font-size: 24px;
   font-weight: bold;
+}
+
+.editBtn .MuiButton-root {
+  font-weight: bold; 
+  background-color: #71C887;
+  color: white;
+  border-radius: 50px;
+  margin-top: 2.2rem;
+  padding: 10px 43px 10px 43px;
+}
+
+.deleteBtn .MuiButton-root {
+  font-weight: bold; 
+  background-color: #71C887;
+  color: white;
+  border-radius: 50px;
+  margin-top: 2.2rem;
+  padding: 10px 43px 10px 43px;
+}
+
+.logoutBtn .MuiButton-root {
+  font-weight: bold; 
+  background-color: #71C887;
+  color: white;
+  border-radius: 50px;
+  margin-top: 2.2rem;
+  padding: 10px 43px 10px 43px;
 }
 
 

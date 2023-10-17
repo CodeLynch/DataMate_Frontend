@@ -47,6 +47,7 @@ import SpecificTemplatePageTwo from "./components/SpecificTemplatePageTwo";
 import SpecificTemplatePageThree from "./components/SpecificTemplatePageThree";
 import HomeInitial from "./pages/HomeInitial";
 import TopbarInit from "./components/TopbarInit";
+import Profile from "./components/Profile";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -553,11 +554,11 @@ function App() {
                 <Route path="/databases" element={<DatabaseScreenPage />} />
                 <Route path="/delete-profile/:id" element={<DeleteProfile />} />
                 <Route path="/deleted-files" element={<DeletedFiles />} />
-                <Route path="/log-in" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
+                {/* <Route path="/log-in" element={isLoggedIn ? <Navigate to="/" /> : <Login />} /> */}
                 <Route path="/login" element={<Login/>}></Route>
                 <Route path="/registration" element={<Registration/>}></Route>
                 <Route path="/edit-profile" element={<EditProfile/>}></Route>
-                <Route path="/deleted-files" element={<DeletedFiles/>}></Route>
+                <Route path="/profile" element={<Profile />}/>
 
                 {/* Add your other routes here */}
               </Routes>
