@@ -48,6 +48,8 @@ import SpecificTemplatePageThree from "./components/SpecificTemplatePageThree";
 import HomeInitial from "./pages/HomeInitial";
 import TopbarInit from "./components/TopbarInit";
 import Profile from "./components/Profile";
+import ForgotPassword from "./components/ForgotPassword";
+import PrivateRoute from "./components/PrivateRoute";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -554,13 +556,15 @@ function App() {
                 <Route path="/databases" element={<DatabaseScreenPage />} />
                 <Route path="/delete-profile/:id" element={<DeleteProfile />} />
                 <Route path="/deleted-files" element={<DeletedFiles />} />
-                {/* <Route path="/log-in" element={isLoggedIn ? <Navigate to="/" /> : <Login />} /> */}
-                <Route path="/login" element={<Login/>}></Route>
-                <Route path="/registration" element={<Registration/>}></Route>
-                <Route path="/edit-profile" element={<EditProfile/>}></Route>
-                <Route path="/profile" element={<Profile />}/>
+                <Route path="/edit-profile" element={<PrivateRoute><EditProfile/></PrivateRoute>}></Route>
+                <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>}/>
 
-                {/* Add your other routes here */}
+
+                {/* Public pages */}
+                <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
+                <Route path="/registration" element={<Registration/>}></Route>
+                <Route path="/forgot-password" element={<ForgotPassword/>}></Route>
+
               </Routes>
             </Box>
           </Box>
