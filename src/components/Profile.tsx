@@ -5,12 +5,15 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import UserService from '../api/UserService';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { logout } from '../helpers/AuthAction';
 
 export default function EditProfile() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const para = useParams() as { id: string };
     //const {user} = useContext(UserContext) as UserContextType;
+    const dispatch = useDispatch();
 
 
     const [data, setData]= useState({
@@ -23,6 +26,15 @@ export default function EditProfile() {
         businessName: "",
         businessType: "",
     })
+
+    const handleEditClick = () => {
+        navigate("/edit-profile");
+    }
+
+    const handleLogoutClick = () => {
+        dispatch(logout());
+        navigate("/login", { replace: true });
+      };
 
     const { firstName, lastName, email, address, username, password, businessName, businessType } = data;
 
@@ -91,7 +103,7 @@ export default function EditProfile() {
                                      }}>
                             John Doe
                                 </Typography>
-                                <Box className='editBtn' sx={{display: 'flex', justifyContent: 'center'}}>
+                                <Box className='editBtn' sx={{display: 'flex', justifyContent: 'center'}} onClick={handleEditClick}>
                                     <Button variant="contained" type="submit" >
                                         Edit Profile
                                     </Button>
@@ -102,7 +114,7 @@ export default function EditProfile() {
                                     </Button>
                                 </Box>
                                 <Box className='logoutBtn' sx={{display: 'flex', justifyContent: 'center', marginTop:'60px'}}>
-                                    <Button variant="contained" type="submit">
+                                    <Button variant="contained" type="submit" onClick={handleLogoutClick}>
                                         Logout
                                     </Button>
                                 </Box>
