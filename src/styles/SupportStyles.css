@@ -203,7 +203,7 @@ h3{
 
 .search{
   box-sizing: border-box;
-  width: 581px;
+  /* width: 581px; */
   height: 49px;
   top: 10px;
   display: flex;

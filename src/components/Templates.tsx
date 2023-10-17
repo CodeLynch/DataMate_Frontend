@@ -55,65 +55,74 @@ export default function Templates(){
     console.log("template: List", filteredTemplates)
     
     return(
-        <div>
-          <Stack direction="column" className='gradientbg' sx={{paddingBottom:"2em"}}>
-            <h1 style={{color: 'white', fontSize: 60, textAlign: 'center'}}>Download Template</h1>
-            <p style={{color: 'white', fontSize: 22, paddingLeft: 5, textAlign:'center'}}> 
-              Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
-          <Grid container sx={{ justifyContent:"center", alignItems:"center" }}>
-            <TextField className='search'
-            hiddenLabel
-            size="medium"  
-            placeholder="Search"
-            sx={{border: 'none', "& fieldset": { border: 'none' },}}
-            onChange={handleSearchChange}
-            InputProps={{ startAdornment: (<InputAdornment position="start"> <SearchOutlinedIcon /> </InputAdornment>),
-            disableUnderline: true, }} 
-          /><br></br><br></br><br></br>
-          </Grid>
-          </Stack>
-
-          <h3 style={{ marginLeft: '11rem', marginTop: '3rem', fontSize: 30 }}>Recent downloads</h3>
-          {recentDownloads.length === 0 ? (
-            <Box sx={{ margin: '3rem', justifyContent: 'center', display: 'flex' }}>
-              <img src={noRecentFiles} style={{ width: 200, height: 200 }} />
-            </Box>
-          ) : (
-            <div style={{ display: 'flex', justifyContent: "left", paddingLeft: "10em", paddingRight: "10em" }}>
-              {recentDownloads.map((template, i) => {
-                return (
-                  <TemplateItem key={i} templateId={template.templateId} templateName={template.templateName} />
-                );
-              })}
-            </div>
-          )}
-
-          <h3 style={{marginLeft: '11rem', marginTop: '3rem', fontSize: 30}}>All Templates</h3>
-          
-          <div style={{ display:'flex', justifyContent:"left", 
-          paddingLeft:"10em",
-          paddingRight:"10em"}}>
-          {/* {
-            templateList !== undefined ?
-            filteredTemplates.map((template, i)=>{
-              return(<TemplateItem templateId={template.templateId} templateName={template.templateName}/>)
-            }):<></>
-          } */}
-
-            {templateList !== undefined && filteredTemplates.length === 0 ? (
-              <Grid container justifyContent="center" alignItems="center">
-                <Typography variant='body2' mb={5}>No templates found</Typography>
+        <Grid container sx={{ mt: {xs: 7, sm: 8, md: 8}}} direction="column">
+          <Box className='gradientbg'>
+            <Stack direction="column" justifyContent="center" alignItems="center" sx={{ pt: 3}}>
+              <Typography sx={{ color: "white", fontWeight: "bold", fontSize: {xs: 30, sm: 45, md: 50} }}> Download Template</Typography>
+              <Typography sx={{color: 'white', fontSize: {xs: 16, sm: 18, md: 20}, py: 3, px: {xs: 5}}}>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</Typography>
+              <Grid container justifyContent="center" alignItems="center" sx={{ mb: 6 }}>
+                <TextField className='search'
+                  hiddenLabel
+                  size="medium"  
+                  placeholder="Search"
+                  sx={{width: {xs: '300px', sm: '400px', md: '581px'} , border: 'none', "& fieldset": { border: 'none' },}}
+                  onChange={handleSearchChange}
+                  InputProps={{ startAdornment: (<InputAdornment position="start"> <SearchOutlinedIcon /> </InputAdornment>),
+                  disableUnderline: true, }} 
+                />
               </Grid>
-            ) : (
-              filteredTemplates.map((template, i) => (
-                <TemplateItem key={i} templateId={template.templateId} templateName={template.templateName} />
-              ))
-            )}
+            </Stack>
+          </Box>
 
-          </div>
-          <br></br>
-                  
-        </div>
+          <Grid container className='wrapper' direction={{ xs: 'column', sm: 'row', md: 'row' }}>
+            <Grid container justifyContent="flex-start" alignItems="center">
+              <Grid container>
+                <Typography sx={{ fontWeight: "bold", fontSize: {xs: 20, sm: 25, md: 30}, mt: '3rem' }}>Recent Downloads</Typography>
+              </Grid>
+              <Grid container>
+                {recentDownloads.length === 0 ? (
+                  <Box sx={{ margin: '3rem', justifyContent: 'center', display: 'flex' }}>
+                    <img src={noRecentFiles} style={{ width: 200, height: 200 }} />
+                  </Box>
+                ) : (
+                  <Grid container>
+                    {recentDownloads.map((template, i) => {
+                      return (
+                        <TemplateItem key={i} templateId={template.templateId} templateName={template.templateName} />
+                      );
+                    })}
+                  </Grid>
+                )}
+              </Grid>
+            </Grid>
+
+
+            <Grid container justifyContent="flex-start" alignItems="center">
+              <Grid container>
+              <Typography sx={{ fontWeight: "bold", fontSize: {xs: 20, sm: 25, md: 30}, mt: '3rem' }}>All Templates</Typography>
+              </Grid>
+              <Grid container>
+              
+                {/* {
+                  templateList !== undefined ?
+                  filteredTemplates.map((template, i)=>{
+                    return(<TemplateItem templateId={template.templateId} templateName={template.templateName}/>)
+                  }):<></>
+                } */}
+
+                  {templateList !== undefined && filteredTemplates.length === 0 ? (
+                    <Grid container justifyContent="center" alignItems="center">
+                      <Typography variant='body2' mb={5}>No templates found</Typography>
+                    </Grid>
+                  ) : (
+                    filteredTemplates.map((template, i) => (
+                      <TemplateItem key={i} templateId={template.templateId} templateName={template.templateName} />
+                    ))
+                  )}
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
         )
     
 }
