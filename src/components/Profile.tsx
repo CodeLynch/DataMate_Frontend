@@ -5,12 +5,13 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import UserService from '../api/UserService';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { RootState } from '../helpers/Store';
 
 export default function EditProfile() {
-    const [showPassword, setShowPassword] = useState(false);
+    //const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
-    const para = useParams() as { id: string };
-    //const {user} = useContext(UserContext) as UserContextType;
+    const userId = useSelector((state: RootState) => state.auth.userId);
 
 
     const [data, setData]= useState({
@@ -29,8 +30,8 @@ export default function EditProfile() {
 
 
     useEffect(() => {
-        if (para.id) {
-            UserService.getUserById(para.id)
+        if (userId) {
+            UserService.getUserById(userId)
                 .then(response => {
                     setData(response.data);
                 })
@@ -38,9 +39,20 @@ export default function EditProfile() {
                     console.error('Error fetching user data:', error);
                 });
         }
-    }, [para]);
-        
+    }, [userId]);
 
+    const handleUserEditClick = () => {
+        navigate("/edit-profile" + userId);
+       
+    }
+    const handleDeleteClick = () => {
+        navigate("/delete-profile/" + userId);
+    }
+    const handleLogoutClick = () => {
+        navigate("/login" +userId);
+    }
+    
+         
     return (
         <div className='gradientbg edit-spacing' 
         style={{ 
@@ -89,20 +101,20 @@ export default function EditProfile() {
                                         justify: 'center',
                                         fontWeight: 'bold', 
                                      }}>
-                            John Doe
+                                    {firstName + " " + lastName}
                                 </Typography>
                                 <Box className='editBtn' sx={{display: 'flex', justifyContent: 'center'}}>
-                                    <Button variant="contained" type="submit" >
+                                    <Button variant="contained" onClick={handleUserEditClick} type="submit" >
                                         Edit Profile
                                     </Button>
                                 </Box>
                                 <Box className='deleteBtn' sx={{display: 'flex', justifyContent: 'center' ,marginTop:'-20px' }}>
-                                    <Button variant="contained" type="submit">
+                                    <Button variant="contained" onClick={handleDeleteClick}type="submit">
                                         Delete Account
                                     </Button>
                                 </Box>
                                 <Box className='logoutBtn' sx={{display: 'flex', justifyContent: 'center', marginTop:'60px'}}>
-                                    <Button variant="contained" type="submit">
+                                    <Button variant="contained" onClick={handleLogoutClick}type="submit">
                                         Logout
                                     </Button>
                                 </Box>
@@ -146,6 +158,7 @@ export default function EditProfile() {
                                     label="First Name"
                                     variant="outlined"
                                     value={firstName}
+                                    InputProps={{readOnly: true,}}
                                     sx={{ 
                                         marginBottom: { xs: 2, sm: 2, md: 2 }, 
                                         marginRight: { md: 2 }, 
@@ -158,6 +171,7 @@ export default function EditProfile() {
                                     label="Last Name"
                                     variant="outlined"
                                     value={lastName}
+                                    InputProps={{readOnly: true,}}
                                     sx={{ 
                                         marginBottom: { xs: 2, sm: 2, md: 2 }, 
                                         width: { xs: '100%', sm: '100%', 
@@ -172,6 +186,7 @@ export default function EditProfile() {
                                     label="Email"
                                     variant="outlined"
                                     value={email}
+                                    InputProps={{readOnly: true,}}
                                     fullWidth
                                     sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
                                 />
@@ -182,6 +197,7 @@ export default function EditProfile() {
                                     label="Address"
                                     variant="outlined"
                                     value={address}
+                                    InputProps={{readOnly: true,}}
                                     fullWidth
                                     sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
                                 />
@@ -192,13 +208,16 @@ export default function EditProfile() {
                                     label="Username"
                                     variant="outlined"
                                     value={username}
+                                    InputProps={{readOnly: true,}}
                                     fullWidth
                                     sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
                                 />
                                 <TextField
                                     id="outlined-read-only-input"
                                     name="password"
+                                    type="password"
                                     value={password}
+                                    InputProps={{readOnly: true,}}
                                     label="Password"
                                     size="small"
                                     fullWidth
@@ -212,19 +231,27 @@ export default function EditProfile() {
                                     label="Business Name"
                                     variant="outlined"
                                     value={businessName}
+                                    InputProps={{readOnly: true,}}
                                     fullWidth
                                     sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
                                 />
                                 <FormControl fullWidth>
-                                    <InputLabel id="outlined-read-only-input" size='small'>Business Type</InputLabel>
-                                    <Select
-                                    name='businessType'
-                                    value={businessType}
-                                    label="Business Type"
-                                    size='small'
-                                    >
-                                    </Select>
-                                </FormControl>
+                                        <InputLabel id="outlined-read-only-input" size='small'>Business Type</InputLabel>
+                                        <Select
+                                        labelId="demo-simple-select-label"
+                                        id="demo-simple-select"
+                                        name='businessType'
+                                        value={businessType}
+                                        label="Business Type"
+                                        size='small'
+                                        >
+                                        <MenuItem value={'Food & Beverages'}>Food & Beverages</MenuItem>
+                                        <MenuItem value={'Retail'}>Retail</MenuItem>
+                                        <MenuItem value={'Manufacturing'}>Manufacturing</MenuItem>
+                                        <MenuItem value={'Service-based'}>Service-based</MenuItem>
+                                        <MenuItem value={'Others'}>Others</MenuItem>
+                                        </Select>
+                                    </FormControl>
                             </Grid>
                             
                         </Container>

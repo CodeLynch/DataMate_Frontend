@@ -31,16 +31,23 @@ import InconsistentDetectPrompt from "./prompts/InconsistentDetectPrompt";
 import SuccessPrompt from "./prompts/SuccessPrompt";
 import ProcessingPage from "./pages/ProcessingPage";
 import DeleteProfile from "./components/DeleteProfile";
-import NormalizePrompt from "./prompts/NormalizePrompt";
-import DeletedFiles from "./components/DeletedFiles";
+import { Provider, useSelector } from 'react-redux';
+import { RootState, store } from './helpers/Store';
 import Login from "./components/Login";
-import Profile from "./components/Profile";
+import FileScreen from "./components/FileScreen";
+import FilePage from "./pages/FileScreenPage";
+import ConvertFilePage from "./pages/ConvertFilePage";
+import DatabasePage from "./pages/DatabasePage";
+import Registration from "./components/Registration";
 import EditProfile from "./components/EditProfile";
-import SpecificTemplatePageThree from "./components/SpecificTemplatePageThree";
+import DeletedFiles from "./components/DeletedFiles";
+import HomeInit from "./components/HomeInit";
+import NormalizePrompt from "./prompts/NormalizePrompt";
 import SpecificTemplatePageTwo from "./components/SpecificTemplatePageTwo";
 import SpecificTemplatePageThree from "./components/SpecificTemplatePageThree";
 import HomeInitial from "./pages/HomeInitial";
 import TopbarInit from "./components/TopbarInit";
+import Profile from "./components/Profile";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -245,7 +252,7 @@ function App() {
             <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
           </Modal>
           {isLoggedIn ? <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} /> : <TopbarInit />}
-          <Box sx={{ display: "flex", marginTop: "50px" }}>
+          <Box sx={{ display: "flex"}}>
             <Box sx={{ flexGrow: 1 }}>
               <Routes>
                 {/* Add your routes here */}
@@ -547,10 +554,11 @@ function App() {
                 <Route path="/databases" element={<DatabaseScreenPage />} />
                 <Route path="/delete-profile/:id" element={<DeleteProfile />} />
                 <Route path="/deleted-files" element={<DeletedFiles />} />
-                <Route path="/log-in" element={<Login />} />
+                {/* <Route path="/log-in" element={isLoggedIn ? <Navigate to="/" /> : <Login />} /> */}
+                <Route path="/login" element={<Login/>}></Route>
+                <Route path="/registration" element={<Registration/>}></Route>
+                <Route path="/edit-profile" element={<EditProfile/>}></Route>
                 <Route path="/profile" element={<Profile />}/>
-                <Route path="/editprofile" element={<EditProfile />}/>
-                <Route path="/specifictemplate3" element={<SpecificTemplatePageThree/>}/>
 
                 {/* Add your other routes here */}
               </Routes>
