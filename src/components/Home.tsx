@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Button, Modal, Stack, Typography } from "@mui/material"
+import { Box, Button, Modal, Stack, Typography, Zoom } from "@mui/material"
 import GirlImg from '../images/girl.png';
 import DownArrow from '../images/downarrow.png';
 import TemplateInstructions from '../images/instructions_one.gif';
@@ -7,14 +7,10 @@ import UploadInstructions from '../images/instructions_two.gif';
 import NumOneIcon from '../images/onenum.png';
 import NumTwoIcon from '../images/twonum.png';
 import NumThreeIcon from '../images/threenum.png';
-import ImportFile from '../prompts/ImportFile';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
-import Topbar from './Topbar';
-import Navbar from './Navbar';
-// import { RootState } from '../helpers/Store';
-// import { getStoredUserData } from '../helpers/AuthAction';
+import { RootState } from '../helpers/Store';
+import Footer from './Footer';
 
 type HomeProps = {
     toggleImport: () => void,
@@ -23,7 +19,7 @@ type HomeProps = {
 export default function Home({toggleImport}:HomeProps){
     const [importFile, setImportFile] = React.useState(false);
     const nav = useNavigate();
-    // const userData = useSelector((state: RootState) => state.auth.user);
+    const isLoggedIn = useSelector((state:RootState) => state.auth.isLoggedIn);
   
     const helpSectionRef = React.useRef<HTMLDivElement | null>(null);
     const handleGetStartedClick = () => {
@@ -38,39 +34,20 @@ export default function Home({toggleImport}:HomeProps){
     };
 
     const handleTemplatesClick =()=>{
-        nav('/templates')
+        if(isLoggedIn) {
+            nav('/templates')
+        }else{
+            nav('/login')
+        }
     }
-
     
-
-    // useEffect(() => {
-    //     if (userData) {
-    //       console.log('User Data:', userData);
-    //     }
-    //   }, [userData]);
-
-    // const storedUserData = getStoredUserData('your-secret-key');
-    // if (storedUserData) {
-    //     // Use the decrypted user data
-    //     console.log('Stored User Data:', storedUserData);
-    // }
-
-    const [open, setOpen] = useState(false);
-    const toggleDrawerOpen = () => {
-        setOpen(!open);
-      };
-    
+    const [isHovered, setIsHovered] = React.useState(false);
 
     return(
-        <Box>
-            <Modal open={open} onClose={toggleDrawerOpen}>
-                <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
-            </Modal>
-            <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
+        <Box mt={6}>
             <section className='gradientbg hero-banner'>
                 <Box className='wrapper'>
                     <Box>
-                        {/* <h2>Welcome, {user?.email}</h2> */}
                         <h1 className='h1-container'>Streamline Your <br></br>Data Management</h1> 
                         <p className='subheading1'>Download templates or import your <br></br>spreadsheet today!</p>
                         <Box className='btnstyle'>
@@ -101,15 +78,15 @@ export default function Home({toggleImport}:HomeProps){
                                 <img className='template-gif' src={TemplateInstructions}/>
                             </Box>
                             <Stack>
-                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className={`ins-alignment hover-style`} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
                                     <img className='num-style-temp' src={NumOneIcon}/>
                                     <p className='temp-text-style'>Select a template provided by our app</p>      
                                 </Stack>
-                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className={`ins-alignment hover-style`} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
                                     <img className='num-style-temp' src={NumTwoIcon}/>
                                     <p className='temp-text-style'>Download a template</p>      
                                 </Stack>
-                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className={`ins-alignment hover-style`} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
                                     <img className='num-style-temp' src={NumThreeIcon}/>
                                     <p className='temp-text-style'>Use the template in creating your data</p>      
                                 </Stack>
@@ -134,15 +111,15 @@ export default function Home({toggleImport}:HomeProps){
                                 <img className='import-gif' src={UploadInstructions}/>
                             </Box>
                             <Stack>
-                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className={`ins-alignment hover-style`} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
                                     <img className='num-style-imp' src={NumOneIcon}/>
                                     <p className='up-text-style'>Import a spreadsheet file from your computer</p>      
                                 </Stack>
-                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className={`ins-alignment hover-style`} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
                                     <img className='num-style-imp' src={NumTwoIcon}/>
                                     <p className='up-text-style'>Our app will restructure your sheet</p>      
                                 </Stack>
-                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className='ins-alignment'>
+                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} className={`ins-alignment hover-style`} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
                                     <img className='num-style-imp' src={NumThreeIcon}/>
                                     <p className='up-text-style'>Convert spreadsheet into a database or download it</p>      
                                 </Stack>
@@ -151,15 +128,12 @@ export default function Home({toggleImport}:HomeProps){
                     </div>
                 </div>
                 <Box className='importBtn templateBtn' sx={{display: 'flex', justifyContent: 'center'}}>
-                     <Button  onClick={toggleImport} variant="contained">IMPORT SPREADSHEET</Button>
+                     <Button  onClick={isLoggedIn ? toggleImport : () => nav('/login')} variant="contained">IMPORT SPREADSHEET</Button>
                 </Box>
             </section>
 
-            <section className='footer gradientbg'>
-                <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <p style={{ fontSize: 15, color: 'white', paddingTop: '1rem'}}>© 2023  All Rights Reserved, DataMate</p>
-                    <p style={{ fontSize: 15, color: 'white', marginTop: '-0.5rem', paddingBottom: '1rem'}}>Privacy Policy  |   Terms</p>
-                </Stack>
+            <section style={{ marginTop: 10 }}>
+                <Footer/>
             </section>
         </Box> 
     )

@@ -14,6 +14,8 @@ export default function TopbarInit() {
     { text: "Login", link: "/login" },
   ];
 
+  const [isHovered, setIsHovered] = React.useState(false);
+
   return (
     <Box sx={{ display: "flex" }}>
       <AppBar
@@ -31,11 +33,12 @@ export default function TopbarInit() {
             alignItems="center"
           >
             <a href="/">
-              <img src={Logo} alt={"datamate-logo"} style={{ width: '150px', height: 'auto', paddingTop: "4px" }} />
+              <img src={Logo} alt={"datamate-logo"} style={{ width: '130px', height: 'auto', paddingTop: "4px" }} />
             </a>
             <Stack direction="row" spacing={2}>
               {navItems.map((listItem, index) => (
                 <NavLink key={index} to={listItem.link}>
+                  <div className='hover-style' onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
                   <Button
                     color="inherit"
                     sx={{
@@ -50,6 +53,7 @@ export default function TopbarInit() {
                   >
                     {listItem.text}
                   </Button>
+                  </div>
                 </NavLink>
               ))}
             </Stack>

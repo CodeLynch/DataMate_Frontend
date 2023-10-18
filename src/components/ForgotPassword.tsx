@@ -13,7 +13,7 @@ export default function ForgotPassword(){
     return(
         <Grid className='gradientbg' sx={{ width: '100%', height: '100%', padding: {xs: '8rem 0rem 7.8rem 0rem', sm: '8rem 0rem 9rem 0rem' , md: '8rem 0rem 7.8rem 0rem '} }}>
             <TopbarInit/>
-            <Grid component='form' container justifyContent="center" alignItems="center">
+            <Grid component='form' container justifyContent="center" alignItems="center" mt={6.6}>
                 <Box sx={{ backgroundColor: 'white', margin: {xs: '30px'}, padding: {xs: '35px 30px 35px 30px', md: '35px 55px 35px 50px'}, borderRadius: '20px', boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)',  opacity: 0.85 }}>
                     <Grid direction='column' container justifyContent="flex-start" alignItems="flex-start">
                         <Typography variant='h4' fontWeight="bold" sx={{ color: '#374248' }}>

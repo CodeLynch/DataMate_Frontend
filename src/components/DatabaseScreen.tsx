@@ -134,11 +134,6 @@ const DatabaseList: React.FC<{}> = () => {
     setShowAdditionalButtons(!showAdditionalButtons);
   };
 
-  const [openNav, setOpenNav] = useState(false);
-  const toggleDrawerOpen = () => {
-    setOpenNav(!openNav);
-  };
-
   return (
     <Grid
       paddingLeft={{ lg: 2, xl: 2 }}
@@ -151,10 +146,6 @@ const DatabaseList: React.FC<{}> = () => {
         justifyContent: "center",
       }}
     >
-      <Modal open={openNav} onClose={toggleDrawerOpen}>
-          <Navbar open={openNav} handleDrawerClose={toggleDrawerOpen} />
-      </Modal>
-      <Topbar open={openNav} handleDrawerOpen={toggleDrawerOpen} />
       <section>
         <Grid
           style={{
