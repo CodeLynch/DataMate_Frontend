@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Navigate,
-  Route,
-  BrowserRouter as Router,
-  Routes,
-} from "react-router-dom";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import SnackbarContextProvider from "./helpers/SnackbarContext";
 import Topbar from "./components/Topbar";
 import { ThemeProvider } from "@mui/material/styles";
@@ -36,8 +31,8 @@ import InconsistentDetectPrompt from "./prompts/InconsistentDetectPrompt";
 import SuccessPrompt from "./prompts/SuccessPrompt";
 import ProcessingPage from "./pages/ProcessingPage";
 import DeleteProfile from "./components/DeleteProfile";
-import { Provider, useSelector } from "react-redux";
-import { RootState, store } from "./helpers/Store";
+import { Provider, useSelector } from 'react-redux';
+import { RootState, store } from './helpers/Store';
 import Login from "./components/Login";
 import FileScreen from "./components/FileScreen";
 import FilePage from "./pages/FileScreenPage";
@@ -52,9 +47,6 @@ import SpecificTemplatePageTwo from "./components/SpecificTemplatePageTwo";
 import SpecificTemplatePageThree from "./components/SpecificTemplatePageThree";
 import HomeInitial from "./pages/HomeInitial";
 import TopbarInit from "./components/TopbarInit";
-import Profile from "./components/Profile";
-import ForgotPassword from "./components/ForgotPassword";
-import PrivateRoute from "./components/PrivateRoute";
 import Profile from "./components/Profile";
 
 /* Customize default MUI theme */
@@ -127,7 +119,7 @@ function App() {
   //object state for the sheet data of the uploaded file
   const [sheetData, setSData] = useState<Object>({});
   //number state for the index of the sheet to be displayed in select table
-  const [sheetIndex, setSIndex] = useState(0);
+  const [sheetIndex, setSIndex] = useState(0); 
 
   // const handleDrawerOpen = () => {
   //   setOpen(true);
@@ -243,366 +235,338 @@ function App() {
     resetVariables();
   }, []);
 
-  const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const isLoggedIn = useSelector((state:RootState) => state.auth.isLoggedIn);
 
   return (
     <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <SnackbarContextProvider>
-          <Backdrop
-            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.modal + 1 }}
-            open={isLoading}
-          >
-            <CircularProgress color="success" />
-          </Backdrop>
-          <Router>
-            <Modal open={open} onClose={toggleDrawerOpen}>
-              <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
-            </Modal>
-            {isLoggedIn ? (
-              <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
-            ) : (
-              <TopbarInit />
-            )}
-            <Box sx={{ display: "flex" }}>
-              <Box sx={{ flexGrow: 1 }}>
-                <Routes>
-                  {/* Add your routes here */}
-                  <Route path="/">
-                    <Route
-                      index
-                      element={
-                        <>
-                          <Modal open={showUpload} onClose={toggleUpload}>
-                            <div>
-                              <ImportFile
-                                toggleImport={toggleUpload}
-                                startLoading={StartLoading}
-                                setFileId={setFileId}
-                              />
-                            </div>
-                          </Modal>
-                          <Box>
-                            <div>
-                              <div>
-                                <Home toggleImport={toggleUpload} />
-                              </div>
-                            </div>
-                          </Box>
-                        </>
-                      }
-                    />
-                  </Route>
+    <ThemeProvider theme={theme}>
+      <SnackbarContextProvider>
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.modal + 1 }}
+          open={isLoading}
+        >
+          <CircularProgress color="success" />
+        </Backdrop>
+        <Router>
+          <Modal open={open} onClose={toggleDrawerOpen}>
+            <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
+          </Modal>
+          {isLoggedIn ? <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} /> : <TopbarInit />}
+          <Box sx={{ display: "flex"}}>
+            <Box sx={{ flexGrow: 1 }}>
+              <Routes>
+                {/* Add your routes here */}
+                <Route path="/">
                   <Route
-                    path="/processing"
+                    index
                     element={
                       <>
-                        <Backdrop
-                          sx={{
-                            color: "#FFFFFF",
-                            zIndex: (theme) => theme.zIndex.modal - 1,
-                            marginTop: "4rem",
-                            position: "fixed",
-                            width: "100%",
-                            height: "100%",
-                          }}
-                          open={isProcessing}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              justifyContent: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <CircularProgress size="10rem" color="success" />
-                            <h1>Processing data...</h1>
-                          </div>
-                        </Backdrop>
-
-                        {
-                          //modal for detect tables here
-                        }
-                        <Modal
-                          open={TableDetect}
-                          onClose={() => {
-                            toggleTableDetect(false);
-                          }}
-                        >
+                        <Modal open={showUpload} onClose={toggleUpload}>
                           <div>
-                            <TableDetectPrompt
-                              toggleNormalized={toggleNormalized}
-                              toggleTableDetect={toggleTableDetect}
-                              toggleSelect={toggleSelect}
-                              toggleEmptyDetect={toggleEmptyDetect}
-                              toggleInconsistentDetect={toggleInconsistent}
-                              toggleImportSuccess={toggleImportSuccess}
-                              tblCount={tableCount}
-                              fileId={uploadedFileId}
-                              vsheets={visibleSheetNames}
-                              sheetdata={sheetData}
-                              updateEmpty={updateEmptyList}
-                              updateInc={updateIncList}
-                              updateSData={updateSheetData}
-                              updateNorm={updateNormList}
-                              emptySheets={SheetsWithEmpty}
-                              incSheets={IncSheets}
-                              normSheets={normSheets}
-                              reset={resetVariables}
-                              wb={workbook}
+                            <ImportFile
+                              toggleImport={toggleUpload}
+                              startLoading={StartLoading}
+                              setFileId={setFileId}
                             />
                           </div>
                         </Modal>
-
-                        {
-                          //modal for select tables here
-                        }
-                        <Modal
-                          open={SelectTable}
-                          onClose={() => {
-                            toggleSelect(false, 0);
-                          }}
-                        >
+                        <Box>
                           <div>
-                            <SelectTablePrompt
-                              toggleNormalized={toggleNormalized}
-                              toggleSelect={toggleSelect}
-                              toggleTableDetect={toggleTableDetect}
-                              toggleEmptyDetect={toggleEmptyDetect}
-                              toggleInconsistentDetect={toggleInconsistent}
-                              toggleImportSuccess={toggleImportSuccess}
-                              tblCount={tableCount}
-                              fileId={uploadedFileId}
-                              vsheets={visibleSheetNames}
-                              sheetdata={sheetData}
-                              updateEmpty={updateEmptyList}
-                              updateInc={updateIncList}
-                              updateSData={updateSheetData}
-                              emptySheets={SheetsWithEmpty}
-                              incSheets={IncSheets}
-                              reset={resetVariables}
-                              wb={workbook}
-                              sheetIndex={sheetIndex}
-                              normSheets={normSheets}
-                              updateNorm={updateNormList}
-                            />
+                            <div>
+                              <Home toggleImport={toggleUpload} />
+                            </div>
                           </div>
-                        </Modal>
-
-                        {/* modal for no tables detected here  */}
-                        <Modal
-                          open={NoTableDetect}
-                          onClose={toggleNoTableDetect}
-                        >
-                          <div>
-                            <NoTablesDetectPrompt
-                              toggleNoTable={toggleUpload}
-                              fileId={uploadedFileId}
-                              reset={resetVariables}
-                            />
-                          </div>
-                        </Modal>
-
-                        {/* modal for normalize tables here  */}
-                        <Modal open={NormalizeTable} onClose={toggleUpload}>
-                          <div>
-                            <NormalizePrompt
-                              toggleNormalized={toggleNormalized}
-                              toggleEmptyDetect={toggleEmptyDetect}
-                              toggleInconsistentDetect={toggleInconsistent}
-                              toggleImportSuccess={toggleImportSuccess}
-                              fileId={uploadedFileId}
-                              vsheets={visibleSheetNames}
-                              sheetdata={sheetData}
-                              updateSData={updateSheetData}
-                              updateWB={updateWorkbook}
-                              reset={resetVariables}
-                              workbook={workbook}
-                              normList={normSheets}
-                              inclist={IncSheets}
-                              sheets={sheetNames}
-                            />
-                          </div>
-                        </Modal>
-
-                        <Modal
-                          open={EmptyDetect}
-                          onClose={() => {
-                            toggleEmptyDetect(false);
-                          }}
-                        >
-                          <div>
-                            <EmptyDetectPrompt
-                              toggleNormalized={toggleNormalized}
-                              toggleEmptyDetect={toggleEmptyDetect}
-                              toggleInconsistentDetect={toggleInconsistent}
-                              toggleImportSuccess={toggleImportSuccess}
-                              fileId={uploadedFileId}
-                              workbook={workbook}
-                              sheets={sheetNames}
-                              vsheets={visibleSheetNames}
-                              sheetdata={sheetData}
-                              emptylist={SheetsWithEmpty}
-                              reset={resetVariables}
-                              inclist={IncSheets}
-                              updateSData={updateSheetData}
-                              normSheets={normSheets}
-                            />
-                          </div>
-                        </Modal>
-
-                        <Modal
-                          open={InconsistentDetect}
-                          onClose={() => {
-                            toggleInconsistent(false);
-                          }}
-                        >
-                          <div>
-                            <InconsistentDetectPrompt
-                              toggleNormalized={toggleNormalized}
-                              toggleInconsistentDetect={toggleInconsistent}
-                              toggleImportSuccess={toggleImportSuccess}
-                              fileId={uploadedFileId}
-                              workbook={workbook}
-                              sheets={sheetNames}
-                              vsheets={visibleSheetNames}
-                              sheetdata={sheetData}
-                              reset={resetVariables}
-                              inclist={IncSheets}
-                              updateSData={updateSheetData}
-                              normSheets={normSheets}
-                            />
-                          </div>
-                        </Modal>
-
-                        <Modal
-                          open={ImportSuccess}
-                          onClose={() => {
-                            toggleImportSuccess(false);
-                          }}
-                        >
-                          <div>
-                            <SuccessPrompt
-                              toggleImportSuccess={toggleImportSuccess}
-                              fileId={uploadedFileId}
-                              reset={resetVariables}
-                              workbook={workbook}
-                              sdata={sheetData}
-                            />
-                          </div>
-                        </Modal>
-
-                        <ProcessingPage
-                          stopLoading={StopLoading}
-                          startProcessing={StartProcessing}
-                          toggleTable={toggleTableDetect}
-                          toggleNoTable={toggleNoTableDetect}
-                          setTblCount={setTblCount}
-                          setFileData={setFileData}
-                          reset={resetVariables}
-                        />
+                        </Box>
                       </>
                     }
                   />
-                  <Route path="/template/1">
-                    <Route
-                      index
-                      element={
-                        <Box sx={{ padding: "1px" }}>
-                          <SpecificTemplatePage />
-                        </Box>
-                      }
-                    />
-                  </Route>
-                  <Route path="/template/2">
-                    <Route
-                      index
-                      element={
-                        <Box sx={{ padding: "1px" }}>
-                          <SpecificTemplatePageTwo />
-                        </Box>
-                      }
-                    />
-                  </Route>
-                  <Route path="/template/3">
-                    <Route
-                      index
-                      element={
-                        <Box sx={{ padding: "1px" }}>
-                          <SpecificTemplatePageThree />
-                        </Box>
-                      }
-                    />
-                  </Route>
-                  <Route
-                    path="/file"
-                    element={
-                      <>
-                        <Filepage stopLoading={StopLoading} />
-                      </>
-                    }
-                  />
-                  <Route path="/template/" element={<SpecificTemplatePage />} />
-                  <Route
-                    path="/file/"
-                    element={<Filepage stopLoading={StopLoading} />}
-                  />
-                  <Route path="/convert" element={<ConvertFilePage />} />
-                  <Route path="/templates" element={<TemplatesPage />} />
-                  <Route
-                    path="/files"
-                    element={
-                      isLoggedIn ? (
-                        <FileScreenPage setFileId={setFileId} />
-                      ) : (
-                        <Navigate to="/login" replace={true} />
-                      )
-                    }
-                  />
-                  <Route
-                    path="/database"
-                    element={<DatabasePage stopLoading={StopLoading} />}
-                  />
-                  <Route path="/databases" element={<DatabaseScreenPage />} />
-                  <Route path="/delete-profile/" element={<DeleteProfile />} />
-                  <Route path="/deleted-files" element={<DeletedFiles />} />
-                  <Route
-                    path="/edit-profile"
-                    element={
-                      <PrivateRoute>
-                        <EditProfile />
-                      </PrivateRoute>
-                    }
-                  ></Route>
-                  <Route
-                    path="/profile"
-                    element={
-                      <PrivateRoute>
-                        <Profile />
-                      </PrivateRoute>
-                    }
-                  />
+                </Route>
+                <Route
+                  path="/processing"
+                  element={
+                    <>
+                      <Backdrop
+                        sx={{
+                          color: "#FFFFFF",
+                          zIndex: (theme) => theme.zIndex.modal - 1,
+                          marginTop: "4rem",
+                          position: "fixed",
+                          width: "100%",
+                          height: "100%",
+                        }}
+                        open={isProcessing}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <CircularProgress size="10rem" color="success" />
+                          <h1>Processing data...</h1>
+                        </div>
+                      </Backdrop>
 
-                  {/* Public pages */}
+                      {
+                        //modal for detect tables here
+                      }
+                      <Modal
+                        open={TableDetect}
+                        onClose={() => {
+                          toggleTableDetect(false);
+                        }}
+                      >
+                        <div>
+                          <TableDetectPrompt
+                            toggleNormalized={toggleNormalized}
+                            toggleTableDetect={toggleTableDetect}
+                            toggleSelect={toggleSelect}
+                            toggleEmptyDetect={toggleEmptyDetect}
+                            toggleInconsistentDetect={toggleInconsistent}
+                            toggleImportSuccess={toggleImportSuccess}
+                            tblCount={tableCount}
+                            fileId={uploadedFileId}
+                            vsheets={visibleSheetNames}
+                            sheetdata={sheetData}
+                            updateEmpty={updateEmptyList}
+                            updateInc={updateIncList}
+                            updateSData={updateSheetData}
+                            updateNorm={updateNormList}
+                            emptySheets={SheetsWithEmpty}
+                            incSheets={IncSheets}
+                            normSheets={normSheets}
+                            reset={resetVariables}
+                            wb={workbook}
+                          />
+                        </div>
+                      </Modal>
+
+                      {
+                        //modal for select tables here
+                      }
+                      <Modal
+                        open={SelectTable}
+                        onClose={() => {
+                          toggleSelect(false, 0);
+                        }}
+                      >
+                        <div>
+                          <SelectTablePrompt
+                            toggleNormalized={toggleNormalized}
+                            toggleSelect={toggleSelect}
+                            toggleTableDetect={toggleTableDetect}
+                            toggleEmptyDetect={toggleEmptyDetect}
+                            toggleInconsistentDetect={toggleInconsistent}
+                            toggleImportSuccess={toggleImportSuccess}
+                            tblCount={tableCount}
+                            fileId={uploadedFileId}
+                            vsheets={visibleSheetNames}
+                            sheetdata={sheetData}
+                            updateEmpty={updateEmptyList}
+                            updateInc={updateIncList}
+                            updateSData={updateSheetData}
+                            emptySheets={SheetsWithEmpty}
+                            incSheets={IncSheets}
+                            reset={resetVariables}
+                            wb={workbook}
+                            sheetIndex={sheetIndex}
+                            normSheets={normSheets}
+                            updateNorm={updateNormList}
+                          />
+                        </div>
+                      </Modal>
+
+                      {/* modal for no tables detected here  */}
+                      <Modal open={NoTableDetect} onClose={toggleNoTableDetect}>
+                        <div>
+                          <NoTablesDetectPrompt
+                            toggleNoTable={toggleUpload}
+                            fileId={uploadedFileId}
+                            reset={resetVariables}
+                          />
+                        </div>
+                      </Modal>
+
+                      {/* modal for normalize tables here  */}
+                      <Modal open={NormalizeTable} onClose={toggleUpload}>
+                        <div>
+                          <NormalizePrompt
+                            toggleNormalized={toggleNormalized}
+                            toggleEmptyDetect={toggleEmptyDetect}
+                            toggleInconsistentDetect={toggleInconsistent}
+                            toggleImportSuccess={toggleImportSuccess}
+                            fileId={uploadedFileId}
+                            vsheets={visibleSheetNames}
+                            sheetdata={sheetData}
+                            updateSData={updateSheetData}
+                            updateWB={updateWorkbook}
+                            reset={resetVariables}
+                            workbook={workbook}
+                            normList={normSheets}
+                            inclist={IncSheets}
+                            sheets={sheetNames}
+                          />
+                        </div>
+                      </Modal>
+
+                      <Modal
+                        open={EmptyDetect}
+                        onClose={() => {
+                          toggleEmptyDetect(false);
+                        }}
+                      >
+                        <div>
+                          <EmptyDetectPrompt
+                            toggleNormalized={toggleNormalized}
+                            toggleEmptyDetect={toggleEmptyDetect}
+                            toggleInconsistentDetect={toggleInconsistent}
+                            toggleImportSuccess={toggleImportSuccess}
+                            fileId={uploadedFileId}
+                            workbook={workbook}
+                            sheets={sheetNames}
+                            vsheets={visibleSheetNames}
+                            sheetdata={sheetData}
+                            emptylist={SheetsWithEmpty}
+                            reset={resetVariables}
+                            inclist={IncSheets}
+                            updateSData={updateSheetData}
+                            normSheets={normSheets}
+                          />
+                        </div>
+                      </Modal>
+
+                      <Modal
+                        open={InconsistentDetect}
+                        onClose={() => {
+                          toggleInconsistent(false);
+                        }}
+                      >
+                        <div>
+                          <InconsistentDetectPrompt
+                            toggleNormalized={toggleNormalized}
+                            toggleInconsistentDetect={toggleInconsistent}
+                            toggleImportSuccess={toggleImportSuccess}
+                            fileId={uploadedFileId}
+                            workbook={workbook}
+                            sheets={sheetNames}
+                            vsheets={visibleSheetNames}
+                            sheetdata={sheetData}
+                            reset={resetVariables}
+                            inclist={IncSheets}
+                            updateSData={updateSheetData}
+                            normSheets={normSheets}
+                          />
+                        </div>
+                      </Modal>
+
+                      <Modal
+                        open={ImportSuccess}
+                        onClose={() => {
+                          toggleImportSuccess(false);
+                        }}
+                      >
+                        <div>
+                          <SuccessPrompt
+                            toggleImportSuccess={toggleImportSuccess}
+                            fileId={uploadedFileId}
+                            reset={resetVariables}
+                            workbook={workbook}
+                            sdata={sheetData}
+                          />
+                        </div>
+                      </Modal>
+
+                      <ProcessingPage
+                        stopLoading={StopLoading}
+                        startProcessing={StartProcessing}
+                        toggleTable={toggleTableDetect}
+                        toggleNoTable={toggleNoTableDetect}
+                        setTblCount={setTblCount}
+                        setFileData={setFileData}
+                        reset={resetVariables}
+                      />
+                    </>
+                  }
+                />
+                <Route path="/template/1">
                   <Route
-                    path="/login"
-                    element={isLoggedIn ? <Navigate to="/" /> : <Login />}
+                    index
+                    element={
+                      <Box sx={{ padding: "1px" }}>
+                        <SpecificTemplatePage />
+                      </Box>
+                    }
                   />
+                </Route>
+                <Route path="/template/2">
                   <Route
-                    path="/registration"
-                    element={<Registration />}
-                  ></Route>
+                    index
+                    element={
+                      <Box sx={{ padding: "1px" }}>
+                        <SpecificTemplatePageTwo />
+                      </Box>
+                    }
+                  />
+                </Route>
+                <Route path="/template/3">
                   <Route
-                    path="/forgot-password"
-                    element={<ForgotPassword />}
-                  ></Route>
-                </Routes>
-              </Box>
+                    index
+                    element={
+                      <Box sx={{ padding: "1px" }}>
+                        <SpecificTemplatePageThree />
+                      </Box>
+                    }
+                  />
+                </Route>
+                <Route
+                  path="/file"
+                  element={
+                    <>
+                      <Filepage stopLoading={StopLoading} />
+                    </>
+                  }
+                />
+                <Route path="/template/" element={<SpecificTemplatePage />} />
+                <Route
+                  path="/file/"
+                  element={<Filepage stopLoading={StopLoading} />}
+                />
+                <Route
+                path ="/convert"
+                element={<ConvertFilePage/>}
+                />
+                <Route path="/templates" element={<TemplatesPage />} />
+                <Route
+                  path="/files"
+                  element={
+                    isLoggedIn ? (
+                      <FileScreenPage setFileId={setFileId}/>
+                    ) : (
+                      <Navigate to="/login" replace={true} />
+                    )
+                  }
+                />
+                <Route path="/database" element={
+                <DatabasePage stopLoading={StopLoading} />
+                } />
+                <Route path="/databases" element={<DatabaseScreenPage />} />
+                <Route path="/delete-profile/:id" element={<DeleteProfile />} />
+                <Route path="/deleted-files" element={<DeletedFiles />} />
+                {/* <Route path="/log-in" element={isLoggedIn ? <Navigate to="/" /> : <Login />} /> */}
+                <Route path="/login" element={<Login/>}></Route>
+                <Route path="/registration" element={<Registration/>}></Route>
+                <Route path="/edit-profile" element={<EditProfile/>}></Route>
+                <Route path="/profile" element={<Profile />}/>
+
+                {/* Add your other routes here */}
+              </Routes>
             </Box>
-          </Router>
-        </SnackbarContextProvider>
-      </ThemeProvider>
+          </Box>
+        </Router>
+      </SnackbarContextProvider>
+    </ThemeProvider>
     </Provider>
   );
 }

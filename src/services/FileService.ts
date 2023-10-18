@@ -2,26 +2,21 @@ import axios from "axios";
 
 class FileService {
     
-
-    //upload by user
-    async uploadFile(file: File, userId: number) {
+    async uploadFile(file: File) {
         let fd = new FormData();
-        fd.append('file', file);
-        fd.append('userId', userId.toString());
-      
-        return axios.post("http://localhost:8080/upload", fd, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+        fd.append('file',file)
+        return axios.post("http://localhost:8080/upload", fd ,{
+            headers:{
+                'Content-Type': 'multipart/form-data'
+            }
         }).then((res) => {
-          if (res.data) {
-            return res.data;
-          }
+            if (res.data) {
+                return res.data;
+            }
         }).catch(err => {
-          console.log(err);
+            console.log(err);
         });
-      }
-      
+    }
 
     async putFile(fileid:number, file:File, filename:string){
         let fd = new FormData();

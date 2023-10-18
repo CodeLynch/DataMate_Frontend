@@ -156,7 +156,7 @@ export default function Registration() {
             {/* <TopbarInit/> */}
             <Grid component="form" encType="multipart/form-data" onSubmit={postUser}>
                 <Grid container justifyContent="center" alignItems="center">
-                    <Box sx={{ mt: {xs: '100%', sm:'10%', md: '6%'}, backgroundColor: 'white', margin: {xs: '30px'}, p: {xs: '35px', sm: '40px', md: '40px'}, borderRadius: '20px', boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)' }}> 
+                    <Box sx={{ backgroundColor: 'white', margin: {xs: '30px'}, p: {xs: '35px', sm: '40px', md: '40px'}, borderRadius: '20px', boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)', opacity: 0.85 }}> 
                         <Container> 
                             <Typography variant="h4" fontWeight="bold" color='#374248'>
                                 Register

@@ -10,7 +10,6 @@ export type User = {
   password: string,
   businessName: string,
   businessType: string,
-  userImage: Blob | null,
 }
 
 export interface FileEntity {

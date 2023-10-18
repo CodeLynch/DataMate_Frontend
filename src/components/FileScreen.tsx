@@ -2,12 +2,18 @@ import React, { useState, useEffect, useRef } from "react";
 import trashBinImage from "../images/Trashbin.png";
 import {
   Button,
+  Select,
   MenuItem,
   FormControl,
+  InputLabel,
+  Drawer,
   Grid,
+  Box,
   Stack,
   IconButton,
+  SelectChangeEvent,
   Link,
+  Modal,
 } from "@mui/material";
 import Popover from "@mui/material/Popover";
 import List from "@mui/material/List";
@@ -21,12 +27,11 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import FileService from "../api/FileService";
 import { FileEntity, ResponseFile, User } from "../api/dataTypes";
 import ImportFile from "../prompts/ImportFile";
+
 import { useNavigate } from "react-router-dom";
 import FileDetails from "./FileDetails";
 import Navbar from "./Navbar";
 import Topbar from "./Topbar";
-import { useSelector } from "react-redux";
-import { RootState } from "../helpers/Store";
 
 type FileId = string;
 
@@ -56,7 +61,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   const anchorRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
-  const userId = useSelector((state: RootState) => state.auth.userId);
+  const [userId, setUserId] = useState(null);
   const nav = useNavigate();
 
   // const itemsPerRow = Math.min(searchResult.length, 3); // Maximum 3 items per row
@@ -110,6 +115,18 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     };
   }, []);
 
+  // useEffect(() => {
+  //   //dynamic fetching
+  //   const fetchData = async () => {
+  //     if (userId !== null) {
+  //       const files = await FileService.getFilesByUserId(userId);
+  //       setFiles(files.filter((file) => !file.isdeleted));
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [userId]);
+
   //delete specific file
   const handleDelete = async (id: number) => {
     try {
@@ -147,21 +164,13 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     setFiles(sortedFiles);
   };
 
-  const handleClearfilter = () => {
-    setSearchQuery("");
-    setCurrentSortOption("All");
-    setSelectedOption("All");
+  const handleClearFilter = () => {
+    setSearchQuery(""); // Clear the search query
+    setCurrentSortOption("All"); // Clear the sort option
+    setSelectedOption("All"); // Clear the selected option in the dropdown
 
-    if (userId) {
-      FileService.getFilesByUserId(userId)
-        .then((res) => {
-          console.log(res);
-          setFiles(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
+    const originalFiles = [...files];
+    setFiles(originalFiles);
   };
 
   //to fully get
@@ -205,39 +214,47 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     file.fileName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  useEffect(() => {
-    if (userId) {
-      FileService.getFilesByUserId(userId)
-        .then((res) => {
-          console.log(res);
-          setFiles(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
-  }, [userId]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const userId = 1;
+  //     const files = await FileService.getFilesByUserId(userId);
+  //     setFiles(files.filter((file) => !file.isdeleted));
+  //   };
+  //   console.log("These are the files:" , files)
+  //   fetchData();
+  // }, []);
+
+  useEffect(()=>{
+    FileService.getFilesByUserId(1)
+    .then((res)=>{
+      console.log(res);
+      setFiles(res);
+    }).catch((err)=>{
+      console.log(err);
+    })
+  },[])
 
   useEffect(() => {
     setSearchResult(filteredFiles);
   }, [searchQuery, filteredFiles]);
 
+  const navigate = useNavigate();
+ 
+
   return (
     <Grid
-      // paddingLeft={{ lg: 2, xl: 2 }}
-      paddingX={{ xs: 5, sm: 5, lg: 10 }}
+      paddingLeft={{ lg: 2, xl: 2 }}
       style={{
         paddingTop: "5rem",
         width: "100%",
-        // alignItems: "center",
-        // display: "flex",
+        alignItems: "center",
+        display: "flex",
         flexDirection: "column",
+        justifyContent: "center",
       }}
     >
-      <section style={{ marginTop: "50px" }}>
+      <section>
         <Grid
-          maxWidth={{ lg: "95%", xl: "80%" }}
-          marginX="auto"
           style={{
             display: "flex",
             alignItems: "center",
@@ -251,12 +268,21 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
               alignItems: "center",
               flex: 1,
               borderRadius: "40px",
-              height: "50px",
+              height: "30px",
               boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.1)",
             }}
           >
-            <SearchIcon style={{ fontSize: "24px", color: "gray" }} />
-
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "40px",
+                background: "#fff",
+              }}
+            >
+              <SearchIcon style={{ fontSize: "24px", color: "gray" }} />
+            </div>
             <input
               style={{
                 fontSize: "20px",
@@ -419,7 +445,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
                 )}
               </FormControl>
               <Button
-                onClick={handleClearfilter}
+                onClick={handleClearFilter}
                 style={{
                   marginLeft: "24px",
                   cursor: "pointer",
@@ -607,28 +633,23 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
       >
         <Grid
           container
-          spacing={{ sm: 3, md: 2, lg: -10, xl: -50 }}
-          style={{ margin: "auto" }}
+          spacing={{ md: 3, lg: 3, xl: 3 }}
+          style={{ margin: "auto", maxWidth: "1200px" }}
           paddingY={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
           paddingRight={{ xs: 2, sm: 2 }}
-          justifyContent="text-start"
         >
           {searchResult.map((file) => (
             <Grid
               key={file.fileId}
               item
-              // paddingLeft={2}
+              paddingLeft={2}
               xs={12}
               sm={6}
               md={4}
-              lg={4}
+              lg={lgValue}
               xl={xlValue}
               paddingBottom={2}
-              // style={{
-              //   display: "flex",
-              //   flexDirection: "column",
-              //   alignItems: "center",
-              // }}
+              width={{ lg: "450px", xl: "450px" }}
             >
               <Grid
                 maxWidth="100%"
@@ -719,7 +740,6 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
                             password: "",
                             businessName: "",
                             businessType: "",
-                            userImage: null,
                           }
                         }
                       />
@@ -781,17 +801,17 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
 
               <Grid
                 style={{
+                  textAlign: "center",
                   marginTop: "0.5rem",
                   fontSize: "14px",
                   color: "#888",
                   fontStyle: "italic",
                 }}
-                // paddingLeft={
-                //   searchResult.length <= 2
-                //     ? { lg: "100px", xl: "100px" }
-                //     : { lg: "50px", xl: "50px" }
-                // }
-                paddingLeft={{ xs: 6, sm: 5, md: 5, lg: 5 }}
+                paddingRight={
+                  searchResult.length <= 2
+                    ? { lg: "100px", xl: "100px" }
+                    : { lg: "50px", xl: "50px" }
+                }
               >
                 Last Modified: {file.latestDateModified}
               </Grid>
