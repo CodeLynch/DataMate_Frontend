@@ -22,14 +22,16 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import UserService from "../api/UserService";
 import axios from "axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../helpers/AuthAction";
 import { Link } from "react-router-dom";
+import { RootState } from "../helpers/Store";
 
 export default function EditProfile() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const para = useParams() as { id: string };
+  const para = {id:useSelector((state: RootState) => state.auth.userId)};
+  const [userImage, setUserImage] = useState<string | undefined>(undefined);
   //const {user} = useContext(UserContext) as UserContextType;
   const dispatch = useDispatch();
 
@@ -69,6 +71,7 @@ export default function EditProfile() {
       UserService.getUserById(para.id)
         .then((response) => {
           setData(response.data);
+          setUserImage(response.data.userImage);
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
@@ -122,7 +125,7 @@ export default function EditProfile() {
             >
               <Avatar
                 alt="Placeholder Image"
-                src="https://via.placeholder.com/150" //sample url
+                src={userImage ? `data:image/jpeg;base64,${userImage}` : undefined}
                 sx={{
                   width: 170,
                   height: 170,
@@ -139,7 +142,7 @@ export default function EditProfile() {
                   fontWeight: "bold",
                 }}
               >
-                John Doe
+                {firstName + " " + lastName} 
               </Typography>
               <Box
                 className="editBtn"
