@@ -67,7 +67,7 @@ export default function SpecificTemplate(){
 
     return(
       <Grid>
-        <Grid className="gradientbg">
+        <Grid className="gradientbg" mt={5}>
           <Grid container direction="row" justifyContent="space-between" sx={{p: {xs: '40px 60px 20px 60px', sm: '40px 60px 20px 60px', md: '40px 60px 20px 60px'} }}>  
             <Typography sx={{ color: 'white', fontWeight: 'bold', fontSize: {xs: '20px', sm: '25px', md: '32px'}, mt: {xs: 1.3, md: .2}}}>
               Employee Timesheet Template

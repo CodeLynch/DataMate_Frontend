@@ -325,134 +325,121 @@ export default function DeletedFiles() {
 
   return (
     <div>
-      <Box m={4}>
-        <Stack direction="row">
-          <ArrowBackIosNewIcon sx={{ fontSize: '30px', color: '#374248', cursor: 'pointer', mr: 2, mt: .8 }} onClick={() => { nav('/files'); }}/>
-          <Typography variant="h4" fontWeight="bold" color="#374248">
-            Deleted Files
-          </Typography>
-        </Stack>
-      </Box>
-      <Stack direction="row" mx={4}>
-        <Grid container>
-          <Grid item xs={15} sm={11} md={11}>
-            <TextField
-              id="outlined-search"
-              label="Search"
-              type="search"
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchOutlinedIcon />
-                  </InputAdornment>
-                ),
-              }}
-              InputLabelProps={{
-                shrink: isLabelShrunk,
-                sx: { ml: isLabelShrunk ? 0 : 4 },
-              }}
-              onFocus={handleTextFieldFocus}
-              onBlur={handleTextFieldBlur}
-              value={searchQuery}
-              onChange={handleSearchChange}
-              sx={{
-                boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.3)",
-                borderRadius: "20px",
-                "& .MuiOutlinedInput-notchedOutline": {
-                  border: "none",
-                },
-                width: "100%",
-              }}
-            />
-          </Grid>
-        </Grid>
-        {isNotXsScreen ? (
-          <>
-            <Grid container mr={1}>
-              <Grid item md={12}>
-                <Stack direction="row" spacing={2}>
-                  <FormControlLabel
-                    value="delete"
-                    control={<Checkbox />}
-                    label="Delete Forever"
-                    labelPlacement="end"
-                    checked={selectedOption === "delete"}
-                    onChange={handleCheckboxDeleteChange}
-                  />
-                  <FormControlLabel
-                    value="restore"
-                    control={<Checkbox />}
-                    label="Restore Files"
-                    labelPlacement="end"
-                    checked={selectedOption === "restore"}
-                    onChange={handleCheckboxRestoreChange}
-                  />
-                </Stack>
-                <Typography variant="body2" color="error">
-                  {deleteError || restoreError}
-                </Typography>
-              </Grid>
-            </Grid>
-
-            <Grid
-              container
-              direction="row"
-              justifyContent="flex-end"
-              alignItems="flex-end"
-            >
-            </Grid>
-          </>
-        ) : (
-          <Box mt={1}>
-            {" "}
-            {/* with menu icon for xs screens */}
-            <Grid container>
-              <IconButton onClick={handleMenuClick}>
-                <MoreVertIcon />
-              </IconButton>
-              <Menu
-                anchorEl={menuAnchor}
-                open={Boolean(menuAnchor)}
-                onClose={handleMenuClose}
-              >
-                <MenuItem>
-                  <FormControlLabel
-                    value="delete"
-                    control={<Checkbox />}
-                    label="Delete Forever"
-                    labelPlacement="end"
-                    checked={selectedOption === "delete"}
-                    onChange={handleCheckboxDeleteChange}
-                  />
-                </MenuItem>
-                <MenuItem>
-                  <FormControlLabel
-                    value="restore"
-                    control={<Checkbox />}
-                    label="Restore Files"
-                    labelPlacement="end"
-                    checked={selectedOption === "restore"}
-                    onChange={handleCheckboxRestoreChange}
-                  />
-                </MenuItem>
-                <Typography variant="body2" color="error" ml={2}>
-                  {deleteError || restoreError}
-                </Typography>
-              </Menu>
-            </Grid>
+      <Grid container sx={{ mt: 10}}>
+        <Stack direction="column">
+          <Box m={4}>
+            <Stack direction="row">
+              <ArrowBackIosNewIcon sx={{ fontSize: '30px', color: '#374248', cursor: 'pointer', mr: 2, mt: .8 }} onClick={() => { nav('/files'); }}/>
+              <Typography variant="h4" fontWeight="bold" color="#374248">
+                Deleted Files
+              </Typography>
+            </Stack>
           </Box>
-        )}
+          <Grid container mx={4} justifyContent="center" alignItems="center">
+            <Stack direction="row">
+              <Grid container sx={{ width: '360px'}} >
+                  <TextField
+                    id="outlined-search"
+                    label="Search"
+                    type="search"
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchOutlinedIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                    InputLabelProps={{
+                      shrink: isLabelShrunk,
+                      sx: { ml: isLabelShrunk ? 0 : 4 },
+                    }}
+                    onFocus={handleTextFieldFocus}
+                    onBlur={handleTextFieldBlur}
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    sx={{
+                      boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.3)",
+                      borderRadius: "20px",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        border: "none",
+                      },
+                      width: "100%",
+                    }}
+                  />
+              </Grid>
+            {isNotXsScreen ? (
+              <Stack direction="row" ml={5}>
+                  <Grid container sx={{ width: 200 }}>
+                    <FormControlLabel
+                      value="delete"
+                      control={<Checkbox />}
+                      label="Delete Forever"
+                      labelPlacement="end"
+                      checked={selectedOption === "delete"}
+                      onChange={handleCheckboxDeleteChange}
+                    />
+                  </Grid>
+                  <Grid container sx={{ width: 200 }}>
+                    <FormControlLabel
+                      value="restore"
+                      control={<Checkbox />}
+                      label="Restore Files"
+                      labelPlacement="end"
+                      checked={selectedOption === "restore"}
+                      onChange={handleCheckboxRestoreChange}
+                    />
+                  </Grid>
+                  <Box sx={{ width: 200, mt: 2 }}>
+                    <Typography variant="body2" color="error">
+                      {deleteError || restoreError}
+                    </Typography>
+                  </Box>
+              </Stack>
+            ) : (
+              <Box mt={1}>
+                {/* with menu icon for xs screens */}
+                <Grid container>
+                  <IconButton onClick={handleMenuClick}>
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={menuAnchor}
+                    open={Boolean(menuAnchor)}
+                    onClose={handleMenuClose}
+                  >
+                    <MenuItem>
+                      <FormControlLabel
+                        value="delete"
+                        control={<Checkbox />}
+                        label="Delete Forever"
+                        labelPlacement="end"
+                        checked={selectedOption === "delete"}
+                        onChange={handleCheckboxDeleteChange}
+                      />
+                    </MenuItem>
+                    <MenuItem>
+                      <FormControlLabel
+                        value="restore"
+                        control={<Checkbox />}
+                        label="Restore Files"
+                        labelPlacement="end"
+                        checked={selectedOption === "restore"}
+                        onChange={handleCheckboxRestoreChange}
+                      />
+                    </MenuItem>
+                    <Typography variant="body2" color="error" ml={2}>
+                      {deleteError || restoreError}
+                    </Typography>
+                  </Menu>
+                </Grid>
+              </Box>
+            )}
+            </Stack>
+          </Grid>
       </Stack>
 
-      <br />
-      <br />
-      <Box
-        sx={{
-          height: calculateDataGridHeight(),
-          width: "100%",
-        }}
-      >
+      <Box sx={{ height: calculateDataGridHeight(), width: "100%", mt: 5 }}>
         <DataGrid
           rows={filteredFiles}
           columns={columns}
@@ -563,7 +550,7 @@ export default function DeletedFiles() {
         </Button>
       </DialogActions>
     </Dialog>
-
+    </Grid>
     </div>
   );
 }

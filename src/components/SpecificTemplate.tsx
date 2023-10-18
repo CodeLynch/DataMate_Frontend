@@ -65,19 +65,19 @@ export default function SpecificTemplate(){
 
     return(
       <Grid>
-        <Grid className="gradientbg">
+        <Grid className="gradientbg" mt={5}>
           <Grid container direction="row" justifyContent="space-between" sx={{p: {xs: '40px 60px 20px 60px', sm: '40px 60px 20px 60px', md: '40px 60px 20px 60px'} }}>  
-            <Typography variant="h4" sx={{ color: 'white', fontWeight: 'bold'}}>
+            <Typography sx={{ color: 'white', fontWeight: 'bold', fontSize: {xs: '20px', sm: '25px', md: '32px'}, mt: {xs: 1.3, md: .2}}}>
               Sales Report Template
             </Typography>
             <IconButton onClick={downloadFile}>
-              <DownloadForOfflineIcon sx={{ color: 'white', width: '40px', height: '40px' }} />
+              <DownloadForOfflineIcon sx={{ color: 'white', width: {xs: '30px', sm: '35px', md: '40px'}, height: {xs: '30px', sm: '35px', md: '40px'} }} />
             </IconButton>
           </Grid>
         </Grid>
 
         <Grid container justifyContent="center" alignItems="center">
-          <Box sx={{ m: {xs: 5, sm: 8, md: 10, maxWidth: 842, height: 400}}}>
+          <Box sx={{ m: {xs: 5, sm: 8, md: 10}, maxWidth: 842, height: {xs: 200, sm: 300, md: 400}}}>
             <img
               src={SalesTemp}
               style={{ width: '100%', height: 'auto', cursor: 'pointer' }}
@@ -89,8 +89,8 @@ export default function SpecificTemplate(){
             By utilizing the Sales Report Template, you can effortlessly record and organize essential information about customer transactions. The template's predefined columns serve specific purposes, capturing key data points such as the date of the sales transaction, customer names, product details, quantity sold, unit price, total sales, and payment status. 
           </Typography>
 
-          <Grid container sx={{ my: {xs: 2, sm: 2, md: 8}, mx: {xs: 2, sm: 2, md: 3} }}>
-            <Typography variant='h2' fontWeight="bold" sx={{ ml: '2rem', fontSize: '40px' }}>Guide</Typography>
+          <Grid container sx={{ my: {xs: 4, sm: 5, md: 8}, mx: {xs: 0, sm: 2, md: 3} }}>
+            <Typography fontWeight="bold" sx={{ ml: '2rem', fontSize: {xs: '25px', sm: '32px', md: '40px'} }}>Guide</Typography>
           </Grid>
 
           <Grid container>
