@@ -198,130 +198,129 @@ export default function EditProfile() {
                 boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
               }}
             >
-              <Stack
-                direction="column"
-                divider={
-                  <Divider
-                    orientation="horizontal"
-                    flexItem
-                    sx={{
-                      borderBottomWidth: "2px",
-                      borderColor: "#374248",
-                    }}
-                  />
-                }
-                spacing={2}
-              >
-                <Typography variant="h4" fontWeight="bold">
-                  User Profile
-                </Typography>
-                <Container>
-                  <Grid
-                    container
-                    direction={{
-                      xs: "column",
-                      sm: "row",
-                      md: "row",
-                    }}
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{ marginTop: "10px" }}
-                  >
-                    <TextField
-                      id="outlined-read-only-input"
-                      size="small"
-                      name="firstName"
-                      label="First Name"
-                      variant="outlined"
-                      value={firstName}
-                      sx={{
-                        marginBottom: { xs: 2, sm: 2, md: 2 },
-                        marginRight: { md: 2 },
-                        width: { xs: "100%", sm: "100%", md: "auto" },
-                      }}
-                    />
-                    <TextField
-                      id="outlined-read-only-input"
-                      size="small"
-                      name="lastName"
-                      label="Last Name"
-                      variant="outlined"
-                      value={lastName}
-                      sx={{
-                        marginBottom: { xs: 2, sm: 2, md: 2 },
-                        width: { xs: "100%", sm: "100%", md: "auto" },
-                      }}
-                    />
-                  </Grid>
-                  <Grid
-                    container
-                    direction="column"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <TextField
-                      id="outlined-read-only-input"
-                      size="small"
-                      name="email"
-                      label="Email"
-                      variant="outlined"
-                      value={email}
-                      fullWidth
-                      sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
-                    />
-                    <TextField
-                      id="outlined-read-only-input"
-                      size="small"
-                      name="address"
-                      label="Address"
-                      variant="outlined"
-                      value={address}
-                      fullWidth
-                      sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
-                    />
-                    <TextField
-                      id="outlined-read-only-input"
-                      size="small"
-                      name="username"
-                      label="Username"
-                      variant="outlined"
-                      value={username}
-                      fullWidth
-                      sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
-                    />
-                    <TextField
-                      id="outlined-read-only-input"
-                      name="password"
-                      value={password}
-                      label="Password"
-                      size="small"
-                      fullWidth
-                      sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
-                    />
-                    <TextField
-                      id="outlined-read-only-input"
-                      size="small"
-                      name="businessName"
-                      label="Business Name"
-                      variant="outlined"
-                      value={businessName}
-                      fullWidth
-                      sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
-                    />
-                    <FormControl fullWidth>
-                      <InputLabel id="outlined-read-only-input" size="small">
-                        Business Type
-                      </InputLabel>
-                      <Select
-                        name="businessType"
-                        value={businessType}
-                        label="Business Type"
-                        size="small"
-                      ></Select>
-                    </FormControl>
-                  </Grid>
-                </Container>
-              </Stack>
+              <Stack direction='column' 
+                        divider={<Divider orientation="horizontal" 
+                        flexItem sx={{ 
+                            borderBottomWidth: '2px', 
+                            borderColor: '#374248' }} />} 
+                            spacing={2}>
+                        <Typography variant="h4" fontWeight="bold">
+                            User Profile
+                        </Typography>
+                        <Container>
+                            <Grid 
+                            container direction={{ 
+                                xs: 'column', 
+                                sm: 'row', 
+                                md: 'row' }} 
+                                justifyContent="center" 
+                                alignItems="center" 
+                                sx={{ marginTop: '10px'}}>
+                                <TextField
+                                    id="outlined-read-only-input"
+                                    size="small"
+                                    name="firstName"
+                                    label="First Name"
+                                    variant="outlined"
+                                    value={firstName}
+                                    InputProps={{readOnly: true,}}
+                                    sx={{ 
+                                        marginBottom: { xs: 2, sm: 2, md: 2 }, 
+                                        marginRight: { md: 2 }, 
+                                        width: { xs: '100%', sm: '100%', md: 'auto' } }}
+                                />
+                                <TextField
+                                    id="outlined-read-only-input"
+                                    size="small"
+                                    name="lastName"
+                                    label="Last Name"
+                                    variant="outlined"
+                                    value={lastName}
+                                    InputProps={{readOnly: true,}}
+                                    sx={{ 
+                                        marginBottom: { xs: 2, sm: 2, md: 2 }, 
+                                        width: { xs: '100%', sm: '100%', 
+                                        md: 'auto' } }}
+                                />
+                            </Grid>
+                            <Grid container direction="column" justifyContent="center" alignItems="center">
+                                <TextField
+                                    id="outlined-read-only-input"
+                                    size="small"
+                                    name="email"
+                                    label="Email"
+                                    variant="outlined"
+                                    value={email}
+                                    InputProps={{readOnly: true,}}
+                                    fullWidth
+                                    sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
+                                />
+                                <TextField
+                                    id="outlined-read-only-input"
+                                    size="small"
+                                    name="address"
+                                    label="Address"
+                                    variant="outlined"
+                                    value={address}
+                                    InputProps={{readOnly: true,}}
+                                    fullWidth
+                                    sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
+                                />
+                                <TextField
+                                    id="outlined-read-only-input"
+                                    size="small"
+                                    name="username"
+                                    label="Username"
+                                    variant="outlined"
+                                    value={username}
+                                    InputProps={{readOnly: true,}}
+                                    fullWidth
+                                    sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
+                                />
+                                <TextField
+                                    id="outlined-read-only-input"
+                                    name="password"
+                                    type="password"
+                                    value={password}
+                                    InputProps={{readOnly: true,}}
+                                    label="Password"
+                                    size="small"
+                                    fullWidth
+                                    sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
+
+                                />
+                                <TextField
+                                    id="outlined-read-only-input"
+                                    size="small"
+                                    name="businessName"
+                                    label="Business Name"
+                                    variant="outlined"
+                                    value={businessName}
+                                    InputProps={{readOnly: true,}}
+                                    fullWidth
+                                    sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
+                                />
+                                <FormControl fullWidth>
+                                        <InputLabel id="outlined-read-only-input" size='small'>Business Type</InputLabel>
+                                        <Select
+                                        labelId="demo-simple-select-label"
+                                        id="demo-simple-select"
+                                        name='businessType'
+                                        value={businessType}
+                                        label="Business Type"
+                                        size='small'
+                                        >
+                                        <MenuItem value={'Food & Beverages'}>Food & Beverages</MenuItem>
+                                        <MenuItem value={'Retail'}>Retail</MenuItem>
+                                        <MenuItem value={'Manufacturing'}>Manufacturing</MenuItem>
+                                        <MenuItem value={'Service-based'}>Service-based</MenuItem>
+                                        <MenuItem value={'Others'}>Others</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                            </Grid>
+
+                        </Container>
+                    </Stack>
             </Box>
           </Grid>
         </Grid>
