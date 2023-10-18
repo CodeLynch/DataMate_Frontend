@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { FileEntity, ResponseFile } from "./dataTypes";
 
-const FILE_BASE_URL = "http://localhost:8080"; // Update with your backend URL
+const FILE_BASE_URL = "http://localhost:8080";
 
 const FileService = {
   //upload FIle
@@ -72,13 +72,12 @@ const FileService = {
     }
   },
 
-  // fetch files by user ID
   getFilesByUserId: async (userId: number): Promise<ResponseFile[]> => {
     try {
       const response: AxiosResponse<ResponseFile[]> = await axios.get(
-        `${FILE_BASE_URL}/filesByUserId?userId=${userId}`
+        `${FILE_BASE_URL}/filesByUserId/${userId}`
       );
-      console.log("res:",response);
+      console.log("res:", response);
       return response.data;
     } catch (error) {
       console.error("Get files by user ID error:", error);
@@ -181,7 +180,6 @@ const FileService = {
       return [];
     }
   },
-
 };
 
 export default FileService;
