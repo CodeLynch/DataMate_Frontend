@@ -26,6 +26,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../helpers/AuthAction";
 import { Link } from "react-router-dom";
 import { RootState } from "../helpers/Store";
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 
 export default function EditProfile() {
   const [showPassword, setShowPassword] = useState(false);
@@ -87,114 +88,118 @@ export default function EditProfile() {
         height: "100%",
       }}
     >
-      <Stack direction="row" spacing="-55rem">
+      <Stack direction="row" justifyContent="center" alignItems="center" width= "100%" height= "100%">
         <Grid
           container
           direction="row"
-          alignItems={{
-            xs: "center",
-            sm: "flex",
-            md: "flex",
-          }}
-          justifyContent={{
-            xs: "left",
-            sm: "flex",
-            md: "flex",
-          }}
-          marginBottom="6px"
+          paddingTop="26px"
+          marginBottom="2px"
         >
           <Box
             sx={{
               backgroundColor: "white",
               margin: { xs: "115px" },
-              padding: {
-                md: "145px 105px 80px 55px",
-              },
+              // padding: {
+              //   md: "145px 105px 80px 55px",
+              // },
               borderRadius: "45px",
               boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
             }}
           >
-            <Grid
-              container
-              direction="column"
-              alignItems={{
-                xs: "center",
-                sm: "flex-end",
-                md: "flex-end",
-              }}
-            >
-              <Avatar
-                alt="Placeholder Image"
-                src={userImage ? `data:image/jpeg;base64,${userImage}` : undefined}
-                sx={{
-                  width: 170,
-                  height: 170,
-                  backgroundColor: "#fff",
-                  borderRadius: "50%",
-                  position: "absolute",
-                  top: 45,
-                }}
-              />
-              <Typography
-                variant="h4"
-                sx={{
-                  justify: "center",
-                  fontWeight: "bold",
-                }}
-              >
-                {firstName + " " + lastName} 
-              </Typography>
-              <Box
-                className="editBtn"
-                sx={{ display: "flex", justifyContent: "center" }}
-                onClick={handleEditClick}
-              >
-                <Button variant="contained" type="submit">
-                  Edit Profile
-                </Button>
-              </Box>
-              <Box
-                className="deleteBtn"
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  marginTop: "-20px",
-                }}
-              >
-                <Link to="/delete-profile/" style={{ textDecoration: "none" }}>
-                  <Button variant="contained" type="submit">
-                    Delete Account
-                  </Button>
-                </Link>
-              </Box>
-              <Box
-                className="logoutBtn"
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  marginTop: "60px",
-                }}
-              >
-                <Button
-                  variant="contained"
-                  type="submit"
-                  onClick={handleLogoutClick}
-                >
-                  Logout
-                </Button>
-              </Box>
+            
+            <Grid container justifyContent="center" alignItems="center">
+              <Grid container justifyContent="center" alignItems="center" direction="row">
+                <Avatar
+                  alt="Placeholder Image"
+                  src={userImage ? `data:image/jpeg;base64,${userImage}` : undefined}
+                  sx={{
+                    width: 170,
+                    height: 170,
+                    backgroundColor: "white",
+                    borderColor: "white",
+                    borderWidth: '5px',
+                    borderRadius: "50%",
+                    position: "absolute",
+                    top: 65,
+                  }}
+                />
+                {/* <IconButton sx={{ backgroundColor: "#71C887" }}>
+                  <AddAPhotoIcon sx={{ color: "white" }} />
+                </IconButton> */}
+                
+              </Grid>
+              <Stack direction="column" justifyContent="center" alignItems="center">
+                <Grid container direction="column" sx={{ m: 8 }} justifyContent="center" alignItems="center">
+                  <Box>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        justify: "center",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {firstName + " " + lastName} 
+                    </Typography>
+
+                  </Box>
+                    <Box
+                      className="editBtn"
+                      sx={{ display: "flex", 
+                      justifyContent: "center", 
+                      // paddingLeft: "40px"
+                    }}
+                      onClick={handleEditClick}
+                    >
+                      <Button variant="contained" type="submit" >
+                        Edit Profile
+                      </Button>
+                    </Box>
+                    <Box
+                      className="editBtn"
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        // marginTop: "-20px",
+                      }}
+                    >
+                      <Link to="/delete-profile/" style={{ textDecoration: "none"}}>
+                        <Button variant="contained" type="submit">
+                          Delete Account
+                        </Button>
+                      </Link>
+                    </Box>
+                    
+                    
+                    <Box
+                      className="editBtn"
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: "60px",
+                      }}
+                    >
+                      <Button
+                        variant="contained"
+                        type="submit"
+                        onClick={handleLogoutClick}
+                      >
+                        Logout
+                      </Button>
+                    </Box>
+                </Grid>
+              </Stack>
             </Grid>
           </Box>
         </Grid>
 
-        <Grid>
+        <Grid container>
           <Grid container justifyContent="center" alignItems="center">
             <Box
               sx={{
                 backgroundColor: "white",
                 margin: { xs: "60px" },
                 padding: {
-                  xs: "50px 30px 25px 30px",
+                  xs: "80px 30px 25px 25px",
                   md: "55px 35px 85px 35px",
                 },
                 borderRadius: "20px",
@@ -202,128 +207,127 @@ export default function EditProfile() {
               }}
             >
               <Stack direction='column' 
-                        divider={<Divider orientation="horizontal" 
-                        flexItem sx={{ 
-                            borderBottomWidth: '2px', 
-                            borderColor: '#374248' }} />} 
-                            spacing={2}>
-                        <Typography variant="h4" fontWeight="bold">
-                            User Profile
-                        </Typography>
-                        <Container>
-                            <Grid 
-                            container direction={{ 
-                                xs: 'column', 
-                                sm: 'row', 
-                                md: 'row' }} 
-                                justifyContent="center" 
-                                alignItems="center" 
-                                sx={{ marginTop: '10px'}}>
-                                <TextField
-                                    id="outlined-read-only-input"
-                                    size="small"
-                                    name="firstName"
-                                    label="First Name"
-                                    variant="outlined"
-                                    value={firstName}
-                                    InputProps={{readOnly: true,}}
-                                    sx={{ 
-                                        marginBottom: { xs: 2, sm: 2, md: 2 }, 
-                                        marginRight: { md: 2 }, 
-                                        width: { xs: '100%', sm: '100%', md: 'auto' } }}
-                                />
-                                <TextField
-                                    id="outlined-read-only-input"
-                                    size="small"
-                                    name="lastName"
-                                    label="Last Name"
-                                    variant="outlined"
-                                    value={lastName}
-                                    InputProps={{readOnly: true,}}
-                                    sx={{ 
-                                        marginBottom: { xs: 2, sm: 2, md: 2 }, 
-                                        width: { xs: '100%', sm: '100%', 
-                                        md: 'auto' } }}
-                                />
-                            </Grid>
-                            <Grid container direction="column" justifyContent="center" alignItems="center">
-                                <TextField
-                                    id="outlined-read-only-input"
-                                    size="small"
-                                    name="email"
-                                    label="Email"
-                                    variant="outlined"
-                                    value={email}
-                                    InputProps={{readOnly: true,}}
-                                    fullWidth
-                                    sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
-                                />
-                                <TextField
-                                    id="outlined-read-only-input"
-                                    size="small"
-                                    name="address"
-                                    label="Address"
-                                    variant="outlined"
-                                    value={address}
-                                    InputProps={{readOnly: true,}}
-                                    fullWidth
-                                    sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
-                                />
-                                <TextField
-                                    id="outlined-read-only-input"
-                                    size="small"
-                                    name="username"
-                                    label="Username"
-                                    variant="outlined"
-                                    value={username}
-                                    InputProps={{readOnly: true,}}
-                                    fullWidth
-                                    sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
-                                />
-                                <TextField
-                                    id="outlined-read-only-input"
-                                    name="password"
-                                    type="password"
-                                    value={password}
-                                    InputProps={{readOnly: true,}}
-                                    label="Password"
-                                    size="small"
-                                    fullWidth
-                                    sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
+              divider={<Divider orientation="horizontal" 
+              flexItem sx={{ 
+                  borderBottomWidth: '3px', 
+                  borderColor: '#374248' }} />} 
+                  spacing={2}>
+                  <Typography variant="h4" fontWeight="bold">
+                      User Profile
+                  </Typography>
+                  <Container>
+                      <Grid 
+                      container direction={{ 
+                          xs: 'column', 
+                          sm: 'row', 
+                          md: 'row' }} 
+                          justifyContent="center" 
+                          alignItems="center" 
+                          sx={{ marginTop: '10px'}}>
+                          <TextField
+                              id="outlined-read-only-input"
+                              size="small"
+                              name="firstName"
+                              label="First Name"
+                              variant="outlined"
+                              value={firstName}
+                              InputProps={{readOnly: true,}}
+                              sx={{ 
+                                  marginBottom: { xs: 2, sm: 2, md: 3 }, 
+                                  marginRight: { md: 2 }, 
+                                  width: { xs: '100%', sm: '100%', md: 'auto' } }}
+                          />
+                          <TextField
+                              id="outlined-read-only-input"
+                              size="small"
+                              name="lastName"
+                              label="Last Name"
+                              variant="outlined"
+                              value={lastName}
+                              InputProps={{readOnly: true,}}
+                              sx={{ 
+                                  marginBottom: { xs: 2, sm: 2, md: 3 }, 
+                                  width: { xs: '100%', sm: '100%', 
+                                  md: 'auto' } }}
+                          />
+                      </Grid>
+                      <Grid container direction="column" justifyContent="center" alignItems="center">
+                          <TextField
+                              id="outlined-read-only-input"
+                              size="small"
+                              name="email"
+                              label="Email"
+                              variant="outlined"
+                              value={email}
+                              InputProps={{readOnly: true,}}
+                              fullWidth
+                              sx={{ marginBottom: { xs: 2, sm: 2, md: 3 } }}
+                          />
+                          <TextField
+                              id="outlined-read-only-input"
+                              size="small"
+                              name="address"
+                              label="Address"
+                              variant="outlined"
+                              value={address}
+                              InputProps={{readOnly: true,}}
+                              fullWidth
+                              sx={{ marginBottom: { xs: 2, sm: 2, md: 3 } }}
+                          />
+                          <TextField
+                              id="outlined-read-only-input"
+                              size="small"
+                              name="username"
+                              label="Username"
+                              variant="outlined"
+                              value={username}
+                              InputProps={{readOnly: true,}}
+                              fullWidth
+                              sx={{ marginBottom: { xs: 2, sm: 2, md: 3 } }}
+                          />
+                          <TextField
+                              id="outlined-read-only-input"
+                              name="password"
+                              type="password"
+                              value={password}
+                              InputProps={{readOnly: true,}}
+                              label="Password"
+                              size="small"
+                              fullWidth
+                              sx={{ marginBottom: { xs: 2, sm: 2, md: 3 } }}
 
-                                />
-                                <TextField
-                                    id="outlined-read-only-input"
-                                    size="small"
-                                    name="businessName"
-                                    label="Business Name"
-                                    variant="outlined"
-                                    value={businessName}
-                                    InputProps={{readOnly: true,}}
-                                    fullWidth
-                                    sx={{ marginBottom: { xs: 2, sm: 2, md: 2 } }}
-                                />
-                                <FormControl fullWidth>
-                                        <InputLabel id="outlined-read-only-input" size='small'>Business Type</InputLabel>
-                                        <Select
-                                        labelId="demo-simple-select-label"
-                                        id="demo-simple-select"
-                                        name='businessType'
-                                        value={businessType}
-                                        label="Business Type"
-                                        size='small'
-                                        >
-                                        <MenuItem value={'Food & Beverages'}>Food & Beverages</MenuItem>
-                                        <MenuItem value={'Retail'}>Retail</MenuItem>
-                                        <MenuItem value={'Manufacturing'}>Manufacturing</MenuItem>
-                                        <MenuItem value={'Service-based'}>Service-based</MenuItem>
-                                        <MenuItem value={'Others'}>Others</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                            </Grid>
-
-                        </Container>
-                    </Stack>
+                          />
+                          <TextField
+                              id="outlined-read-only-input"
+                              size="small"
+                              name="businessName"
+                              label="Business Name"
+                              variant="outlined"
+                              value={businessName}
+                              InputProps={{readOnly: true,}}
+                              fullWidth
+                              sx={{ marginBottom: { xs: 2, sm: 2, md: 3 } }}
+                          />
+                          <FormControl fullWidth>
+                                  <InputLabel id="outlined-read-only-input" size='small'>Business Type</InputLabel>
+                                  <Select
+                                  labelId="demo-simple-select-label"
+                                  id="demo-simple-select"
+                                  name='businessType'
+                                  value={businessType}
+                                  label="Business Type"
+                                  size='small'
+                                  >
+                                  <MenuItem value={'Food & Beverages'}>Food & Beverages</MenuItem>
+                                  <MenuItem value={'Retail'}>Retail</MenuItem>
+                                  <MenuItem value={'Manufacturing'}>Manufacturing</MenuItem>
+                                  <MenuItem value={'Service-based'}>Service-based</MenuItem>
+                                  <MenuItem value={'Others'}>Others</MenuItem>
+                                  </Select>
+                              </FormControl>
+                      </Grid>
+                  </Container>
+                </Stack>
             </Box>
           </Grid>
         </Grid>
