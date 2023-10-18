@@ -1,19 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import trashBinImage from "../images/Trashbin.png";
 import {
   Button,
-  Select,
   MenuItem,
   FormControl,
-  InputLabel,
-  Drawer,
   Grid,
-  Box,
   Stack,
   IconButton,
-  SelectChangeEvent,
   Link,
-  Modal,
 } from "@mui/material";
 import Popover from "@mui/material/Popover";
 import List from "@mui/material/List";
@@ -24,11 +18,71 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchIcon from "@mui/icons-material/Search";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import FileService from "../api/FileService";
+import { DatabaseEntity, FileEntity, ResponseFile, User } from "../api/dataTypes";
+import ImportFile from "../prompts/ImportFile";
+import { useNavigate } from "react-router-dom";
+import FileDetails from "./FileDetails";
 import Navbar from "./Navbar";
 import Topbar from "./Topbar";
+import { useSelector } from "react-redux";
+import { RootState } from "../helpers/Store";
+import DatabaseService from "../services/DatabaseService";
 
-const DatabaseList: React.FC<{}> = () => {
+type FileId = string;
+
+//Importfile
+type FileListProp = {
+  setFileId: (num: number) => void;
+};
+const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  // const [files, setFiles] = useState<DatabaseEntity[]>([]);
+  const [databases, setDatabases] = useState<DatabaseEntity[]>([]);
+  const [filteredDBs, setFilteredDBs] = useState<DatabaseEntity[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("All");
+  const [selectedMenuOption, setSelectedMenuOption] = useState("");
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [selectedFileId, setSelectedFileId] = useState<FileId | null>(null);
+  const [anchorE2, setAnchorE2] = useState<null | HTMLElement>(null);
+  const [selectedOptionPopMenu, setSelectedOptionPopMenu] = useState("All");
+  const open = Boolean(anchorE2);
+  const isPopoverOpen = Boolean(anchorEl);
+  const [searchQuery, setSearchQuery] = useState(""); // State for the search query
+  const [searchResult, setSearchResult] = useState<DatabaseEntity[]>([]);
+  const [currentSortOption, setCurrentSortOption] = useState("All");
+  const [selectedFile, setSelectedFile] = useState<DatabaseEntity | null>(null);
+  const [database, setDatabase] = useState<DatabaseEntity | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const anchorRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+  const userId = useSelector((state: RootState) => state.auth.userId);
+  const nav = useNavigate();
+
+  // const itemsPerRow = Math.min(searchResult.length, 3); // Maximum 3 items per row
+  const itemsPerRow = Math.min(databases.length, 3);
+  const lgValue = Math.floor(12 / itemsPerRow);
+  const xlValue = Math.floor(12 / itemsPerRow);
+
+  const handleClickFileName = (db: DatabaseEntity) => {
+    let id = db?.databaseId
+ console.log(id)
+    nav("/database", {
+      state: {
+        dbid: id,
+      },
+    });
+  };
+
+  const handleOptionSelectPop = (option: string, db: DatabaseEntity| null) => {
+    setSelectedMenuOption(option);
+    setSelectedFile(db);
+    setIsOpen(!!db);
+  };
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -42,112 +96,129 @@ const DatabaseList: React.FC<{}> = () => {
     };
   }, []);
 
-  const files = [
-    {
-      id: "1",
-      name: "database1",
-      thumbnailUrl:
-        "https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png",
-      lastModified: "07-24-2023",
-    },
-    {
-      id: "2",
-      name: "data2",
-      thumbnailUrl:
-        "https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png",
-      lastModified: "07-24-2023",
-    },
-    {
-      id: "3",
-      name: "data3",
-      thumbnailUrl:
-        "https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png",
-      lastModified: "07-24-2023",
-    },
-    {
-      id: "4",
-      name: "database4",
-      thumbnailUrl:
-        "https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png",
-      lastModified: "07-24-2023",
-    },
-  ];
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("All");
-  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-  const [selectedMenuOption, setSelectedMenuOption] = useState("");
-
-  //Sort by
-  const handleDropdownToggle = () => {
-    setIsDropdownOpen((prev) => !prev);
-  };
-
-  const handleOptionSelect = (option: any) => {
-    setSelectedOption(option);
-    setIsDropdownOpen(false);
-  };
-
-  //file menu
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
+  //to fully get
   const handleIconButtonClick = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
-    setAnchorEl(event.currentTarget);
+    const target = event.currentTarget;
+    const databaseId = target.dataset.databaseId;
+
+    if (databaseId) {
+      setAnchorEl(target);
+      setSelectedFileId(databaseId);
+    }
   };
 
   const handlePopoverClose = () => {
     setAnchorEl(null);
+    setSelectedFileId(null);
   };
-
-  const handleOptionSelectPop = (option: string) => {
-    setSelectedMenuOption(option);
-    handlePopoverClose();
-  };
-
-  const isPopoverOpen = Boolean(anchorEl);
 
   //smallscreen menu
-  const [anchorE2, setAnchorE2] = useState<null | HTMLElement>(null);
-  const [selectedOptionPopMenu, setSelectedOptionPopMenu] = useState("All");
-  const open = Boolean(anchorE2);
+ 
 
-  const handleOptionSelectPopMenu = (option: string) => {
-    setSelectedOptionPopMenu(option);
-    setAnchorE2(null);
+  //search funtion
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
 
-  const handlePopoverOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorE2(event.currentTarget);
-  };
+  useEffect(()=>{
+    if(databases.length > 0){
+      console.log("db state ", databases);
+      setFilteredDBs(databases.filter((db) =>
+      db.databaseName.toLowerCase().includes(searchQuery.toLowerCase())));
+    }
+    
+  },[databases])
+  
+  
 
-  const handlePopoverCloseE2 = () => {
-    setAnchorE2(null);
-  };
+  useEffect(() => {
+    if (userId) {
+      DatabaseService.getDBsByUser(userId)
+        .then((res) => {
+          console.log(res);
+          setDatabases(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }, [userId]);
 
-  const [showAdditionalButtons, setShowAdditionalButtons] = useState(false);
-  const toggleAdditionalButtons = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event.preventDefault();
-    setShowAdditionalButtons(!showAdditionalButtons);
-  };
+  useEffect(() => {
+    setSearchResult(filteredDBs);
+  }, [searchQuery, filteredDBs]);
 
+
+    //Sort by
+    const handleDropdownToggle = () => {
+      setIsDropdownOpen((prev) => !prev);
+    };
+  
+    // Sort your files function
+    const handleOptionSelect = (option: string) => {
+      setIsDropdownOpen(false);
+  
+      let sortedFiles = [...databases];
+      setSelectedOption(option);
+  
+      if (option === "Name") {
+        sortedFiles.sort((a, b) => a.databaseName.localeCompare(b.databaseName));
+      } 
+  
+      setDatabases(sortedFiles);
+    };
+
+
+    const openImportModal = () => {
+      setIsImportModalOpen(true);
+      document.body.style.overflow = "hidden"; // Prevent scrolling
+    };
+  
+    const closeImportModal = () => {
+      setIsImportModalOpen(false);
+      document.body.style.overflow = "auto"; // Allow scrolling
+    };
+
+    const handleClearfilter = () => {
+      setSearchQuery("");
+      setCurrentSortOption("All");
+      setSelectedOption("All");
+  
+      if (userId) {
+        DatabaseService.getDBsByUser(userId)
+          .then((res) => {
+            console.log(res);
+            setDatabase(res);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+    };
+    
+    const handlePopoverOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+      setAnchorE2(event.currentTarget);
+    };
+  
+    const handlePopoverCloseE2 = () => {
+      setAnchorE2(null);
+    };
   return (
     <Grid
-      paddingLeft={{ lg: 2, xl: 2 }}
+      paddingX={{ xs: 5, sm: 5, lg: 10 }}
       style={{
         paddingTop: "5rem",
         width: "100%",
-        alignItems: "center",
-        display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
       }}
     >
-      <section>
+        <section style={{ marginTop: "50px" }}>
         <Grid
+          maxWidth={{ lg: "95%", xl: "80%" }}
+          marginX="auto"
           style={{
             display: "flex",
             alignItems: "center",
@@ -159,23 +230,14 @@ const DatabaseList: React.FC<{}> = () => {
             style={{
               display: "flex",
               alignItems: "center",
-              flex: 1, // Set flex to 0.5 for half width
+              flex: 1,
               borderRadius: "40px",
-              height: "30px",
+              height: "50px",
               boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.1)",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "40px",
-                background: "#fff",
-              }}
-            >
-              <SearchIcon style={{ fontSize: "24px", color: "gray" }} />
-            </div>
+            <SearchIcon style={{ fontSize: "24px", color: "gray" }} />
+
             <input
               style={{
                 fontSize: "20px",
@@ -187,24 +249,52 @@ const DatabaseList: React.FC<{}> = () => {
               type="text"
               placeholder="Search"
               aria-label="Search"
+              value={searchQuery}
+              onChange={handleSearchInputChange}
             />
           </Grid>
+      
+          {isImportModalOpen && (
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                zIndex: 999,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              // onClick={closeImportModal}
+            >
+              <ImportFile
+                toggleImport={closeImportModal}
+                startLoading={() => {}}
+                setFileId={setFileId}
+              />
+            </div>
+          )}
+
           {isLargeScreen && (
-            <Link underline="none" href="/home" color={"black"}>
+            <Link underline="none" href="/deleted-files" color={"black"}>
               <IconButton
                 style={{
                   marginLeft: "24px",
                   fontSize: "20px",
                 }}
               >
-                <AddCircleIcon
-                  style={{ height: "30", width: "30", color: "green" }}
+                <img
+                  src={trashBinImage}
+                  alt="Bin"
+                  style={{ width: "28px", height: "28px", marginRight: "12px" }}
                 />
-                <span style={{ color: "black", marginLeft: "12px" }}>New</span>
+                <span style={{ color: "black" }}>Bin</span>
               </IconButton>
             </Link>
           )}
-
           {isLargeScreen && (
             <Link underline="none" href="/" color={"black"}>
               <IconButton
@@ -239,7 +329,7 @@ const DatabaseList: React.FC<{}> = () => {
                     display: "flex",
                     alignItems: "center",
                     padding: "8px 16px",
-                    width: "fit-content", // Add this line to adjust the width
+                    width: "fit-content",
                   }}
                 >
                   <span
@@ -266,7 +356,7 @@ const DatabaseList: React.FC<{}> = () => {
                       marginTop: "8px",
                       padding: "8px",
                       fontSize: "20px",
-                      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Optional: Add a shadow for better visibility
+                      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
                     }}
                   >
                     <MenuItem
@@ -274,6 +364,12 @@ const DatabaseList: React.FC<{}> = () => {
                       style={{ cursor: "pointer", color: "#000" }}
                     >
                       All
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => handleOptionSelect("Name")}
+                      style={{ cursor: "pointer", color: "#000" }}
+                    >
+                      Name
                     </MenuItem>
                     <MenuItem
                       onClick={() => handleOptionSelect("Date")}
@@ -291,6 +387,7 @@ const DatabaseList: React.FC<{}> = () => {
                 )}
               </FormControl>
               <Button
+                onClick={handleClearfilter}
                 style={{
                   marginLeft: "24px",
                   cursor: "pointer",
@@ -341,22 +438,23 @@ const DatabaseList: React.FC<{}> = () => {
                   alignItems: "flex-start",
                 }}
               >
-                <Link underline="none" href="/home" color={"black"}>
-                  <IconButton
+                
+                <IconButton
+                  style={{
+                    fontSize: "20px",
+                  }}
+                >
+                  <img
+                    src={trashBinImage}
+                    alt="Bin"
                     style={{
-                      marginTop: "20px",
-                      fontSize: "20px",
+                      width: "28px",
+                      height: "28px",
+                      marginRight: "12px",
                     }}
-                  >
-                    <AddCircleIcon
-                      style={{ height: "30", width: "30", color: "green" }}
-                    />
-                    <span style={{ color: "black", marginLeft: "12px" }}>
-                      New
-                    </span>
-                  </IconButton>
-                </Link>
-
+                  />
+                  <span style={{ color: "black" }}>Bin</span>
+                </IconButton>
                 <Link underline="none" href="/" color={"black"}>
                   <IconButton
                     style={{
@@ -387,7 +485,7 @@ const DatabaseList: React.FC<{}> = () => {
                         display: "flex",
                         alignItems: "center",
                         padding: "8px 16px",
-                        width: "fit-content", // Add this line to adjust the width
+                        width: "fit-content",
                       }}
                     >
                       <span
@@ -414,7 +512,7 @@ const DatabaseList: React.FC<{}> = () => {
                           marginTop: "8px",
                           padding: "8px",
                           fontSize: "20px",
-                          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Optional: Add a shadow for better visibility
+                          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
                         }}
                       >
                         <MenuItem
@@ -455,51 +553,58 @@ const DatabaseList: React.FC<{}> = () => {
           </div>
         </Grid>
       </section>
-
-      <section style={{ display: "flex", justifyContent: "center" }}>
+      <section
+        style={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <Grid
           container
-          spacing={{ md: 3, lg: 0, xl: 1 }}
-          style={{ margin: "auto" }} // Use auto margins
+          spacing={{ sm: 3, md: 2, lg: -10, xl: -50 }}
+          style={{ margin: "auto" }}
           paddingY={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
-          paddingLeft={{ lg: 10, xl: 12 }}
           paddingRight={{ xs: 2, sm: 2 }}
+          justifyContent="text-start"
         >
-          {files.map((file) => (
+          {searchResult.map((database) => (
             <Grid
-              key={file.id}
-              item
-              paddingLeft={2}
-              //12 is the w-full
+              key={database.databaseId}
+item
               xs={12}
               sm={6}
               md={4}
               lg={4}
-              xl={4}
+              xl={xlValue}
               paddingBottom={2}
             >
               <Grid
-                maxWidth={{ xs: "100%", sm: "100%", xl: "80%", lg: "60%" }}
+                maxWidth="100%"
+                width={{ xs: "full", sm: "full", lg: "320px" }}
                 paddingX={"20px"}
                 paddingY={{ lg: "10px" }}
                 style={{
                   backgroundColor: "#71C887",
                   borderRadius: "8px",
+                  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
                 }}
               >
                 <div
                   style={{
                     display: "flex",
-                    alignItems: "center", // Align items vertically in the center
+                    alignItems: "center",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                   }}
                 >
                   <div style={{ flex: "1" }}>
-                    <Link underline="none" href="/FilePage" color={"black"}>
-                      {file.name}
-                    </Link>
+                    <div
+                      key={database.databaseId}
+                      onClick={() => handleClickFileName(database)}
+                    >
+                     {database.databaseName}
+                    </div>
                   </div>
                   <IconButton
                     style={{
@@ -510,6 +615,7 @@ const DatabaseList: React.FC<{}> = () => {
                       alignItems: "center",
                     }}
                     onClick={handleIconButtonClick}
+                    data-file-id={database.databaseId}
                   >
                     <MoreHorizIcon
                       style={{ fill: "black", width: "1em", height: "1em" }}
@@ -517,7 +623,10 @@ const DatabaseList: React.FC<{}> = () => {
                   </IconButton>
 
                   <Popover
-                    open={isPopoverOpen}
+                    open={
+                      isPopoverOpen &&
+                      String(selectedFileId) === String(database.databaseName)
+                    }
                     anchorEl={anchorEl}
                     onClose={handlePopoverClose}
                     anchorOrigin={{
@@ -532,22 +641,29 @@ const DatabaseList: React.FC<{}> = () => {
                     <List>
                       <ListItem
                         button
-                        onClick={() => handleOptionSelectPop("details")}
+                        onClick={() => {
+                          console.log(
+                            `Details option selected for fileId: ${database.databaseId}`
+                          );
+                          handleOptionSelectPop("Details", database);
+                        }}
                       >
                         <ListItemText primary="Details" />
                       </ListItem>
+
+
                       <ListItem
                         button
-                        onClick={() => handleOptionSelectPop("delete")}
+                        onClick={() => {
+                          console.log(
+                            `Delete option selected for fileId: ${database.databaseId}`
+                          );
+
+                        }}
                       >
                         <ListItemText primary="Delete" />
                       </ListItem>
-                      <ListItem
-                        button
-                        onClick={() => handleOptionSelectPop("open")}
-                      >
-                        <ListItemText primary="Open" />
-                      </ListItem>
+                      
                     </List>
                   </Popover>
                 </div>
@@ -560,10 +676,12 @@ const DatabaseList: React.FC<{}> = () => {
                     height: "100%",
                   }}
                 >
-                  <Link href="/FilePage">
-                    <Box
-                      component="img"
-                      src={file.thumbnailUrl}
+                  <div
+                    key={database.databaseId}
+                    onClick={() => handleClickFileName(database)}
+                  >
+                    <img
+                      src="https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png"
                       alt="Thumbnail preview of a Drive item"
                       style={{
                         width: "100%",
@@ -572,30 +690,40 @@ const DatabaseList: React.FC<{}> = () => {
                         paddingBottom: "10px",
                         borderRadius: "8px",
                         display: "block",
-                        margin: "0 auto", // Center the image horizontally
+                        margin: "0 auto",
                       }}
                     />
-                  </Link>
+                  </div>
                 </div>
               </Grid>
+
               <Grid
                 style={{
-                  textAlign: "center",
                   marginTop: "0.5rem",
                   fontSize: "14px",
                   color: "#888",
                   fontStyle: "italic",
                 }}
-                paddingRight={{ lg: 15 }}
+                // paddingLeft={
+                //   searchResult.length <= 2
+                //     ? { lg: "100px", xl: "100px" }
+                //     : { lg: "50px", xl: "50px" }
+                // }
+                paddingLeft={{ xs: 6, sm: 5, md: 5, lg: 5 }}
               >
-                Last Modified: {file.lastModified}
+                {/* Last Modified: {file.latestDateModified} */}
               </Grid>
             </Grid>
           ))}
         </Grid>
       </section>
+      {searchResult.length === 0 && (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          {searchQuery && `No files found for "${searchQuery}"`}
+        </div>
+      )}
     </Grid>
   );
 };
 
-export default DatabaseList;
+export default FileList;

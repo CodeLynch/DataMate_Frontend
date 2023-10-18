@@ -29,8 +29,8 @@ class DatabaseService{
         })
     }
 
-    async getDBByUser(userid: number){
-        return axios.get(`${API_URL}/getUserDBs?userId=${userid}`)
+    async getDBsByUser(userid: number){
+        return axios.get(`${API_URL}/getUserDbs/${userid}`)
         .then((res)=>{
             if (res.data) {
                 return res.data;
@@ -39,5 +39,8 @@ class DatabaseService{
             console.log(err);
         })
     }
+
+    
+
 }
 export default new DatabaseService();
