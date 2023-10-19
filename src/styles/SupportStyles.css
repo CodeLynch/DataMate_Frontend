@@ -436,7 +436,9 @@ h3{
   color: white;
   border-radius: 50px;
   margin-top: 2.2rem;
-  padding: 10px 43px 10px 43px;
+  width: 200px;
+  height: 50px
+  /* padding: 10px 43px 10px 43px; */
 }
 
 .deleteBtn .MuiButton-root {
@@ -445,7 +447,7 @@ h3{
   color: white;
   border-radius: 50px;
   margin-top: 2.2rem;
-  padding: 10px 43px 10px 43px;
+  /* padding: 10px 43px 10px 43px; */
 }
 
 .logoutBtn .MuiButton-root {
@@ -454,7 +456,7 @@ h3{
   color: white;
   border-radius: 50px;
   margin-top: 2.2rem;
-  padding: 10px 43px 10px 43px;
+  /* padding: 10px 43px 10px 43px; */
 }
 
 

@@ -52,9 +52,9 @@ import SpecificTemplatePageTwo from "./components/SpecificTemplatePageTwo";
 import SpecificTemplatePageThree from "./components/SpecificTemplatePageThree";
 import HomeInitial from "./pages/HomeInitial";
 import TopbarInit from "./components/TopbarInit";
-import Profile from "./components/Profile";
 import ForgotPassword from "./components/ForgotPassword";
 import PrivateRoute from "./components/PrivateRoute";
+import Profile from "./components/Profile";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
