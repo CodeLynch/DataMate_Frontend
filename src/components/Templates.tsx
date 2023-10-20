@@ -59,7 +59,7 @@ export default function Templates(){
           <Box className='gradientbg'>
             <Stack direction="column" justifyContent="center" alignItems="center" sx={{ pt: 3}}>
               <Typography sx={{ color: "white", fontWeight: "bold", fontSize: {xs: 30, sm: 45, md: 50} }}> Download Template</Typography>
-              <Typography sx={{color: 'white', fontSize: {xs: 16, sm: 18, md: 20}, py: 3, px: {xs: 5}}}>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</Typography>
+              <Typography sx={{textAlign: "center" , color: 'white', fontSize: {xs: 16, sm: 18, md: 20}, py: 3, px: {xs: 5}}}>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</Typography>
               <Grid container justifyContent="center" alignItems="center" sx={{ mb: 6 }}>
                 <TextField className='search'
                   hiddenLabel
