@@ -320,7 +320,6 @@ export default function Registration() {
                                     type="file"
                                     variant="outlined"
                                     size='small'
-                                    required
                                     onChange={handleFileChange}
                                     fullWidth
                                     InputLabelProps={{ shrink: true }}
