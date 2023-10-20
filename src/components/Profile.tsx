@@ -216,14 +216,12 @@ export default function EditProfile() {
                       User Profile
                   </Typography>
                   <Container>
-                      <Grid 
-                      container direction={{ 
-                          xs: 'column', 
-                          sm: 'row', 
-                          md: 'row' }} 
+                    <Grid 
+                      container direction="row"
                           justifyContent="center" 
                           alignItems="center" 
                           sx={{ marginTop: '10px'}}>
+                          <Stack direction="row">
                           <TextField
                               id="outlined-read-only-input"
                               size="small"
@@ -250,6 +248,8 @@ export default function EditProfile() {
                                   width: { xs: '100%', sm: '100%', 
                                   md: 'auto' } }}
                           />
+
+                          </Stack>
                       </Grid>
                       <Grid container direction="column" justifyContent="center" alignItems="center">
                           <TextField
