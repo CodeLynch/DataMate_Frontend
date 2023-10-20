@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
@@ -39,6 +41,7 @@ import Topbar from "./Topbar";
 import Navbar from "./Navbar";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
+import CloseIcon from '@mui/icons-material/Close';
 
 
 export default function DeletedFiles() {
@@ -65,7 +68,7 @@ export default function DeletedFiles() {
 
 
   const theme = useTheme();
-  const isNotXsScreen = useMediaQuery(theme.breakpoints.up("sm"));
+  const isNotXsScreen = useMediaQuery(theme.breakpoints.up("md"));
 
   const handleChange = (event: SelectChangeEvent) => {
     setSort(event.target.value as string);
@@ -166,7 +169,7 @@ export default function DeletedFiles() {
     {
       field: "fileName",
       headerName: "File Name",
-      width: 1250,
+      width: 1170,
       renderCell: (params) => <div>{params.row.fileName}</div>,
     },
     {
@@ -179,7 +182,7 @@ export default function DeletedFiles() {
           <Tooltip title="Restore" arrow>
             <RestoreIcon
             sx={{ color: "#14847C", cursor: "pointer" }}
-            onClick={() => handleRestore(params.row.fileId)}
+            onClick={() => handleRestore()}
           />
         </Tooltip>
         </div>
@@ -266,6 +269,10 @@ export default function DeletedFiles() {
     setIsDeleteDialogOpen(false);
   };
 
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [restoreSuccess, setRestoreSuccess] = useState(false);
+
+
   const handleDelete = async () => {
     if (selectedRows.length > 0) {
       const deleteResults = await Promise.all(
@@ -274,21 +281,35 @@ export default function DeletedFiles() {
           return { id, result };
         })
       );
-
+  
       setDeletedFiles((prevDeletedFiles) =>
         prevDeletedFiles.filter(
           (file) => !selectedRows.includes(file.fileId.toString())
         )
       );
-
+  
       setSelectedRows([]);
       setSelectedOption("");
-
       setIsDeleteDialogOpen(false);
+  
+      const successfulDeletion = deleteResults.filter(
+        (r) => r.result === "Files deleted successfully"
+      );
+      const failedDeletion = deleteResults.filter(
+        (r) => r.result !== "Files deleted successfully"
+      );
+  
+      if (successfulDeletion) {
+        setDeleteSuccess(true);
+        setRestoreSuccess(false);
+      } else {
+        setDeleteSuccess(false);
+        console.error("Failed to delete files:", failedDeletion);
+      }
     }
   };
-
-  const handleRestore = async (fileId:any) => {
+  
+  const handleRestore = async () => {
     if (selectedRows.length > 0) {
       const restoreResults = await Promise.all(
         selectedRows.map(async (id) => {
@@ -296,119 +317,86 @@ export default function DeletedFiles() {
           return { id, result };
         })
       );
-
+  
       const successfulRestorations = restoreResults.filter(
         (r) => r.result === "File restored successfully"
       );
       const failedRestorations = restoreResults.filter(
         (r) => r.result !== "File restored successfully"
       );
-
+  
       if (successfulRestorations.length > 0) {
         const files = await FileService.getDeletedFilesById(userId);
         setDeletedFiles(files);
-
+  
         setSelectedRows([]);
         setSelectedOption("");
-
-        console.log("Files restored successfully:", successfulRestorations);
-      }
-
+        setIsRestoreDialogOpen(false);
+  
+        setRestoreSuccess(true);
+        setDeleteSuccess(false);
+      } 
+  
       if (failedRestorations.length > 0) {
         console.error("Failed to restore files:", failedRestorations);
       }
-
-      handleRestoreDialogClose();
-      
     }
   };
+  
 
   return (
     <div>
-      <Grid container sx={{ mt: 10}}>
-        <Stack direction="column">
-          <Box m={4}>
-            <Stack direction="row">
-              <ArrowBackIosNewIcon sx={{ fontSize: '30px', color: '#374248', cursor: 'pointer', mr: 2, mt: .8 }} onClick={() => { nav('/files'); }}/>
-              <Typography variant="h4" fontWeight="bold" color="#374248">
-                Deleted Files
-              </Typography>
-            </Stack>
-          </Box>
-          <Grid container mx={4} justifyContent="center" alignItems="center">
-            <Stack direction="row">
-              <Grid container sx={{ width: '360px'}} >
-                  <TextField
-                    id="outlined-search"
-                    label="Search"
-                    type="search"
-                    variant="outlined"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchOutlinedIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                    InputLabelProps={{
-                      shrink: isLabelShrunk,
-                      sx: { ml: isLabelShrunk ? 0 : 4 },
-                    }}
-                    onFocus={handleTextFieldFocus}
-                    onBlur={handleTextFieldBlur}
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    sx={{
-                      boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.3)",
-                      borderRadius: "20px",
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        border: "none",
-                      },
-                      width: "100%",
-                    }}
-                  />
-              </Grid>
-            {isNotXsScreen ? (
-              <Stack direction="row" ml={5}>
-                  <Grid container sx={{ width: 200 }}>
-                    <FormControlLabel
-                      value="delete"
-                      control={<Checkbox />}
-                      label="Delete Forever"
-                      labelPlacement="end"
-                      checked={selectedOption === "delete"}
-                      onChange={handleCheckboxDeleteChange}
-                    />
-                  </Grid>
-                  <Grid container sx={{ width: 200 }}>
-                    <FormControlLabel
-                      value="restore"
-                      control={<Checkbox />}
-                      label="Restore Files"
-                      labelPlacement="end"
-                      checked={selectedOption === "restore"}
-                      onChange={handleCheckboxRestoreChange}
-                    />
-                  </Grid>
-                  <Box sx={{ width: 200, mt: 2 }}>
-                    <Typography variant="body2" color="error">
-                      {deleteError || restoreError}
-                    </Typography>
-                  </Box>
+      <Grid container sx={{ mt: 10}} className="wrapper-datagrid">
+        <Grid container>
+          <Box my={5}>
+              <Stack direction="row">
+                <ArrowBackIosNewIcon sx={{ fontSize: '30px', color: '#374248', cursor: 'pointer', mr: 2, mt: .8 }} onClick={() => { nav('/files'); }}/>
+                <Typography variant="h4" fontWeight="bold" color="#374248">
+                  Deleted Files
+                </Typography>
               </Stack>
-            ) : (
-              <Box mt={1}>
-                {/* with menu icon for xs screens */}
-                <Grid container>
-                  <IconButton onClick={handleMenuClick}>
-                    <MoreVertIcon />
-                  </IconButton>
-                  <Menu
-                    anchorEl={menuAnchor}
-                    open={Boolean(menuAnchor)}
-                    onClose={handleMenuClose}
-                  >
-                    <MenuItem>
+            </Box>
+        </Grid>
+        <Stack direction="row">
+          <Stack direction="row">
+            <Grid container sx={{ ml: { sm: 4} }}>
+              <TextField
+                id="outlined-search"
+                label="Search"
+                type="search"
+                variant="outlined"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchOutlinedIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                InputLabelProps={{
+                  shrink: isLabelShrunk,
+                  sx: { ml: isLabelShrunk ? 0 : 4 },
+                }}
+                onFocus={handleTextFieldFocus}
+                onBlur={handleTextFieldBlur}
+                value={searchQuery}
+                onChange={handleSearchChange}
+                sx={{
+                  boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.3)",
+                  borderRadius: "20px",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    border: "none",
+                  },
+                  width: {xs: 400, sm: 600, md: 500},
+                  mr: {xs: 3, sm: 5, md: 5},
+                }}
+              />
+            </Grid>
+          </Stack>
+          <Grid container justifyContent="center" alignItems="center">
+            <Stack direction="row">
+              {isNotXsScreen ? (
+                <Grid container direction="row">
+                    <Grid item>
                       <FormControlLabel
                         value="delete"
                         control={<Checkbox />}
@@ -417,8 +405,8 @@ export default function DeletedFiles() {
                         checked={selectedOption === "delete"}
                         onChange={handleCheckboxDeleteChange}
                       />
-                    </MenuItem>
-                    <MenuItem>
+                    </Grid>
+                    <Grid item>
                       <FormControlLabel
                         value="restore"
                         control={<Checkbox />}
@@ -427,14 +415,96 @@ export default function DeletedFiles() {
                         checked={selectedOption === "restore"}
                         onChange={handleCheckboxRestoreChange}
                       />
-                    </MenuItem>
-                    <Typography variant="body2" color="error" ml={2}>
-                      {deleteError || restoreError}
-                    </Typography>
-                  </Menu>
+                    </Grid>
+                    <Grid item>
+                     <Collapse in={!!deleteError || !!restoreError}>
+                        <Alert severity="error">
+                          {deleteError || restoreError}
+                          <IconButton
+                            aria-label="close"
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                              setDeleteError("");
+                              setRestoreError(""); 
+                            }}
+                          >
+                            <CloseIcon fontSize="inherit"/>
+                          </IconButton>
+                        </Alert>
+                      </Collapse>
+                      <Collapse in={deleteSuccess || restoreSuccess}>
+                        <Alert severity="success">
+                          {deleteSuccess && "Files deleted successfully."}
+                          {restoreSuccess && "Files restored successfully."}
+                          <IconButton
+                            aria-label="close"
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                              setDeleteSuccess(false);
+                              setRestoreSuccess(false);
+                            }}
+                          >
+                            <CloseIcon fontSize="inherit" />
+                          </IconButton>
+                        </Alert>
+                      </Collapse>
+                    </Grid>
                 </Grid>
-              </Box>
-            )}
+              ) : (
+                <Box mt={1}>
+                  {/* with menu icon for xs screens */}
+                  <Grid container>
+                    <IconButton onClick={handleMenuClick}>
+                      <MoreVertIcon />
+                    </IconButton>
+                    <Menu
+                      anchorEl={menuAnchor}
+                      open={Boolean(menuAnchor)}
+                      onClose={handleMenuClose}
+                    >
+                      <MenuItem>
+                        <FormControlLabel
+                          value="delete"
+                          control={<Checkbox />}
+                          label="Delete Forever"
+                          labelPlacement="end"
+                          checked={selectedOption === "delete"}
+                          onChange={handleCheckboxDeleteChange}
+                        />
+                      </MenuItem>
+                      <MenuItem>
+                        <FormControlLabel
+                          value="restore"
+                          control={<Checkbox />}
+                          label="Restore Files"
+                          labelPlacement="end"
+                          checked={selectedOption === "restore"}
+                          onChange={handleCheckboxRestoreChange}
+                        />
+                      </MenuItem>
+                     
+                     <Collapse in={!!deleteError || !!restoreError}>
+                        <Alert severity="error" sx={{ mx: 2 }}>
+                          {deleteError || restoreError}
+                          <IconButton
+                            aria-label="close"
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                              setDeleteError("");
+                              setRestoreError(""); 
+                            }}
+                          >
+                            <CloseIcon fontSize="inherit"/>
+                          </IconButton>
+                        </Alert>
+                      </Collapse>
+                    </Menu>
+                  </Grid>
+                </Box>
+              )}
             </Stack>
           </Grid>
       </Stack>
