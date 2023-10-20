@@ -1,17 +1,17 @@
-import { Avatar, Badge, Box, Drawer, IconButton, Toolbar } from "@mui/material";
+import { Avatar, Badge, Box, Divider, Drawer, Grid, IconButton, List, ListItem, Popover, Stack, Toolbar, Tooltip, Typography } from "@mui/material";
 import Logo from "../images/datamate-logo.png";
 import WLogo from "../images/DMLogoWhiteNoBG.png";
-import { Menu } from "@mui/icons-material";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { AccountCircle, ExitToApp, Menu } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
-import { DrawerHeader } from "../styles/NavbarStyles";
-import NavbarList from "./NavbarList";
 import { useEffect, useState } from "react";
 import { AppBar } from "../styles/TopbarSytles";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
 import UserService from "../api/UserService";
-import PersonIcon from '@mui/icons-material/Person';
+import React from "react";
+import { logout } from "../helpers/AuthAction";
+import SettingsIcon from '@mui/icons-material/Settings';
+import FeedbackIcon from '@mui/icons-material/Feedback';
 
 type TopbarProps = {
   open: boolean;
@@ -23,6 +23,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
   const location = useLocation();
   const userId = useSelector((state: RootState) => state.auth.userId);
   const [userImage, setUserImage] = useState<string | undefined>(undefined);
+  const dispatch = useDispatch();
 
 
   const handleProfileClick = () => {
@@ -45,6 +46,51 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
   // useEffect(() => {
   //   console.log('Profile pic:',userImage);
   // }, [userImage]);
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleAvatarClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMyProfileClick = () => {
+    navigate("/profile");
+    handleAvatarClose();
+  };
+
+  const handleLogoutClick = () => {
+    dispatch(logout());
+    navigate("/login", { replace: true });
+  };
+
+  const [data, setData]= useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    address: "",
+    username: "",
+    password: "",
+    businessName: "",
+    businessType: "",
+})
+
+  const { firstName, lastName, email, address, username, password, businessName, businessType } = data;
+
+  useEffect(() => {
+    if (userId) {
+        UserService.getUserById(userId)
+            .then(response => {
+                setData(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+            });
+    }
+  }, [userId]);
 
   return (
     <AppBar
@@ -87,32 +133,81 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
           </a>
         </Box>
 
-        <IconButton
-          sx={{ color: location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database"? "#FFFFFF" : "#000000" }}
-          onClick={handleProfileClick}
-        >
-          {/* <AccountCircleIcon /> */}
-          <div className="hover-style">
-            <Avatar
-              sx={{ bgcolor: '#3DB1BA',  width: {xs: 30, sm: 37, md: 40}, height: {xs: 30, sm: 37, md: 40} }}
-              alt="User"
-              src={userImage ? `data:image/jpeg;base64,${userImage}` : undefined}
-          ></Avatar>
-          </div>
-        </IconButton>
+        <Box>
+          <Tooltip title="Account">
+            <IconButton
+              sx={{ color: location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database"? "#FFFFFF" : "#000000" }}
+              onClick={handleAvatarClick}
+              aria-controls={open ? 'account-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? 'true' : undefined}
+            >
+              <div className="hover-style">
+                <Avatar
+                  sx={{ bgcolor: '#3DB1BA',  width: {xs: 30, sm: 37, md: 40}, height: {xs: 30, sm: 37, md: 40} }}
+                  alt="User"
+                  src={userImage ? `data:image/jpeg;base64,${userImage}` : undefined}>
+                </Avatar>
+              </div>
+            </IconButton>
+          </Tooltip>
+
+          <Popover
+            open={Boolean(anchorEl)}
+            anchorEl={anchorEl}
+            onClose={handleAvatarClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+          >
+            <Box sx={{ p: 2 }}>
+              <Grid container direction="column" justifyContent="flex-start" alignItems="flex-start">
+                <Stack>
+                  <IconButton onClick={handleMyProfileClick}>
+                    <Grid container >
+                    <Avatar
+                      sx={{ bgcolor: '#3DB1BA', mr:2,  width: {xs: 19, sm: 29, md: 32}, height: {xs: 19, sm: 29, md: 32} }}
+                      alt="User"
+                      src={userImage ? `data:image/jpeg;base64,${userImage}` : undefined}>
+                    </Avatar>
+                    </Grid>
+                    <Typography sx={{fontSize: '15px', whiteSpace: 'nowrap', fontWeight: 'bold'}}>{firstName + " " + lastName}</Typography>            
+                  </IconButton>
+                  <Divider orientation="horizontal" />
+                </Stack>
+                <List>
+                  <ListItem>
+                    <IconButton>
+                      <SettingsIcon sx={{ fontSize: '21px' }} />
+                      <Typography sx={{ml: 2, fontSize: '15px'}}>Settings</Typography>                
+                    </IconButton>
+                  </ListItem>
+                  <ListItem>
+                    <IconButton>
+                      <FeedbackIcon sx={{ fontSize: '21px' }} />
+                      <Typography sx={{ml: 2, fontSize: '15px'}}>Feedback</Typography>                
+                    </IconButton>
+                  </ListItem>
+                  <ListItem>
+                    <IconButton onClick={handleLogoutClick}>
+                      <ExitToApp sx={{ fontSize: '21px' }} />
+                      <Typography sx={{ml: 2, fontSize: '15px'}}>Logout</Typography>                
+                    </IconButton>
+                  </ListItem>
+                </List>
+              </Grid>
+            </Box>
+          </Popover>
+        </Box>
+        
       </Toolbar>
 
-      {/* <Drawer open={open} sx={{ "& .MuiPaper-root": { backgroundColor: "tertiary.main" } }} onClose={handleDrawerOpen}>
-        <DrawerHeader onClick={handleDrawerOpen} sx={{ display: 'flex', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex'}}>
-            <img src={Logo} alt="datamate logo" style={{ width: '120px', height: '35px', marginRight: '58px'}} />
-            <IconButton sx={{ color: "tertiary.contrastText" }}>
-              <Menu />
-            </IconButton>
-          </Box>
-        </DrawerHeader>
-        <NavbarList open={open} />
-      </Drawer> */}
+      
     </AppBar>
   );
 };
