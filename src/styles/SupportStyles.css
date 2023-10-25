@@ -81,6 +81,13 @@
   padding-right: 20px;
 }
 
+.wrapper-footer{
+  max-width: 1350px;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 .wrapper-datagrid{
   max-width: 1500px;
   margin: 0 auto;
