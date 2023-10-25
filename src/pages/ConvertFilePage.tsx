@@ -8,12 +8,13 @@ import styled from "@emotion/styled";
 import axios from "axios";
 import ReactDataGrid from "@inovua/reactdatagrid-community";
 import '@inovua/reactdatagrid-community/index.css'
-import '@inovua/reactdatagrid-community/index.css'
 import '@inovua/reactdatagrid-community/theme/green-light.css'
 import ConvertService from "../services/ConvertService";
 import DatabaseService from "../services/DatabaseService";
 import TableService from "../services/TableService";
-import path from "node:path/win32";
+import { RootState } from "../helpers/Store";
+import { useSelector } from "react-redux";
+
 
 type ConvertProps = {
     startLoading: () => void,
@@ -81,6 +82,7 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
     const [fileName, setFileName] = useState("");
     const [databaseId, setDatabaseId] = useState(-1);
     const [isDone, setDone] = useState(false);
+    const userId = useSelector((state: RootState) => state.auth.userId);
 
 
 
@@ -241,7 +243,7 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
                 row[header] = parseFloat(value);
             } else if (!isNaN(Date.parse(value))) {
                 // Check if the value is a valid date
-                row[header] = new Date(value);
+                row[header] = new Date(value).toDateString();
             }else {
                 // If not a number, date, or boolean, keep it as a string
                 row[header] = value;
@@ -303,7 +305,11 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
         return "VARCHAR(255)";
     } else if (typeof value === "number") {
         if (Number.isInteger(value)) {
+           if(value > 2000000000){
+            return "VARCHAR(255)";
+           }else{
             return "INTEGER";
+           }
         } else {
             return "DOUBLE";
         }
@@ -327,13 +333,20 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
 
         const insertValues = jsonData.map(record => `(${columns.map(col => {
             const value = record[col];
+            if(value === "NULL"){
+                return 'NULL';
+            }
             if (typeof value === "string") {
                 return `'${value}'`;
             } else if (value instanceof Date) {
                 // Format date as 'YYYY-MM-DD'
                 return `'${value.toISOString().split('T')[0]}'`;
             } else {
-                return value;
+                if(value as number > 2000000000){
+                    return `'${value}'`;
+                }else{
+                    return value;
+                }
             }
         }).join(', ')})`).join(', ');
     
@@ -355,10 +368,9 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
         if(dataCols !== undefined && sheetData !== undefined){
             let sql2dArr:ConvertCommand[] = [...SQLCommands];
             let dbname = fileName.replace(/\.[^/.]+$/, "");
-            console.log("dbname val: ", dbname)
+            console.log("dbname val: ", dbname);
             startLoading();
-            DatabaseService.postDatabase(dbname, 1)
-            .then((res)=>{
+            DatabaseService.postDatabase(dbname, userId).then((res)=>{
                     console.log("post res:", res);
                     let dbres = res as unknown as DatabaseResponse;
                     let dbId = dbres.databaseId;

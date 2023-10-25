@@ -152,10 +152,10 @@ export default function Registration() {
 
 
     return (
-        <div className='gradientbg edit-spacing' style={{ width: '100%', height: '100%'}}>
+        <Grid container className='gradientbg edit-spacing' justifyContent="center" alignItems="center" sx={{ width: '100%', height: '100%'}}>
             {/* <TopbarInit/> */}
             <Grid component="form" encType="multipart/form-data" onSubmit={postUser}>
-                <Grid container justifyContent="center" alignItems="center">
+                <Grid container justifyContent="center" alignItems="center" sx={{ width: '100%', height: '100vh', mt: 5, mb: 11 }}>
                     <Box sx={{ mt: {xs: '100%', sm:'10%', md: '6%'}, backgroundColor: 'white', margin: {xs: '30px'}, p: {xs: '35px', sm: '40px', md: '40px'}, borderRadius: '20px', boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)' }}> 
                         <Container> 
                             <Typography variant="h4" fontWeight="bold" color='#374248'>
@@ -320,7 +320,6 @@ export default function Registration() {
                                     type="file"
                                     variant="outlined"
                                     size='small'
-                                    required
                                     onChange={handleFileChange}
                                     fullWidth
                                     InputLabelProps={{ shrink: true }}
@@ -346,6 +345,6 @@ export default function Registration() {
                 
                 </Grid>
             </Grid>
-        </div>
+        </Grid>
     );
 }

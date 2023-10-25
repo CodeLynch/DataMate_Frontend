@@ -15,6 +15,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import UserService from "../api/UserService";
 import { useDispatch } from "react-redux";
 import { logout } from "../helpers/AuthAction";
+import { Grid } from "@mui/material";
 
 const DeleteProfile = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -110,185 +111,190 @@ const DeleteProfile = () => {
     <section
       className="gradientbg"
       style={{
-        position: "fixed",
+        // position: "fixed",
         top: 0,
         left: 0,
-        width: "100vw",
+        width: "100%",
         height: "100%",
       }}
     >
-      <Box
-        component="form"
-        onSubmit={deleteAccount}
-        width={{ xl: "50%", sm: "85%", xs: "95%", lg: "50%" }}
-        height={{ xl: 500, sm: 550, xs: 650, lg: 500 }}
-        marginX="auto"
-        marginTop="200px"
-        borderRadius="50px"
-        sx={{
-          backgroundColor: "#FFFFFF",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          textAlign: "center",
-        }}
-      >
-        <Avatar
-          alt="Placeholder Image"
-          src={userImage ? `data:image/jpeg;base64,${userImage}` : undefined}
+      <Grid container component="form" onSubmit={deleteAccount} justifyContent="center" alignItems="center" sx={{ width: '100%',  mt: 8 }}>
+        <Box
+          // width={{ xl: "50%", sm: "85%", xs: "95%", lg: "50%" }}
+          // height={{ xl: 500, sm: 550, xs: 650, lg: 500 }}
+          // marginX="auto"
+          // marginTop="200px"
+          borderRadius="50px"
           sx={{
-            width: 150,
-            height: 150,
-            backgroundColor: "#fff",
-            borderRadius: "50%",
-            position: "absolute",
-            top: -75,
+            backgroundColor: "#FFFFFF",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
+            textAlign: "center",
+            mt: 15,
+            mx: {xs: 5}
           }}
-        />
-
-        <Stack
-          marginTop={{ xs: 0, sm: 4, md: 5, lg: 5, xl: 5 }}
-          paddingX="20px"
         >
-          <Typography
-            variant="h4"
-            color="black"
-            fontWeight="bold"
-            marginBottom="50px"
-            textAlign="center"
-          >
-            Delete Account
-          </Typography>
-          <Typography
-            variant="body1"
-            textAlign="left"
-            // marginLeft={{ xs: 3, sm: 3, md: 0, lg: 0, xl: 0 }}
-            marginBottom="10px"
-            color="black"
-          >
-            We are sorry to hear that you want to delete your account.
-          </Typography>
-          <TextField
-            onChange={handleChange}
-            type={showPassword ? "text" : "password"}
-            value={passwordInput} // Use passwordInput instead of password
-            label="Password"
-            name="password"
-            id="filled-password-input"
-            required
-            autoComplete="current-password"
-            variant="outlined"
-            error={passwordError !== null}
-            helperText={passwordError}
+          <Avatar
+            alt="Placeholder Image"
+            src={userImage ? `data:image/jpeg;base64,${userImage}` : undefined}
             sx={{
-              marginBottom: "50px",
-              marginLeft: {
-                xs: 3,
-                sm: 3,
-                md: 0,
-                lg: 0,
-                xl: 0,
-              },
-              "& .MuiInputLabel-root": {
-                color: "black",
-              },
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "black",
-                },
-                "&:hover fieldset": {
-                  borderColor: "black",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "black",
-                },
-              },
-            }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  {" "}
-                  <IconButton onClick={handlePasswordShow}>
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>{" "}
-                </InputAdornment>
-              ),
+              width: 150,
+              height: 150,
+              backgroundColor: "#fff",
+              borderRadius: "50%",
+              position: "absolute",
+              top: -75,
             }}
           />
 
-          <Typography
-            variant="body2"
-            textAlign="left"
-            marginBottom="20px"
-            color="black"
-            marginLeft={{ xs: 3, sm: 3, md: 0, lg: 0, xl: 0 }}
+          <Stack
+            // marginTop={{ xs: 0, sm: 4, md: 5, lg: 5, xl: 5 }}
+            m={8}
+            // paddingX="20px"
           >
-            If you choose to continue, your account details, and other related
-            data will also be deleted.
-          </Typography>
-          <Typography
-            variant="body2"
-            textAlign="left"
-            marginBottom="10px"
-            color="black"
-            marginLeft={{ xs: 3, sm: 3, md: 0, lg: 0, xl: 0 }}
-          >
-            Do you still want to delete your account?
-          </Typography>
-        </Stack>
-        <Box
-          marginTop={{
-            xs: "50px",
-            sm: "20px",
-            md: "20px",
-            lg: "20px",
-            xl: "20px",
-          }}
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            width: "100%",
-            marginRight: "15%",
-          }}
-        >
-          <Button
-            variant="contained"
-            type="submit"
-            sx={{
-              width: "130px",
-              height: "40px",
-              borderRadius: "50px",
-              color: "white",
-              backgroundColor: "#CCCCCC",
-              boxShadow: "0px 4px 4px 0px #00000040",
-              "&:hover": {
-                backgroundColor: "red",
-              },
-            }}
-          >
-            Delete
-          </Button>
+            <Typography
+              variant="h4"
+              color="black"
+              fontWeight="bold"
+              marginBottom="50px"
+              textAlign="center"
+              sx={{ mt: 3 }}
+            >
+              Delete Account
+            </Typography>
+            <Typography
+              variant="body1"
+              textAlign="left"
+              // marginLeft={{ xs: 3, sm: 3, md: 0, lg: 0, xl: 0 }}
+              marginBottom="10px"
+              color="black"
+            >
+              We are sorry to hear that you want to delete your account.
+            </Typography>
+            <TextField
+              onChange={handleChange}
+              type={showPassword ? "text" : "password"}
+              value={passwordInput} // Use passwordInput instead of password
+              label="Password"
+              name="password"
+              id="filled-password-input"
+              required
+              autoComplete="current-password"
+              variant="outlined"
+              error={passwordError !== null}
+              helperText={passwordError}
+              sx={{
+                marginBottom: "50px",
+                marginLeft: {
+                  xs: 3,
+                  sm: 3,
+                  md: 0,
+                  lg: 0,
+                  xl: 0,
+                },
+                "& .MuiInputLabel-root": {
+                  color: "black",
+                },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "black",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "black",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "black",
+                  },
+                },
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {" "}
+                    <IconButton onClick={handlePasswordShow}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>{" "}
+                  </InputAdornment>
+                ),
+              }}
+            />
 
-          <Button
-            variant="contained"
+            <Typography
+              variant="body2"
+              textAlign="left"
+              marginBottom="20px"
+              color="black"
+              marginLeft={{ xs: 3, sm: 3, md: 0, lg: 0, xl: 0 }}
+            >
+              If you choose to continue, your account details, and other related
+              data will also be deleted.
+            </Typography>
+            <Typography
+              variant="body2"
+              textAlign="left"
+              marginBottom="10px"
+              color="black"
+              marginLeft={{ xs: 3, sm: 3, md: 0, lg: 0, xl: 0 }}
+            >
+              Do you still want to delete your account?
+            </Typography>
+          </Stack>
+          <Box
+            // marginTop={{
+            //   xs: "50px",
+            //   sm: "20px",
+            //   md: "20px",
+            //   lg: "20px",
+            //   xl: "20px",
+            // }}
             sx={{
-              width: "130px",
-              height: "40px",
-              borderRadius: "50px",
-              color: "white",
-              marginLeft: "10px",
-              backgroundColor: "#71C887",
-              "&:hover": {
-                backgroundColor: "green",
-              },
+              display: "flex",
+              justifyContent: "flex-end",
+              width: "100%",
+              marginRight: "15%",
+              mb: 3
             }}
           >
-            Cancel
-          </Button>
+            <Button
+              variant="contained"
+              type="submit"
+              sx={{
+                width: "130px",
+                height: "40px",
+                borderRadius: "50px",
+                color: "white",
+                backgroundColor: "#CCCCCC",
+                boxShadow: "0px 4px 4px 0px #00000040",
+                "&:hover": {
+                  backgroundColor: "red",
+                },
+              }}
+            >
+              Delete
+            </Button>
+
+            <Button
+              variant="contained"
+              sx={{
+                width: "130px",
+                height: "40px",
+                borderRadius: "50px",
+                color: "white",
+                marginLeft: "10px",
+                backgroundColor: "#71C887",
+                "&:hover": {
+                  backgroundColor: "green",
+                },
+              }}
+            >
+              Cancel
+            </Button>
+          </Box>
         </Box>
-      </Box>
+      </Grid>
     </section>
   );
 };

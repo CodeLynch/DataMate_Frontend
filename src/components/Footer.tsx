@@ -36,8 +36,8 @@ export default function Footer(){
                     </Grid>
                 )}
                 <Grid container justifyContent= 'center' alignItems= 'center'>
-                    <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <p style={{ fontSize: 15, color: 'white', paddingTop: '1rem'}}>© 2023  All Rights Reserved, DataMate</p>
+                    <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', pt: '1rem' }}>
+                        <p style={{ fontSize: 15, color: 'white' }}>© 2023  All Rights Reserved, DataMate</p>
                         <p style={{ fontSize: 15, color: 'white', marginTop: '-0.5rem', paddingBottom: '1rem'}}>Privacy Policy  |   Terms</p>
                     </Stack>
                 </Grid>
@@ -51,9 +51,6 @@ export default function Footer(){
                             <FacebookIcon sx={{ color: "white", width: 25, height: 25, mr: 2 }}/>
                             <EmailIcon sx={{ color: "white", width: 25, height: 25, mr: 2 }}/>
                             <LinkedInIcon sx={{ color: "white", width: 25, height: 25 }}/>
-                            <Typography variant="body2">
-
-                            </Typography>
                         </Stack>
                     </Stack>
                 </Grid>

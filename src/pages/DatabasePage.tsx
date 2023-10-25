@@ -88,6 +88,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
   }
 
     useEffect(()=>{
+      //if(dbId !== undefined){
         TableService.getTblByDB(dbId).then(
             (res)=>{
                 console.log("get res:", res);
@@ -104,10 +105,22 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                 setCurrentTbl(Tables[0]);
                 setCurrentTblID(0);
                 setColsData(createColumns(tblResponse[0].columns))
+                if(Tables[0] !== undefined){
+                  TableService.getTblData(Tables[0])
+                .then((res)=>{
+                  console.log("get tbl data res:",res);
+                  setTblData(createObjects(tblResponse[0].columns, res as [][]));
+                }).catch((err)=>{
+                  console.log(err);
+                })
+                }
+                
               }
         ).catch((err)=>{
           console.log(err);
         })
+      //}
+        
     },[])
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -116,20 +129,21 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
     };
 
     useEffect(()=>{
-      TableService.getTblByName(Tables[currentTblID])
-      .then((res)=>{
-        let tblRes:TableType = res as TableType;
-        console.log("tbl res:", res);
-        setColsData(createColumns(tblRes.columns));
-        if(Tables[currentTblID] !== undefined){
-          TableService.getTblData(Tables[currentTblID])
-          .then((res)=>{
-            setTblData(createObjects(tblRes.columns, res as [][]));
-          })
-        }
-      }).catch((err)=>{
-        console.log(err);
-      })
+      if(Tables[currentTblID] !== undefined || Tables[currentTblID] !== null){
+        TableService.getTblByName(Tables[currentTblID])
+        .then((res)=>{
+          let tblRes:TableType = res as TableType;
+          setColsData(createColumns(tblRes.columns));
+          
+            TableService.getTblData(Tables[currentTblID])
+            .then((res)=>{
+              setTblData(createObjects(tblRes.columns, res as [][]));
+            })
+          
+        }).catch((err)=>{
+          console.log(err);
+        })
+    }
     }, [currentTbl])
 
     function getTabProps(index: number) {

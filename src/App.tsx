@@ -54,6 +54,7 @@ import HomeInitial from "./pages/HomeInitial";
 import TopbarInit from "./components/TopbarInit";
 import ForgotPassword from "./components/ForgotPassword";
 import PrivateRoute from "./components/PrivateRoute";
+import DatabaseScreen from "./components/DatabaseScreen";
 import Profile from "./components/Profile";
 
 /* Customize default MUI theme */
@@ -563,7 +564,7 @@ function App() {
                     path="/database"
                     element={<DatabasePage stopLoading={StopLoading} />}
                   />
-                  <Route path="/databases" element={<DatabaseScreenPage />} />
+                  <Route path="/databases" element={<DatabaseScreen setFileId={setFileId} />} />
                   <Route path="/delete-profile/" element={<DeleteProfile />} />
                   <Route path="/deleted-files" element={<DeletedFiles />} />
                   <Route

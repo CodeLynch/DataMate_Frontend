@@ -35,3 +35,9 @@ export interface ResponseFile {
   userId: number;
   // thumbnailUrl: string;
 }
+
+export interface DatabaseEntity {
+  databaseId: number;
+  databaseName: string,
+  userId: number;
+}
