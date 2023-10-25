@@ -207,6 +207,8 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
       setAnchorE2(null);
     };
   return (
+    <>
+    {databases.length <= 0 ? <h1>No or empty Response Received</h1>:
     <Grid
       paddingX={{ xs: 5, sm: 5, lg: 10 }}
       style={{
@@ -723,6 +725,8 @@ item
         </div>
       )}
     </Grid>
+  }
+  </>
   );
 };
 
