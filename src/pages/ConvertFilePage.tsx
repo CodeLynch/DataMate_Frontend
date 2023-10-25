@@ -471,7 +471,7 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
     //-----------------------------------------------------------------------------------------------------
     return(
         <>
-            <div style={{marginRight:'50px', marginLeft:'50px', maxHeight:'80vh', marginTop:'50px'}}>
+            <div style={{marginRight:'50px', marginLeft:'50px', maxHeight:'80vh', marginTop:'100px'}}>
             <h1 style={{textAlign:'center'}}>Convert Spreadsheet to Database?</h1>
                 <div style={{marginTop:"1em"}}>
                     <div style={{marginLeft:"10%"}}>

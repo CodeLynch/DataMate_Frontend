@@ -211,7 +211,7 @@ export default function Filepage({stopLoading}:FilePageProps) {
     return(
         <>
         {HeaderArr !== undefined && BodyArr !== undefined? <>
-            <div style={{marginRight:'50px', marginLeft:'50px', height:'80vh'}}>
+            <div style={{marginRight:'50px', marginLeft:'50px', height:'80vh', marginTop:'100px'}}>
             <h1>{fileName}</h1>
                 <div style={{marginTop:"1em"}}>
                     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
