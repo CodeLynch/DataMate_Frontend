@@ -227,7 +227,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                     </Box>
                     <Box sx={{width:"80%", display:"flex", flexDirection:"column", margin:".5em"}}>
                         <Box sx={{backgroundColor:"#347845",maxWidth: '40%', padding:".3em", display:"flex", justifyContent:"center", color:"white"}}>
-                            {currentTbl === "" || currentTbl == undefined? "Table" : currentTbl}
+                            {currentTbl === "" || currentTbl === undefined? "Table" : currentTbl}
                         </Box>
                         <Box sx={{ width: '100%', display:"flex", justifyContent:"center", marginTop:0}}>
                             <Box style={{backgroundColor:"#347845",width: '100%', height:"100%", display:"flex" }}>
