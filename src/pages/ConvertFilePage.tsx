@@ -37,7 +37,8 @@ interface TableRow {
 }
 
 type ConvertCommand = {
-    createTable: string;
+    tblName: string;
+    tblColumns: string;
     insertValues: string;
 }
 
@@ -328,7 +329,7 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
         const columns: string[] = Object.keys(jsonData[0]);
         let newTblName = tableName.replace(/[^a-zA-Z0-9]/g,'_'); 
         console.log("new name: ",newTblName)
-        const createTableQuery = `CREATE TABLE IF NOT EXISTS ${newTblName} (${columns.map(col => `${col.replace(/[^a-zA-Z0-9]/g,'_')} ${getColumnType(jsonData[0][col])}`).join(', ')});`;
+        const tblColsQuery = `(${columns.map(col => `${col.replace(/[^a-zA-Z0-9]/g,'_')} ${getColumnType(jsonData[0][col])}`).join(', ')});`;
     
 
         const insertValues = jsonData.map(record => `(${columns.map(col => {
@@ -352,11 +353,12 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
     
         let SQLcolumns: string[] = Object.keys(jsonData[0]).map(key => key.replace(/[^a-zA-Z0-9]/g,'_'));
         console.log("join: ", SQLcolumns.join(', '));
-        const insertTableQuery = `INSERT INTO ${tableName.replace(/[^a-zA-Z0-9]/g,'_')} (${SQLcolumns.join(', ')}) VALUES ${insertValues};`;
+        const valsQuery = `(${SQLcolumns.join(', ')}) VALUES ${insertValues};`;
         
         return {
-            createTable:`${createTableQuery}`,
-            insertValues: `${insertTableQuery}`
+            tblName: `${newTblName}`,
+            tblColumns:`${tblColsQuery}`,
+            insertValues: `${valsQuery}`
         };
     }
 
@@ -438,10 +440,10 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
             console.log("SQL Commands are: ", SQLCommands);
             let i = 0;
             SQLCommands.map((com, i)=>{
-            ConvertService.postCommand(com.createTable)
+            ConvertService.postCommand(com.tblName, com.tblColumns, 1)
             .then((res)=>{
                 console.log("Table Created!");
-                ConvertService.postCommand(com.insertValues)
+                ConvertService.postCommand(com.tblName, com.insertValues, 2)
                 .then((res)=>{
                     i++;
                     console.log("Values Inserted!");
