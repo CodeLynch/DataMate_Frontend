@@ -181,7 +181,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                             <EditIcon/>
                         </div>
                     </div>
-                    <div className="iconTab" style={{display:"flex", alignSelf:"flex-end"}}>
+                    <div className="iconTab" style={{display:"flex", fontSize:"18px", alignSelf:"flex-end", cursor:"pointer"}}>
                         EXPORT AS SQL
                     </div>
                     
@@ -205,21 +205,19 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                         aria-label="Vertical tabs example"
                         sx={{ borderRight: 1, borderColor: 'divider', backgroundColor:"white",
                         "& button.Mui-selected":{backgroundColor: '#91E09F'},
-                        display:'flex', justifyContent:"left", height:'100%',
+                        display:'flex', justifyContent:"left", height:'100%', width:"100%",
                         }}
                         
                         >
                           {Tables.map((tbl, i)=>{
                             return  <Tab
-                            sx={{alignItems:"flex-start"}} 
+                            sx={{alignItems:"flex-start", textOverflow:"ellipsis"}} 
                             label={
-                            <span style={{display:"flex", flexDirection:"row", maxHeight:"20px"}}>
+                            <span style={{display:"flex", flexDirection:"row", maxHeight:"30px"}}>
                               <div style={{width:"20px", height:"20px", margin:"2px"}}>
                                 <TblIcon/>
                               </div>
-                              <div style={{margin:"4px",  maxWidth:200, textOverflow:"ellipsis"}}>
-                              {tbl}
-                              </div>
+                              <p style={{margin:"4px", maxWidth:"265px", fontSize:"14px", overflow:"hidden", textOverflow:"ellipsis"}}>{tbl}</p>
                             </span> 
                             }{...getTabProps(i)} />
                           })}
