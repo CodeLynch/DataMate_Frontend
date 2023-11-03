@@ -327,9 +327,9 @@ function App() {
                         }
                         <Modal
                           open={TableDetect}
-                          onClose={() => {
-                            toggleTableDetect(false);
-                          }}
+                          // onClose={() => {
+                          //   toggleTableDetect(false);
+                          // }}
                         >
                           <div>
                             <TableDetectPrompt
@@ -358,9 +358,9 @@ function App() {
                         }
                         <Modal
                           open={SelectTable}
-                          onClose={() => {
-                            toggleSelect(false, 0);
-                          }}
+                          // onClose={() => {
+                          //   toggleSelect(false, 0);
+                          // }}
                         >
                           <div>
                             <SelectTablePrompt
@@ -389,7 +389,7 @@ function App() {
                         {/* modal for no tables detected here  */}
                         <Modal
                           open={NoTableDetect}
-                          onClose={toggleNoTableDetect}
+                          // onClose={toggleNoTableDetect}
                         >
                           <div>
                             <NoTablesDetectPrompt
@@ -402,9 +402,10 @@ function App() {
 
                         <Modal
                           open={EmptyDetect}
-                          onClose={() => {
-                            toggleEmptyDetect(false);
-                          }}
+                          // onClose={() => {
+                          //   resetVariables();
+                          //   toggleEmptyDetect(false);
+                          // }}
                         >
                           <div>
                             <EmptyDetectPrompt
@@ -426,9 +427,10 @@ function App() {
 
                         <Modal
                           open={InconsistentDetect}
-                          onClose={() => {
-                            toggleInconsistent(false);
-                          }}
+                          // onClose={() => {
+                          //   resetVariables();
+                          //   toggleInconsistent(false);
+                          // }}
                         >
                           <div>
                             <InconsistentDetectPrompt
@@ -448,9 +450,9 @@ function App() {
 
                         <Modal
                           open={ImportSuccess}
-                          onClose={() => {
-                            toggleImportSuccess(false);
-                          }}
+                          // onClose={() => {
+                          //   toggleImportSuccess(false);
+                          // }}
                         >
                           <div>
                             <SuccessPrompt
@@ -521,7 +523,9 @@ function App() {
                   <Route path="/convert" element={
                   <>
                   {/* modal for normalize tables here  */}
-                  <Modal open={NormalizeTable} onClose={toggleUpload}>
+                  <Modal open={NormalizeTable} onClose={()=>{
+                    toggleNormalized(false, -1);
+                  }}>
                   <div>
                     <NormalizePrompt
                       toggleNormalized={toggleNormalized}

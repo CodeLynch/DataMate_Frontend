@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import modalStyle from "../styles/ModalStyles";
 import * as XLSX from 'xlsx'
-import { Box, Button, CircularProgress, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, styled } from "@mui/material";
+import { Box, Button, CircularProgress, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, TextField, styled } from "@mui/material";
 import { useEffect, useState } from "react";
 import FileService from "../services/FileService";
 
@@ -52,6 +52,7 @@ const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, togg
   const [IncSheets, setIS] = useState<string[]>([])
   const [isInconsistent, SetInconsistent] = useState(false);
   const [filteredData, setFData] = useState<Object>({});
+  const [replaceStr, setReplaceStr] = useState("NULL")
 
   const nav = useNavigate();
   useEffect(()=>{
@@ -110,6 +111,10 @@ useEffect(()=>{
   };
   //---------------------------------------------------------------
 
+  const handleReplaceChange = (word:string) =>{
+    setReplaceStr(word);
+  }
+
   function filterRowsWithNullValues(table: TableRow[]): TableRow[] {
     return table.filter((row) => {
       for (const key in row) {
@@ -140,6 +145,21 @@ useEffect(()=>{
     }
     return table;
   }
+
+  function replaceEmptyWithKeyword(table: TableRow[], word: string): TableRow[] {
+    for (const row of table) {
+      for (const key in row) {
+        if (row.hasOwnProperty(key)) {
+          const value = row[key];
+          if (value === null || value === undefined || value === "") {
+            // Empty value found in the row, replace with "NULL"
+            row[key] = word;
+          }
+        }
+      }
+    }
+    return table;
+  }
   
   const cancelProcess = () => {
       FileService.deleteFile(fileId).then((res)=>{
@@ -155,10 +175,30 @@ useEffect(()=>{
     const sd = sheetdata as WorkbookData;
     //use algorithm for replacing empty values with NULL
     for (const sheet in emptylist){
-        sd[emptylist[sheet]] = replaceEmptyWithNull(sd[emptylist[sheet]] as TableRow[]); 
+        if(replaceStr === "" || replaceStr == "NULL"){
+            sd[emptylist[sheet]] = replaceEmptyWithNull(sd[emptylist[sheet]] as TableRow[]); 
+        }else{
+            sd[emptylist[sheet]] = replaceEmptyWithKeyword(sd[emptylist[sheet]] as TableRow[], replaceStr);
+        }
         workbook!.Sheets[emptylist[sheet]] = XLSX.utils.json_to_sheet(sd[emptylist[sheet]], {skipHeader:true});
       }
     updateSData(sd as Object);
+    //clean empty list
+    while(emptylist.length > 0){
+     emptylist.pop();
+    }
+    toggleEmptyDetect(false)
+    //check if inconsistency list has values
+    if(inclist.length > 0){
+      //open inconsistency prompt
+      toggleInconsistentDetect(true);
+    }else{
+      //else open success prompt
+      toggleImportSuccess(true);
+    }
+  }
+
+  function keepEmptyFunc(){
     //clean empty list
     while(emptylist.length > 0){
      emptylist.pop();
@@ -188,7 +228,6 @@ useEffect(()=>{
     }}>
         <div style={{marginTop:"3%", padding:"2em", backgroundColor:"#DCF1EC"}}>
           <p style={{fontSize:"32px", padding:0, margin:0}}>DataMate has detected empty cells, do you wish to continue?</p>
-          <p style={{fontSize:"16px", paddingTop:'1em', paddingLeft:0, paddingBottom:'1em', margin:0}}>Empty cells will be assigned to NULL.</p>
           <div style={{display:'flex', flexDirection:'row'}}>
             <div style={{width: '85%'}}>
               {/* for table preview */}
@@ -268,9 +307,23 @@ useEffect(()=>{
               </Tabs>
             </div>
           </div> 
+          <div>
+            <p style={{fontSize:"16px", paddingTop:'1em', paddingLeft:0, paddingBottom:'1em', margin:0}} >Replace blank cells with (replaced with NULL by default):</p>
+            <TextField 
+            onChange={(e)=>{handleReplaceChange(e.target.value)}}
+            sx={{backgroundColor:"white" ,
+            marginBottom:".3em", width:"100%", textDecoration:"underline", borderBottom:"1px"}} 
+            placeholder="Replace Keyword"
+            value={replaceStr}
+            />
+          </div>
           <div style={{display:"flex", justifyContent:"space-between"}}>
           <Button disableElevation onClick={cancelProcess} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: 'white', color:'black', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Cancel</Button>
-          <Button disableElevation onClick={nextFunc} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Next</Button>
+          
+            <div>
+              <Button disableElevation onClick={keepEmptyFunc} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Keep Empty</Button>
+              <Button disableElevation onClick={nextFunc} variant="contained" sx={{fontSize:'18px', textTransform:'none', backgroundColor: '#71C887', color:'white', borderRadius:50 , paddingInline: 4, margin:'5px'}}>Replace</Button>
+            </div>
 
           </div>
         </div>

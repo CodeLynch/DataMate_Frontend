@@ -236,7 +236,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                                     {/* //code for the table */}
                                     <ReactDataGrid
                                         idProperty="id"
-                                        style={{width:"100%", }}
+                                        style={{width:"100%"}}
                                         columns={colsData}
                                         dataSource={tblData}
                                         theme="green-light"
