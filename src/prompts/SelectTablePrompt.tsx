@@ -29,7 +29,6 @@ type SelectProps = {
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
     toggleImportSuccess: (status:boolean) => void,
-    toggleNormalized: (status:boolean) => void,
     tblCount: number,
     fileId: number,
     vsheets:string[],
@@ -43,7 +42,6 @@ type SelectProps = {
     wb: XLSX.WorkBook | null | undefined,
     sheetIndex: number,
     updateNorm: (sheet:string) => void,
-    normSheets: string[],
   }
 
 interface WorkbookData {
@@ -70,9 +68,9 @@ type TableMapRow = Record<string, string>;
 type TableMap = TableMapRow[];
 type SelectedCell = Record<string, boolean>;
 
-const SelectTablePrompt = ({toggleSelect, toggleTableDetect, toggleNormalized, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
+const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
     toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb,
-  sheetIndex, updateNorm, normSheets}: SelectProps) => {  
+  sheetIndex, updateNorm}: SelectProps) => {  
     const [currentSheet, setCurrentSheet] = useState("");
     const [currentTab, setCurrentTab] = useState("");
     const [currentTabID, setTabID] = useState(-1);
@@ -205,10 +203,6 @@ useEffect(()=>{
           toggleSelect(false,0);
           toggleInconsistentDetect(true);
           console.log("Inconsistency triggered");
-        }else if(notNormalized){
-          toggleTableDetect(false);
-          toggleNormalized(true);
-          console.log("Normalized Prompt triggered");
         }
         else{
           toggleSelect(false,0);
@@ -571,16 +565,6 @@ function canBeNormalized(rows: (string | number)[][]): boolean {
           updateInc(vsheets[s]);
           SetInconsistent(true);
         }
-      }
-
-      //if block for normalized prompt
-      if(!(hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as [][]))){
-        console.log("this happened");
-        if(!normSheets.includes(vsheets[s])){
-          updateNorm(vsheets[s]);
-          setNotNormalized(true);
-        }
-        
       }
     }
     setCheckDone(true);

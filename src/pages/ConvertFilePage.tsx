@@ -18,6 +18,9 @@ import { useSelector } from "react-redux";
 
 type ConvertProps = {
     startLoading: () => void,
+    updateNorm: (item:string) => void,
+    normSheets: string[],
+    toggleNormalized: (status:boolean, id: number) => void,
 }
 interface HeaderConfig {
     name: string;
@@ -34,6 +37,10 @@ interface HeaderConfig {
 
 interface TableRow {
     [key: string]: string | number | boolean | Date;
+}
+
+interface WorkbookData {
+    [sheet: string]: Object[];
 }
 
 type ConvertCommand = {
@@ -55,7 +62,7 @@ type TableResponse ={
     user: Object;
 }
 
-export default function ConvertFilePage({startLoading}:ConvertProps) {
+export default function ConvertFilePage({startLoading, normSheets, updateNorm, toggleNormalized}:ConvertProps) {
     const loc = useLocation();
     const nav = useNavigate();
     const fileId = loc.state.fileid;
@@ -277,6 +284,121 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
     }
     
     //-----------------------------------------------------------------------------------------------------
+    //Normalization functions ------------------------------------------------------------------------------
+
+    //function for checking if a table has a primary key
+    function hasPossiblePrimaryKey(table: TableRow[]): boolean {
+    console.log("Checking table: ", table);
+    if (table.length === 0) {
+      console.log("There is no table, returning false...");
+      return false; // The table is empty
+    }
+  
+    let isFirstIteration = true;
+    const firstColumnValues: Set<number> = new Set();
+
+    for (const row of table) {
+      if (isFirstIteration) {
+        isFirstIteration = false;
+        continue; // Skip the first iteration (headers)
+      }
+
+      const firstColumnValue = row[Object.keys(row)[0]]; // Get the value of the first column in each row
+
+      if (Number.isNaN(Number(firstColumnValue)) || firstColumnValues.has(firstColumnValue as number)) {
+        console.log(firstColumnValue,":", Number.isNaN(Number(firstColumnValue))," is non-numeric or duplicate, returning false...");
+        return false; // The first column has a non-numeric value or a duplicate value
+      }
+
+      firstColumnValues.add(firstColumnValue as number);
+    }
+    
+  
+  
+    console.log("First column is a primary key, returning true...");
+    return true; // The first column has unique numeric values
+  }
+
+  //getting a string array of a column name and its dependencies
+  function getColumnDependencies(columnName: string, table: (string | number)[][], doneSearching: string[]): string[] {
+  const columnIndex = table[0].indexOf(columnName);
+
+  if (columnIndex === -1) {
+    return [];
+  }
+
+  const numRows = table.length;
+  const dependencies: string[] = [columnName];
+
+  for (let col = 1; col < table[0].length; col++) {
+    if (col !== columnIndex) {
+      const otherColumn = table[0][col];
+      let isDependency = true;
+
+      for (let row = 1; row < numRows; row++) {
+        const targetValue = table[row][columnIndex];
+        const otherValue = table[row][col];
+
+        if (!hasCorrespondingValue(table, columnName, otherColumn as string, targetValue, otherValue)) {
+          isDependency = false;
+          break;
+        }
+      }
+
+      if (isDependency && !doneSearching.includes(otherColumn as string)) {
+        dependencies.push(otherColumn as string);
+      }
+    }
+  }
+
+  return dependencies;
+}
+
+function hasCorrespondingValue(table: (string | number)[][], columnName1: string, columnName2: string, targetValue: any, currentValue: any): boolean {
+  const columnIndex1 = table[0].indexOf(columnName1);
+  const columnIndex2 = table[0].indexOf(columnName2);
+
+  if (columnIndex1 === -1 || columnIndex2 === -1) {
+    return false;
+  }
+
+  for (let row = 1; row < table.length; row++) {
+    if (table[row][columnIndex1] === targetValue && table[row][columnIndex2] !== currentValue) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+  function canBeNormalized(rows: (string | number)[][]): boolean {
+    let doNotSearch:string[] = [];
+    const numCols = rows[0].length;
+    let res = false;
+
+    for (let col = 0; col < numCols; col++) {
+      const columnName = rows[0][col];
+      if(!doNotSearch.includes(columnName as string)){
+        let depArr = getColumnDependencies(columnName as string, rows, doNotSearch);
+        if(depArr.length > 1 && depArr.length !== numCols - col){
+          for(const col in depArr){
+            //inserting the column and the dependencies into do not search
+            doNotSearch.push(depArr[col]); 
+          } 
+          //concat the columns in the depArr as table
+          console.log("can be normalized returning true...");
+          res = true;
+          break;
+        }else{
+          doNotSearch.push(columnName as string);
+        }
+      }
+    }
+    console.log("cannot be normalized returning false...");
+    return res;
+  }
+
+    //-----------------------------------------------------------------------------------------------------
     //Button functions ------------------------------------------------------------------------------------
     function handleBack(){
         nav('/file',{
@@ -286,19 +408,19 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
         });
     }
 
-    function getFileType(filename:string){
-        var re = /(?:\.([^.]+))?$/;
-        var res = re.exec(filename) as unknown;
-        return res as string;
-    }
+    // function getFileType(filename:string){
+    //     var re = /(?:\.([^.]+))?$/;
+    //     var res = re.exec(filename) as unknown;
+    //     return res as string;
+    // }
 
     //workbook to Array Buffer method
-    function s2ab(s:String) { 
-    var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
-    var view = new Uint8Array(buf);  //create uint8array as viewer
-    for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; //convert to octet
-    return buf;    
-    }
+    // function s2ab(s:String) { 
+    // var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
+    // var view = new Uint8Array(buf);  //create uint8array as viewer
+    // for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; //convert to octet
+    // return buf;    
+    // }
 
     function getColumnType(value: any): string {
     console.log("Type of ", value, " is ", typeof value);
@@ -364,6 +486,32 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
 
     const uid = function(){
         return Date.now().toString(36) + Math.floor(Math.pow(10, 12) + Math.random() * 9*Math.pow(10, 12)).toString(36);
+    }
+
+    function handleConfirm(){
+        const sd = sheetData as WorkbookData;
+        let isNormalized = true;
+        for (const s in visibleSheetNames){
+            console.log("result: ", hasPossiblePrimaryKey(sd[visibleSheetNames[s]] as TableRow[]) && !canBeNormalized(sd[visibleSheetNames[s]] as [][]));
+            console.log(visibleSheetNames[s]," has possible pk: ", hasPossiblePrimaryKey(sd[visibleSheetNames[s]] as TableRow[]), "can be normalized: ", canBeNormalized(sd[visibleSheetNames[s]] as [][]));
+            //if block for normalized prompt
+            console.log("prompt condition:", (!(hasPossiblePrimaryKey(sd[visibleSheetNames[s]] as TableRow[])) && canBeNormalized(sd[visibleSheetNames[s]] as [][])));
+            if(!(hasPossiblePrimaryKey(sd[visibleSheetNames[s]] as TableRow[])) && canBeNormalized(sd[visibleSheetNames[s]] as [][])){
+              console.log("this happened for ", visibleSheetNames[s]);
+              isNormalized = false;
+              console.log("current normList:", normSheets);
+              if(!normSheets.includes(visibleSheetNames[s])){
+                updateNorm(visibleSheetNames[s]);  
+                }
+            }
+        }
+        console.log("is it normalized? ",isNormalized)
+        if(isNormalized){
+            getSQLQuery();
+        }else{
+            console.log("normalized prompt: ", toggleNormalized);
+            toggleNormalized(true, fileId);
+        }
     }
 
     function getSQLQuery(){
@@ -527,7 +675,7 @@ export default function ConvertFilePage({startLoading}:ConvertProps) {
                                 Back
                             </Button>
                             <Button variant="contained" 
-                            onClick={getSQLQuery}
+                            onClick={handleConfirm}
                             sx={{fontWeight: 'bold', backgroundColor: '#347845', color:'white', paddingInline: 4, margin:'5px', boxShadow:5, borderRadius:5}}>
                                 Confirm
                             </Button>

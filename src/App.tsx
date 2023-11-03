@@ -166,8 +166,9 @@ function App() {
     setSelect(status);
   };
 
-  const toggleNormalized = (status: boolean) => {
+  const toggleNormalized = (status: boolean, fileId: number) => {
     setNormTable(status);
+    setFileId(fileId);
   };
 
   const StartLoading = () => {
@@ -332,7 +333,6 @@ function App() {
                         >
                           <div>
                             <TableDetectPrompt
-                              toggleNormalized={toggleNormalized}
                               toggleTableDetect={toggleTableDetect}
                               toggleSelect={toggleSelect}
                               toggleEmptyDetect={toggleEmptyDetect}
@@ -345,10 +345,8 @@ function App() {
                               updateEmpty={updateEmptyList}
                               updateInc={updateIncList}
                               updateSData={updateSheetData}
-                              updateNorm={updateNormList}
                               emptySheets={SheetsWithEmpty}
                               incSheets={IncSheets}
-                              normSheets={normSheets}
                               reset={resetVariables}
                               wb={workbook}
                             />
@@ -366,7 +364,6 @@ function App() {
                         >
                           <div>
                             <SelectTablePrompt
-                              toggleNormalized={toggleNormalized}
                               toggleSelect={toggleSelect}
                               toggleTableDetect={toggleTableDetect}
                               toggleEmptyDetect={toggleEmptyDetect}
@@ -384,7 +381,6 @@ function App() {
                               reset={resetVariables}
                               wb={workbook}
                               sheetIndex={sheetIndex}
-                              normSheets={normSheets}
                               updateNorm={updateNormList}
                             />
                           </div>
@@ -404,28 +400,6 @@ function App() {
                           </div>
                         </Modal>
 
-                        {/* modal for normalize tables here  */}
-                        <Modal open={NormalizeTable} onClose={toggleUpload}>
-                          <div>
-                            <NormalizePrompt
-                              toggleNormalized={toggleNormalized}
-                              toggleEmptyDetect={toggleEmptyDetect}
-                              toggleInconsistentDetect={toggleInconsistent}
-                              toggleImportSuccess={toggleImportSuccess}
-                              fileId={uploadedFileId}
-                              vsheets={visibleSheetNames}
-                              sheetdata={sheetData}
-                              updateSData={updateSheetData}
-                              updateWB={updateWorkbook}
-                              reset={resetVariables}
-                              workbook={workbook}
-                              normList={normSheets}
-                              inclist={IncSheets}
-                              sheets={sheetNames}
-                            />
-                          </div>
-                        </Modal>
-
                         <Modal
                           open={EmptyDetect}
                           onClose={() => {
@@ -434,7 +408,6 @@ function App() {
                         >
                           <div>
                             <EmptyDetectPrompt
-                              toggleNormalized={toggleNormalized}
                               toggleEmptyDetect={toggleEmptyDetect}
                               toggleInconsistentDetect={toggleInconsistent}
                               toggleImportSuccess={toggleImportSuccess}
@@ -447,7 +420,6 @@ function App() {
                               reset={resetVariables}
                               inclist={IncSheets}
                               updateSData={updateSheetData}
-                              normSheets={normSheets}
                             />
                           </div>
                         </Modal>
@@ -460,7 +432,6 @@ function App() {
                         >
                           <div>
                             <InconsistentDetectPrompt
-                              toggleNormalized={toggleNormalized}
                               toggleInconsistentDetect={toggleInconsistent}
                               toggleImportSuccess={toggleImportSuccess}
                               fileId={uploadedFileId}
@@ -471,7 +442,6 @@ function App() {
                               reset={resetVariables}
                               inclist={IncSheets}
                               updateSData={updateSheetData}
-                              normSheets={normSheets}
                             />
                           </div>
                         </Modal>
@@ -548,7 +518,28 @@ function App() {
                     path="/file/"
                     element={<Filepage stopLoading={StopLoading} />}
                   />
-                  <Route path="/convert" element={<ConvertFilePage startLoading={StartLoading} />} />
+                  <Route path="/convert" element={
+                  <>
+                  {/* modal for normalize tables here  */}
+                  <Modal open={NormalizeTable} onClose={toggleUpload}>
+                  <div>
+                    <NormalizePrompt
+                      toggleNormalized={toggleNormalized}
+                      fileId={uploadedFileId}
+                      reset={resetVariables}
+                      normList={normSheets}
+                      startLoading={StartLoading}
+                    />
+                  </div>
+                  </Modal>
+                  <ConvertFilePage 
+                  startLoading={StartLoading}
+                  updateNorm={updateNormList}
+                  normSheets={normSheets}
+                  toggleNormalized={toggleNormalized} />
+                  </> 
+                  }
+                  />
                   <Route path="/templates" element={<TemplatesPage />} />
                   <Route
                     path="/files"
