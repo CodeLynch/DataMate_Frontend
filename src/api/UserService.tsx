@@ -47,6 +47,24 @@ class UserService {
   //       throw new Error(`Error deleting user: ${error}`);
   //     }
   //   };
+
+  forgotPassword = (email: string) => {
+    return axios.post(`${USER_BASE_URL}/forgot-password`, null, {
+      params: { email }, // Send email as a query parameter
+    });
+  };
+
+  verifyCode = (email: string, code: string) => {
+    return axios.post(
+      `${USER_BASE_URL}/verify-code?email=${email}&code=${code}`
+    );
+  };
+
+  resetPassword = (email: string, newPassword: string) => {
+    return axios.post(
+      `${USER_BASE_URL}/reset-password?email=${email}&newPassword=${newPassword}`
+    );
+  };
 }
 
 export default new UserService();
