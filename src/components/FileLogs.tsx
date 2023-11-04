@@ -97,6 +97,10 @@ export default function FileLogs(){
         setIsDropdownOpen((prev) => !prev);
     };
 
+    const handleDropdownClose = () => {
+        setIsDropdownOpen(false);
+    };
+
     const handleClearFilter = () => {
         setSearchQuery("");
         setSortBy("None");
@@ -238,13 +242,19 @@ export default function FileLogs(){
                                     >
                                         <MenuItem
                                         style={{ cursor: "pointer", color: "#000" }}
-                                        onClick={() => handleSortOptionSelect("Newest")}
+                                        onClick={() => {
+                                            handleSortOptionSelect("Newest");
+                                            handleDropdownClose();
+                                          }}
                                         >
                                         Newest
                                         </MenuItem>
                                         <MenuItem
                                         style={{ cursor: "pointer", color: "#000" }}
-                                        onClick={() => handleSortOptionSelect("Oldest")}
+                                        onClick={() => {
+                                            handleSortOptionSelect("Oldest");
+                                            handleDropdownClose();
+                                          }}
                                         >
                                         Oldest
                                         </MenuItem>
@@ -331,13 +341,19 @@ export default function FileLogs(){
                                             >
                                                 <MenuItem
                                                 style={{ cursor: "pointer", color: "#000" }}
-                                                onClick={() => handleSortOptionSelect("Newest")}
+                                                onClick={() => {
+                                                    handleSortOptionSelect("Newest");
+                                                    handleDropdownClose();
+                                                }}
                                                 >
                                                 Newest
                                                 </MenuItem>
                                                 <MenuItem
                                                 style={{ cursor: "pointer", color: "#000" }}
-                                                onClick={() => handleSortOptionSelect("Oldest")}
+                                                onClick={() => {
+                                                    handleSortOptionSelect("Oldest");
+                                                    handleDropdownClose();
+                                                }}
                                                 >
                                                 Oldest
                                                 </MenuItem>
