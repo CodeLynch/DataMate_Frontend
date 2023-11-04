@@ -56,6 +56,9 @@ import ForgotPassword from "./components/ForgotPassword";
 import PrivateRoute from "./components/PrivateRoute";
 import DatabaseScreen from "./components/DatabaseScreen";
 import Profile from "./components/Profile";
+import VerifyCode from "./components/VerifyEmail";
+import ResetPassword from "./components/ResetPassword";
+import Snackbar from "./components/Snackbar";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -195,6 +198,10 @@ function App() {
   };
 
   const setFileId = (id: number) => {
+    setUploadedFileId(id);
+  };
+
+  const setDatabaseId = (id: number) => {
     setUploadedFileId(id);
   };
 
@@ -564,7 +571,10 @@ function App() {
                     path="/database"
                     element={<DatabasePage stopLoading={StopLoading} />}
                   />
-                  <Route path="/databases" element={<DatabaseScreen setFileId={setFileId} />} />
+                  <Route
+                    path="/databases"
+                    element={<DatabaseScreen setDatabaseId={setDatabaseId} />}
+                  />
                   <Route path="/delete-profile/" element={<DeleteProfile />} />
                   <Route path="/deleted-files" element={<DeletedFiles />} />
                   <Route
@@ -593,14 +603,16 @@ function App() {
                     path="/registration"
                     element={<Registration />}
                   ></Route>
-                  <Route
-                    path="/forgot-password"
-                    element={<ForgotPassword />}
-                  ></Route>
+                  <Route path="forgot-password">
+                    <Route index element={<ForgotPassword />} />
+                    <Route path="verify-code" element={<VerifyCode />} />
+                    <Route path="reset-password" element={<ResetPassword />} />
+                  </Route>
                 </Routes>
               </Box>
             </Box>
           </Router>
+          <Snackbar />
         </SnackbarContextProvider>
       </ThemeProvider>
     </Provider>
