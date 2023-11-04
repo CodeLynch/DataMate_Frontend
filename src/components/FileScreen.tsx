@@ -328,7 +328,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
             </Link>
           )}
           {isLargeScreen && (
-            <Link underline="none" href="/" color={"black"}>
+            <Link underline="none" href="/file-logs" color={"black"}>
               <IconButton
                 style={{
                   marginLeft: "24px",
