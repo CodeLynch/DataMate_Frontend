@@ -101,7 +101,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
       <Toolbar
         sx={{
           backgroundColor:
-            location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database" ? "#71C887" : "#FFFFFF",
+            location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database" || location.pathname === "/file-logs" || location.pathname === "/deleted-files" || location.pathname === "/files" ? "#71C887" : "#FFFFFF",
         }}
       >
         <IconButton
@@ -110,7 +110,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
           edge="start"
           sx={{
             width: "4%",
-            color: location.pathname === "/file" ? "#FFFFFF" : "#000000",
+            color: location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database" || location.pathname === "/file-logs" || location.pathname === "/deleted-files" || location.pathname === "/files" ? "#FFFFFF" : "#000000",
             marginRight: 1,
             ...(open && { display: "none" }),
           }}
@@ -121,7 +121,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
         <Box sx={{ width: "100%" }}>
           <a href="/">
             <img
-              src={location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database"?  WLogo : Logo}
+              src={location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database" || location.pathname === "/file-logs" || location.pathname === "/deleted-files" || location.pathname === "/files" ?  WLogo : Logo}
               alt={"datamate logo"}
               style={{
                 width: "100px",

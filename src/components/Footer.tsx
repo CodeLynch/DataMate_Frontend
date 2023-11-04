@@ -36,7 +36,7 @@ export default function Footer(){
                             
                             <Grid container sx={{ ml: flexTwoScreen ? 0 : flexScreen ? 22 : 28, mt: 4, maxHeight: 88 }} justifyContent= 'center' alignItems= 'center'>
                                 <Stack direction="row">
-                                    <Grid container direction="column" sx={{ mr: flexScreen? 10:12 }}>
+                                    <Grid container direction="column" sx={{ mr: flexScreen? 10:13 }}>
                                         <Typography fontWeight='bold' fontFamily="Helvetica" color="white" sx={{ fontSize: '20px', whiteSpace:"nowrap"}}>
                                             Who we are
                                         </Typography>
@@ -51,7 +51,7 @@ export default function Footer(){
                                         </Stack>
                                     </Grid>
 
-                                    <Grid container direction="column" sx={{ mr: flexScreen? 10:12 }}>
+                                    <Grid container direction="column" sx={{ mr: flexScreen? 10:13 }}>
                                         <Typography fontWeight='bold' fontFamily="Helvetica" color="white" sx={{ fontSize: '20px'}}>
                                             Explore
                                         </Typography>
@@ -64,7 +64,7 @@ export default function Footer(){
                                         </Stack>
                                     </Grid>
 
-                                    <Grid container direction="column" sx={{ mr: flexScreen? 12:15 }}>
+                                    <Grid container direction="column" sx={{ mr: flexScreen? 12:13 }}>
                                         <Typography fontWeight='bold' fontFamily="Helvetica" color="white" sx={{ fontSize: '20px'}}>
                                             Let's talk
                                         </Typography>
