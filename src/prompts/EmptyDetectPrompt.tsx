@@ -1,24 +1,8 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import modalStyle from "../styles/ModalStyles";
+import { useNavigate } from "react-router-dom";
 import * as XLSX from 'xlsx'
-import { Box, Button, CircularProgress, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tabs, TextField, styled } from "@mui/material";
+import { Box, Button, CircularProgress, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, styled } from "@mui/material";
 import { useEffect, useState } from "react";
 import FileService from "../services/FileService";
-
-
-
-const styles = {
-    dialogPaper: {
-      backgroundColor: '#DCF1EC',
-      padding: "25px",
-    },
-    uploadButton: {
-        marginTop: '5px',
-        borderRadius: '50px',
-        width: '250px',
-        background: '#71C887',
-      },
-};
 
 type EmptyProps = {
     toggleEmptyDetect: (status:boolean) => void,
@@ -39,7 +23,7 @@ interface WorkbookData {
     [sheet: string]: Object[];
 }
 
-interface TableRow {
+interface TableRowType {
     [key: string]: string | number;
 }
 
@@ -49,8 +33,6 @@ const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, togg
   const [rowsPerPage, setRowsPerPage] = useState(50);
   const [HeaderArr, setHArr] = useState<[][] | undefined>(undefined)
   const [BodyArr, setBArr] = useState<[][] | undefined>(undefined)
-  const [IncSheets, setIS] = useState<string[]>([])
-  const [isInconsistent, SetInconsistent] = useState(false);
   const [filteredData, setFData] = useState<Object>({});
   const [replaceStr, setReplaceStr] = useState("NULL")
 
@@ -59,7 +41,7 @@ const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, togg
     //create copy of sheetdata
     const fdata = JSON.parse(JSON.stringify(sheetdata))
     for(const s in emptylist){
-      fdata[emptylist[s]] = filterRowsWithNullValues(fdata[emptylist[s]] as TableRow[]); 
+      fdata[emptylist[s]] = filterRowsWithNullValues(fdata[emptylist[s]] as TableRowType[]); 
     }
     setFData(fdata);
   },[])
@@ -86,7 +68,7 @@ const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, togg
     const row =  sheetdata[currSheet] as unknown
     let rowArr = row as [][]
     setHArr(rowArr)
-},[currentSheet])
+  },[currentSheet])
 
 //useEffect for re-assigning the body array for the table when Header array state has changed
 useEffect(()=>{
@@ -115,7 +97,7 @@ useEffect(()=>{
     setReplaceStr(word);
   }
 
-  function filterRowsWithNullValues(table: TableRow[]): TableRow[] {
+  function filterRowsWithNullValues(table: TableRowType[]): TableRowType[] {
     return table.filter((row) => {
       for (const key in row) {
         if (row.hasOwnProperty(key) && (row[key] === null || row[key] === "" || row[key] === undefined) ) {
@@ -131,7 +113,7 @@ useEffect(()=>{
       setCurrentSheet(newValue);
   }
 
-  function replaceEmptyWithNull(table: TableRow[]): TableRow[] {
+  function replaceEmptyWithNull(table: TableRowType[]): TableRowType[] {
     for (const row of table) {
       for (const key in row) {
         if (row.hasOwnProperty(key)) {
@@ -146,7 +128,7 @@ useEffect(()=>{
     return table;
   }
 
-  function replaceEmptyWithKeyword(table: TableRow[], word: string): TableRow[] {
+  function replaceEmptyWithKeyword(table: TableRowType[], word: string): TableRowType[] {
     for (const row of table) {
       for (const key in row) {
         if (row.hasOwnProperty(key)) {
@@ -175,10 +157,10 @@ useEffect(()=>{
     const sd = sheetdata as WorkbookData;
     //use algorithm for replacing empty values with NULL
     for (const sheet in emptylist){
-        if(replaceStr === "" || replaceStr == "NULL"){
-            sd[emptylist[sheet]] = replaceEmptyWithNull(sd[emptylist[sheet]] as TableRow[]); 
+        if(replaceStr === "" || replaceStr === "NULL"){
+            sd[emptylist[sheet]] = replaceEmptyWithNull(sd[emptylist[sheet]] as TableRowType[]); 
         }else{
-            sd[emptylist[sheet]] = replaceEmptyWithKeyword(sd[emptylist[sheet]] as TableRow[], replaceStr);
+            sd[emptylist[sheet]] = replaceEmptyWithKeyword(sd[emptylist[sheet]] as TableRowType[], replaceStr);
         }
         workbook!.Sheets[emptylist[sheet]] = XLSX.utils.json_to_sheet(sd[emptylist[sheet]], {skipHeader:true});
       }

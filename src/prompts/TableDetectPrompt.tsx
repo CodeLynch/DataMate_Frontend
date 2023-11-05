@@ -69,8 +69,8 @@ toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, u
   const [isInconsistent, SetInconsistent] = useState(false);
   // const [isNotNormalized, setNotNormalized] = useState(false);
   const [isCheckDone, setCheckDone] = useState(false);
-
   const nav = useNavigate();
+  const TableHeight = (vsheets.length * 50).toString() + "px";
 
 
   function delete_ws(wb:XLSX.WorkBook, wsname:string) {
@@ -461,10 +461,10 @@ useEffect(()=>{
           <p style={{fontSize:"32px", padding:0, margin:0}}>DataMate has detected <b>{tblCount}</b> possible table</p>}
           <p style={{fontSize:"16px", paddingTop:'1em', paddingLeft:0, paddingBottom:'1em', margin:0}}>Please check the tables you want to include for processing.</p>
           <div style={{display:'flex', flexDirection:'row'}}>
-            <div style={{width: '85%'}}>
+            <div style={{width: '80%'}}>
               {/* for table preview */}
               {HeaderArr !== undefined && BodyArr !== undefined? <>
-                          <Paper elevation={0} sx={{ maxHeight:'270px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
+                          <Paper elevation={0} sx={{ height: vsheets.length > 3? {TableHeight}:"150px", overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
                           <TableContainer>
                               <Table stickyHeader aria-label="sticky table">
                               <TableHead >
@@ -514,17 +514,7 @@ useEffect(()=>{
               <><CircularProgress size="10rem" 
               color="success" /></>}
             </div>
-            <div style={{width: '15%', display:"flex", flexDirection:"row"}} >
-              <div style={{display:"flex", flexDirection:"column", width:"25%"}}>
-              {/* for checkbox list*/ }{
-                CheckboxList.length !== 0 && vsheets.length > 0? vsheets.map((sheet,i) =>{
-                  return(
-                    <Checkbox sx={{paddingTop:"15px", paddingBottom:"9px", borderRadius:0 ,backgroundColor:currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC',
-                    "&:hover":{backgroundColor: currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC'}}} checked={CheckboxList[i].checked} onChange={()=>{toggleCheckbox(i);}} />                  
-                  )
-              }):<></>
-              }
-              </div>
+            <div style={{width: '20%', display:"flex", flexDirection:"row", justifyContent:"flex-start"}} >
               {/* for table tabs */}
               <Tabs
                 orientation="vertical"
@@ -532,14 +522,33 @@ useEffect(()=>{
                 onChange={changeSheet}
                 TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
                 sx={{
+                display:"flex", 
+                justifyContent:"flex-start",
+                width:'100%',
                 "& button":{borderRadius: 0, color: 'black', backgroundColor: '#DCF1EC'},
                 "& button.Mui-selected":{backgroundColor: '#71C887', color: 'white'},
                 }}
                 aria-label="secondary tabs example"
                 >
-                {vsheets.length > 0? vsheets.map((sheet,i) =>{
+                {vsheets.length > 0 && CheckboxList.length !== 0? vsheets.map((sheet,i) =>{
                     return(
-                          <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left", textOverflow:"ellipsis"}}  value={sheet} label={sheet} />                     
+                        <Tab 
+                          sx={{display:"flex", backgroundColor:"#D9D9D9", padding:"5px", maxHeight:"20px", justifyContent:"flex-start"}} 
+                          value={sheet} 
+                          label={
+                            <span style={{display:"flex", flexDirection:"row", maxHeight:"20px", marginTop:"5px", width:"100%"}}>
+                              <div style={{marginRight:"10px"}}>                        
+                                <Checkbox sx={{margin:0, padding:0, backgroundColor:currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC',
+                                "&:hover":{backgroundColor: currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC'}}} checked={CheckboxList[i].checked} onChange={()=>{toggleCheckbox(i);}} />  
+                              </div>
+                              <div style={{marginLeft:"5px"}}>
+                                <p style={{margin:0, fontSize:"16px", textAlign:"left",display:"flex", alignItems:"center", overflow:"hidden", textOverflow:"ellipsis"}}>
+                                  {sheet}        
+                                </p>
+                              </div>
+                            </span> 
+                          }/>
+                          // <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left", textOverflow:"ellipsis"}}  value={sheet} label={sheet} />                     
                     )
                 }):<></>}
               </Tabs>

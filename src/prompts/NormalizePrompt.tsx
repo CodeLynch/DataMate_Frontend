@@ -112,6 +112,7 @@ const NormalizePrompt = ({toggleNormalized, fileId, startLoading, normList, rese
   const [isDone, setDone] = useState(false);
   var nameid = 1;
   const userId = useSelector((state: RootState) => state.auth.userId);
+  const TableHeight = (vsheets.length * 50).toString() + "px";
 
 //Helper functions ---------------------------------------------------------------------------------
 function sheetjs_cleanEmptyRows(sd:XLSX.SheetType) {
@@ -912,7 +913,7 @@ useEffect(()=>{
           <div style={{display:'flex', flexDirection:'row'}}>
             <div style={{width: '85%'}}>
             {HeaderArr !== undefined && BodyArr !== undefined? <>
-                          <Paper elevation={0} sx={{ minHeight:"150px", maxHeight:'270px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
+                          <Paper elevation={0} sx={{ height:TableHeight, overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
                           <TableContainer>
                               <Table stickyHeader aria-label="sticky table">
                               <TableHead >

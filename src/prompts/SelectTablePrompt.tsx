@@ -88,13 +88,14 @@ const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, v
     const [columns, setColumns] = useState<HeaderConfig[]>([]);
     const [dataSource, setDataSrc] = useState<Object[]>([]);
     const [overwriteStatus, setOWStat] = useState(false);
-    const dynamicHeight = Math.min(dataSource.length * 5.5, 80) + 'vh'
+    const dynamicHeight = (createdSheets.length * 60);
     const tabsRef = useRef<HTMLDivElement[]>([]);
     const [isEditing, setEditing] = useState(false);
   const nav = useNavigate();
   const gridstyle = {
     fontSize:"10px",
     height:dynamicHeight,
+    maxHeight:520,
   }
 
   //set currentSheet and header array on load based from props
@@ -694,7 +695,7 @@ function canBeNormalized(rows: (string | number)[][]): boolean {
                   <Tabs
                     orientation="vertical"
                     variant="scrollable"
-                    scrollButtons={createdSheets.length < 4? false: "auto"}
+                    scrollButtons={createdSheets.length < 8? false: "auto"}
                     value= {currentTabID}
                     onChange={changeTab}
                     TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}

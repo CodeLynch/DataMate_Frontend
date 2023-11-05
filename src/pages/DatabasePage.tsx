@@ -46,6 +46,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
     const [currentTblID, setCurrentTblID] = useState(0);
     const [colsData, setColsData] = useState<HeaderConfig[]>([]);
     const [Database, setDBName] = useState('');
+    const tblHeight = tblData.length * 47;
     let FirstColumns:string[] = [];
 
 
@@ -236,7 +237,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                                     {/* //code for the table */}
                                     <ReactDataGrid
                                         idProperty="id"
-                                        style={{width:"100%"}}
+                                        style={{width:"100%", height:tblHeight}}
                                         columns={colsData}
                                         dataSource={tblData}
                                         theme="green-light"

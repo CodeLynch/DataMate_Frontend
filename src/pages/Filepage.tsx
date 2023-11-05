@@ -240,7 +240,8 @@ export default function Filepage({stopLoading}:FilePageProps) {
                                         <TableCell key={j} align='left'>
                                         {cell === true? "TRUE": cell === false? "FALSE":cell}
                                         </TableCell>:
-                                        <></>
+                                        <TableCell key={j} align='left'>
+                                        </TableCell>
                                         }
                                         </>
                                     );
