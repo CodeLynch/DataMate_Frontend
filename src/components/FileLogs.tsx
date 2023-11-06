@@ -143,7 +143,7 @@ export default function FileLogs(){
     
      return(
         <div>
-            <Box m={7}>
+            <Box sx={{mx: {xs: 1, sm: 5, md: 7}}}>
                 <section>
                     <Stack direction="row" mt={13}>
                         <ArrowBackIosNewIcon sx={{ fontSize: '25px', color: '#374248', cursor: 'pointer', mr: 2, mt: .6 }} onClick={() => { nav('/files'); }}/>
@@ -153,7 +153,7 @@ export default function FileLogs(){
                     </Stack>
 
                     
-                    <Grid container direction="row">
+                    <Grid container direction="row" justifyContent="center" alignItems="center">
                         <Grid item mt={5} xs={5}>
                             <TextField
                                 id="outlined-search"
@@ -181,25 +181,26 @@ export default function FileLogs(){
                                     "& .MuiOutlinedInput-notchedOutline": {
                                         border: "none",
                                     },
-                                    width: "100%"
+                                    width: {xs: 300, sm: 400, md: 500},
                                 }}
                             />
                         </Grid>
                         <Grid item xs={3}> </Grid>
                         
                         {isNotXsScreen ? (
-                            <Grid item mt={5} xs>
+                        <Grid item mt={5} xs>
                             <div style={{ display: "flex", alignItems: "center" }}>
-                                <span
-                                    style={{
-                                    color: "#000",
-                                    marginRight: "12px",
-                                    marginLeft: "15px",
-                                    fontSize: "20px",
-                                    }}
-                                >
-                                    Sort by:
-                                </span>
+                                <Box sx={{ ml: {xs: '15px', sm: '20px', md: '25px'}}}>
+                                    <span
+                                        style={{
+                                        color: "#374248",
+                                        marginRight: "12px",
+                                        fontSize: "20px",
+                                        }}
+                                    >
+                                        Sort by:
+                                    </span>
+                                </Box>
                                 <FormControl>
                                     <div
                                     onClick={handleDropdownToggle}
@@ -278,7 +279,7 @@ export default function FileLogs(){
                         </Grid>
                         ) :(
                             <Box mt={1}>
-                                <IconButton onClick={handleMenuClick}>
+                                <IconButton onClick={handleMenuClick} sx={{ mt: 5, ml: {xs: 8, sm: 11}}}>
                                     <MoreVertIcon />
                                 </IconButton>
                                 <Menu
@@ -288,94 +289,94 @@ export default function FileLogs(){
                                 >
 
                                     <div style={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
-                                        <MenuItem>
-                                        <span
-                                            style={{
-                                            color: "#000",
-                                            marginRight: "12px",
-                                            marginLeft: "15px",
-                                            fontSize: "20px",
-                                            }}
-                                        >
-                                            Sort by:
-                                        </span>
-                                        <FormControl>
-                                            <div
-                                            onClick={handleDropdownToggle}
-                                            style={{
-                                                background: "#71C887",
-                                                borderRadius: "4px",
-                                                cursor: "pointer",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                padding: "8px 16px",
-                                                width: "fit-content",
-                                            }}
-                                            >
-                                            <span
-                                                style={{
-                                                color: "#fff",
-                                                fontWeight: "bold",
-                                                marginRight: "8px",
-                                                }}
-                                            >
-                                                {selectedOption}
-                                            </span>
-                                            <KeyboardArrowDownIcon
-                                                style={{ fontSize: "20px", color: "#fff" }}
-                                            />
-                                            </div>
-                                            {isDropdownOpen && (
-                                            <div
-                                                style={{
-                                                background: "#fff",
-                                                borderRadius: "4px",
-                                                position: "absolute",
-                                                top: "100%",
-                                                left: 0,
-                                                marginTop: "8px",
-                                                padding: "8px",
-                                                fontSize: "20px",
-                                                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-                                                }}
-                                            >
-                                                <MenuItem
-                                                style={{ cursor: "pointer", color: "#000" }}
-                                                onClick={() => {
-                                                    handleSortOptionSelect("Newest");
-                                                    handleDropdownClose();
-                                                }}
+                                        <Stack justifyContent="center" alignItems={isDropdownOpen ? 'flex-start' : 'center'}>
+                                            <MenuItem>
+                                                <span
+                                                    style={{
+                                                    color: "#374248",
+                                                    marginRight: "12px",
+                                                    fontSize: "20px",
+                                                    }}
                                                 >
-                                                Newest
-                                                </MenuItem>
-                                                <MenuItem
-                                                style={{ cursor: "pointer", color: "#000" }}
-                                                onClick={() => {
-                                                    handleSortOptionSelect("Oldest");
-                                                    handleDropdownClose();
-                                                }}
+                                                    Sort by:
+                                                </span>
+                                                <FormControl>
+                                                    <div
+                                                    onClick={handleDropdownToggle}
+                                                    style={{
+                                                        background: "#71C887",
+                                                        borderRadius: "4px",
+                                                        cursor: "pointer",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        padding: "8px 16px",
+                                                        width: "fit-content",
+                                                    }}
+                                                    >
+                                                    <span
+                                                        style={{
+                                                        color: "#fff",
+                                                        fontWeight: "bold",
+                                                        marginRight: "8px",
+                                                        }}
+                                                    >
+                                                        {selectedOption}
+                                                    </span>
+                                                    <KeyboardArrowDownIcon
+                                                        style={{ fontSize: "20px", color: "#fff" }}
+                                                    />
+                                                    </div>
+                                                    {isDropdownOpen && (
+                                                    <div
+                                                        style={{
+                                                        background: "#fff",
+                                                        borderRadius: "4px",
+                                                        position: "absolute",
+                                                        top: "100%",
+                                                        left: 0,
+                                                        marginTop: "8px",
+                                                        padding: "8px",
+                                                        fontSize: "20px",
+                                                        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+                                                        }}
+                                                    >
+                                                        <MenuItem
+                                                        style={{ cursor: "pointer", color: "#374248" }}
+                                                        onClick={() => {
+                                                            handleSortOptionSelect("Newest");
+                                                            handleDropdownClose();
+                                                        }}
+                                                        >
+                                                        Newest
+                                                        </MenuItem>
+                                                        <MenuItem
+                                                        style={{ cursor: "pointer", color: "#374248" }}
+                                                        onClick={() => {
+                                                            handleSortOptionSelect("Oldest");
+                                                            handleDropdownClose();
+                                                        }}
+                                                        >
+                                                        Oldest
+                                                        </MenuItem>
+                                                    </div>
+                                                    )}
+                                                </FormControl>
+                                            </MenuItem>
+                                            <MenuItem >
+                                                <Button
+                                                    onClick={handleClearFilter}
+                                                    style={{
+                                                    cursor: "pointer",
+                                                    background: "none",
+                                                    border: "none",
+                                                    color: "red",
+                                                    fontSize: "10px",
+                                                    }}
                                                 >
-                                                Oldest
-                                                </MenuItem>
-                                            </div>
-                                            )}
-                                        </FormControl>
-                                        </MenuItem>
-                                        <MenuItem>
-                                        <Button
-                                            onClick={handleClearFilter}
-                                            style={{
-                                            marginLeft: "24px",
-                                            cursor: "pointer",
-                                            background: "none",
-                                            border: "none",
-                                            color: "red",
-                                            fontSize: "10px",
-                                            }}
-                                        >
-                                            Clear Filter
-                                        </Button>
-                                        </MenuItem>
+                                                    Clear Filter
+                                                </Button>
+                                            </MenuItem>
+                                        </Stack>
                                     </div>
 
                                 </Menu>
@@ -385,7 +386,7 @@ export default function FileLogs(){
                 </section>
 
                 <section>
-                    <Box mt={5}>
+                    <Box sx={{ mt: 5, mx: {xs: 2}}}>
                         {sortedGroupedTimelineData.length > 0 ? (
                             sortedGroupedTimelineData
                                 .slice()
