@@ -56,9 +56,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import PrivateRoute from "./components/PrivateRoute";
 import DatabaseScreen from "./components/DatabaseScreen";
 import Profile from "./components/Profile";
-import VerifyCode from "./components/VerifyEmail";
-import ResetPassword from "./components/ResetPassword";
-import Snackbar from "./components/Snackbar";
+import FileLogs from "./components/FileLogs";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -590,6 +588,15 @@ function App() {
                     element={
                       <PrivateRoute>
                         <Profile />
+                      </PrivateRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/file-logs"
+                    element={
+                      <PrivateRoute>
+                        <FileLogs />
                       </PrivateRoute>
                     }
                   />

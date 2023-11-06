@@ -81,6 +81,13 @@
   padding-right: 20px;
 }
 
+.wrapper-footer{
+  max-width: 1350px;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 .wrapper-datagrid{
   max-width: 1500px;
   margin: 0 auto;
@@ -163,6 +170,7 @@ h3{
 
 .dropArea {
   border: 2px dashed black;
+  border-radius: 5px;
   padding: 30px;
   text-align: center;
   background-color: #fff;
@@ -465,6 +473,43 @@ h3{
   margin-top: 2.2rem;
   /* padding: 10px 43px 10px 43px; */
 }
+
+/* Custom timeline styles */
+
+.timeline {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  background: #71C887;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.timeline-content {
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  padding: 12px;
+  flex-grow: 1;
+  background: #f6f8fa;
+}
+
+.timeline-message {
+  font-size: 14px;
+  color: #71C887;
+}
+
+.timeline-datetime {
+  font-size: 12px;
+  color: #374248;
+  font-style: italic;
+}
+
+
 
 
 /* Responsive */

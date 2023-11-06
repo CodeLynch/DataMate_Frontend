@@ -158,7 +158,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
     return(
         <>
         {tblData !== undefined? <>
-            <Box sx={{height:"85vh", margin:'1em', marginTop:'2em'}}>
+            <Box sx={{height:"85vh", margin:'1em', marginTop:'5em'}}>
                 <Box sx={{display:"flex", flexDirection:"row", justifyContent:"space-between"}}>
                     <div style={{display:"flex", flexDirection:"row", padding:"5px"}}>
                         <h1 style={{margin:5}}>{Database}</h1>
