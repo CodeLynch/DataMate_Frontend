@@ -57,6 +57,9 @@ import PrivateRoute from "./components/PrivateRoute";
 import DatabaseScreen from "./components/DatabaseScreen";
 import Profile from "./components/Profile";
 import FileLogs from "./components/FileLogs";
+import VerifyCode from "./components/VerifyEmail";
+import Snackbar from "./components/Snackbar";
+import ResetPassword from "./components/ResetPassword";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -510,97 +513,145 @@ function App() {
                       </>
                     }
                   />
-                  <Route path="/template/1">
+                  <Route
+                    path="/convert"
+                    element={
+                      <PrivateRoute>
+                        <ConvertFilePage />
+                      </PrivateRoute>
+                    }
+                  />
+                  {/* nested for Templates */}
+                  <Route path="templates">
                     <Route
                       index
                       element={
-                        <Box sx={{ padding: "1px" }}>
+                        <PrivateRoute>
+                          <TemplatesPage />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="template"
+                      element={
+                        <PrivateRoute>
                           <SpecificTemplatePage />
-                        </Box>
+                        </PrivateRoute>
                       }
                     />
+                    <Route path="1">
+                      <Route
+                        index
+                        element={
+                          <Box sx={{ padding: "1px" }}>
+                            <SpecificTemplatePage />
+                          </Box>
+                        }
+                      />
+                    </Route>
+                    <Route path="2">
+                      <Route
+                        index
+                        element={
+                          <Box sx={{ padding: "1px" }}>
+                            <SpecificTemplatePageTwo />
+                          </Box>
+                        }
+                      />
+                    </Route>
+                    <Route path="3">
+                      <Route
+                        index
+                        element={
+                          <Box sx={{ padding: "1px" }}>
+                            <SpecificTemplatePageThree />
+                          </Box>
+                        }
+                      />
+                    </Route>
                   </Route>
-                  <Route path="/template/2">
+                  {/* nested for Files */}
+                  <Route path="files">
                     <Route
                       index
                       element={
-                        <Box sx={{ padding: "1px" }}>
-                          <SpecificTemplatePageTwo />
-                        </Box>
+                        <PrivateRoute>
+                          <FileScreenPage setFileId={setFileId} />
+                        </PrivateRoute>
                       }
                     />
+                    <Route
+                      path="file"
+                      element={
+                        <PrivateRoute>
+                          <Filepage stopLoading={StopLoading} />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="file-logs"
+                      element={
+                        <PrivateRoute>
+                          <FileLogs />
+                        </PrivateRoute>
+                      }
+                    />{" "}
+                    <Route path="deleted-files" element={<DeletedFiles />} />
                   </Route>
-                  <Route path="/template/3">
+                  {/* nested for Databases */}
+                  <Route path="databases">
+                    {" "}
                     <Route
                       index
                       element={
-                        <Box sx={{ padding: "1px" }}>
-                          <SpecificTemplatePageThree />
-                        </Box>
+                        <PrivateRoute>
+                          <DatabaseScreen setDatabaseId={setDatabaseId} />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="database"
+                      element={
+                        <PrivateRoute>
+                          <DatabasePage stopLoading={StopLoading} />
+                        </PrivateRoute>
                       }
                     />
                   </Route>
-                  <Route
-                    path="/file"
-                    element={
-                      <>
-                        <Filepage stopLoading={StopLoading} />
-                      </>
-                    }
-                  />
-                  <Route path="/template/" element={<SpecificTemplatePage />} />
-                  <Route
-                    path="/file/"
-                    element={<Filepage stopLoading={StopLoading} />}
-                  />
-                  <Route path="/convert" element={<ConvertFilePage />} />
-                  <Route path="/templates" element={<TemplatesPage />} />
-                  <Route
-                    path="/files"
-                    element={
-                      isLoggedIn ? (
-                        <FileScreenPage setFileId={setFileId} />
-                      ) : (
-                        <Navigate to="/login" replace={true} />
-                      )
-                    }
-                  />
-                  <Route
-                    path="/database"
-                    element={<DatabasePage stopLoading={StopLoading} />}
-                  />
-                  <Route
-                    path="/databases"
-                    element={<DatabaseScreen setDatabaseId={setDatabaseId} />}
-                  />
-                  <Route path="/delete-profile/" element={<DeleteProfile />} />
-                  <Route path="/deleted-files" element={<DeletedFiles />} />
-                  <Route
-                    path="/edit-profile"
-                    element={
-                      <PrivateRoute>
-                        <EditProfile />
-                      </PrivateRoute>
-                    }
-                  ></Route>
-                  <Route
-                    path="/profile"
-                    element={
-                      <PrivateRoute>
-                        <Profile />
-                      </PrivateRoute>
-                    }
-                  />
+                  {/* nested for Profile  */}
+                  <Route path="profile">
+                    <Route
+                      index
+                      element={
+                        <PrivateRoute>
+                          <Profile />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="edit-profile"
+                      element={
+                        <PrivateRoute>
+                          <EditProfile />
+                        </PrivateRoute>
+                      }
+                    ></Route>
 
-                  <Route
-                    path="/file-logs"
-                    element={
-                      <PrivateRoute>
-                        <FileLogs />
-                      </PrivateRoute>
-                    }
-                  />
-
+                    <Route
+                      path="delete-profile"
+                      element={
+                        <PrivateRoute>
+                          <DeleteProfile />
+                        </PrivateRoute>
+                      }
+                    />
+                  </Route>
+                  {/* nested for forgot pass */}
+                  <Route path="forgot-password">
+                    <Route index element={<ForgotPassword />} />
+                    <Route path="verify-code" element={<VerifyCode />} />
+                    <Route path="reset-password" element={<ResetPassword />} />
+                  </Route>
                   {/* Public pages */}
                   <Route
                     path="/login"
@@ -610,11 +661,6 @@ function App() {
                     path="/registration"
                     element={<Registration />}
                   ></Route>
-                  <Route path="forgot-password">
-                    <Route index element={<ForgotPassword />} />
-                    <Route path="verify-code" element={<VerifyCode />} />
-                    <Route path="reset-password" element={<ResetPassword />} />
-                  </Route>
                 </Routes>
               </Box>
             </Box>
