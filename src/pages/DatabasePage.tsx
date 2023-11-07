@@ -5,9 +5,11 @@ import TableService from "../services/TableService";
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ReactDataGrid from "@inovua/reactdatagrid-community";
 import { EditIcon, TblIcon } from "../components/icons";
+import { SaveAs } from "@mui/icons-material";
 
 type DatabasePageProps = {
     stopLoading: () => void,
+    startLoading: () => void,
   }
 
 type DatabaseType = {
@@ -36,7 +38,16 @@ interface HeaderConfig {
     };},
 }
 
-export default function DatabasePage({stopLoading}:DatabasePageProps) {
+interface TableObj{
+  tblName: string,
+  data: Object[],
+}
+
+interface TableRow {
+  [key: string]: string | number | boolean | Date;
+}
+
+export default function DatabasePage({stopLoading, startLoading}:DatabasePageProps) {
     const loc = useLocation();
     const nav = useNavigate();
     const dbId = loc.state.dbid;
@@ -46,7 +57,10 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
     const [currentTblID, setCurrentTblID] = useState(0);
     const [colsData, setColsData] = useState<HeaderConfig[]>([]);
     const [Database, setDBName] = useState('');
+    const [downloadWindow, setDLWindow] = useState(false);
+    const [DBObj, setDBObj] = useState<TableObj[]>([])
     const tblHeight = tblData.length * 47;
+    let sqlStr = "";
     let FirstColumns:string[] = [];
 
 
@@ -70,7 +84,7 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
       return strArr;
   }
 
-  function createObjects(keys: string[], arrayOfArrays: any[][]): Object[] {
+  function createObjects(keys: string[], arrayOfArrays: (number | string | Date | boolean)[][]): Object[] {
     if (keys.length === 0 || arrayOfArrays.length === 0) {
       return [];
     }
@@ -80,13 +94,142 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
     }
   
     return arrayOfArrays.map((arr) => {
-      const obj: { [key: string]: any } = {};
+      const obj: { [key: string]: (number | string | Date | boolean) } = {};
       keys.forEach((key, index) => {
         obj[key] = arr[index];
       });
       return obj;
     });
   }
+
+  function getColumnType(value: (string | number | boolean | Date)): string {
+    console.log("Type of ", value, " is ", typeof value);
+    if (typeof value === "string") {
+        return "VARCHAR(255)";
+    } else if (typeof value === "number") {
+        if (Number.isInteger(value)) {
+           if(value > 2000000000){
+            return "VARCHAR(255)";
+           }else{
+            return "INTEGER";
+           }
+        } else {
+            return "DOUBLE";
+        }
+    } else if (typeof value === "boolean") {
+        return "BOOLEAN";
+    } else if (value instanceof Date) {
+        return "DATE";
+    } else {
+        throw new Error(`Unsupported data type: ${typeof value}`);
+    }}
+  
+  function getCreateQuery(jsonData: TableRow[], tableName: string): String {
+    if (jsonData.length === 0) {
+        throw new Error("JSON array is empty.");
+    }
+    let dbSql = Database.replace(/ *\([^)]*\) */g, "");
+    let ReturnStr = `CREATE TABLE ${dbSql}.${tableName}`;
+    const columns: string[] = Object.keys(jsonData[0]);
+    ReturnStr = ReturnStr + " " + `(${columns.map(col => `${col.replace(/[^a-zA-Z0-9]/g,'_')} ${getColumnType(jsonData[0][col])}`).join(', ')});`;
+    
+    return ReturnStr;
+  }
+
+  function getInsertQuery(jsonData: TableRow[], tableName: string): string {
+    let dbSql = Database.replace(/ *\([^)]*\) */g, "");
+    let returnStr = `INSERT INTO ${dbSql}.${tableName} `
+    const columns: string[] = Object.keys(jsonData[0]);
+    const insertValues = jsonData.map(record => `(${columns.map(col => {
+        const value = record[col];
+        if(value === "NULL"){
+            return 'NULL';
+        }
+        if (typeof value === "string") {
+            return `'${value}'`;
+        } else if (value instanceof Date) {
+            // Format date as 'YYYY-MM-DD'
+            return `'${value.toISOString().split('T')[0]}'`;
+        } else {
+            if(value as number > 2000000000){
+                return `'${value}'`;
+            }else{
+                return value;
+            }
+        }
+    }).join(', ')})`).join(', ');
+
+    let SQLcolumns: string[] = Object.keys(jsonData[0]).map(key => key.replace(/[^a-zA-Z0-9]/g,'_'));
+    console.log("join: ", SQLcolumns.join(', '));
+    const valsQuery = `(${SQLcolumns.join(', ')}) VALUES ${insertValues};`;
+    return returnStr + " " + valsQuery;
+  }
+
+  function compileDB(){
+    //empty DBObj
+    startLoading()
+    while(DBObj.length > 0){
+      DBObj.pop();
+    }
+    let tempArr = [...DBObj]
+    let iniColumns:string[][] = [];
+    let tblNames:string[] = [];
+    for(const tbl in Tables){
+      TableService.getTblByName(Tables[tbl])
+      .then((res)=>{
+        let tblRes = res as TableType
+        iniColumns[tbl] = tblRes.columns;
+        tblNames[tbl] = tblRes.tableName;
+        console.log("iniColumns arr:", iniColumns);
+        TableService.getTblData(Tables[tbl])
+        .then((res)=>{
+          tempArr.push({tblName:tblNames[tbl], data:createObjects(iniColumns[tbl],res as [][])})
+          if(tempArr.length == Tables.length){
+          console.log("compiling complete...", tempArr);
+          stopLoading()
+          setDBObj(tempArr);
+          setDLWindow(true);
+          }
+        }).catch((err)=>{
+          console.log(err);
+        })
+      }).catch((err)=>{
+        console.log(err);
+      })
+    }
+  }
+
+  useEffect(()=>{
+    if(DBObj.length === Tables.length && downloadWindow){
+      //for create
+      console.log("str before ", sqlStr);
+      DBObj.map((tbl, t)=>{
+        sqlStr = sqlStr + getCreateQuery(tbl.data as TableRow[], tbl.tblName) + "\n";
+      })
+      //for insert
+      DBObj.map((tbl, t)=>{
+        sqlStr = sqlStr + getInsertQuery(tbl.data as TableRow[], tbl.tblName) + "\n";
+      })
+      // console.log("str so far:", sqlStr);
+      const finalStr = `CREATE DATABASE ${Database.replace(/ *\([^)]*\) */g, "")};` + "\n" + sqlStr;
+      const sqlFile =  new Blob([`${finalStr}`],{type: 'text/plain;charset=utf-8'});
+      const href = URL.createObjectURL(sqlFile);
+  
+      // create "a" HTML element with href to file & click
+      const link = document.createElement('a');
+      link.href = href;
+      // const name = JSON.stringify(fileName)
+      link.setAttribute('download', `${Database}.sql`); //or any other extension
+      document.body.appendChild(link);
+      link.click();
+  
+      // clean up "a" element & remove ObjectURL
+      document.body.removeChild(link);
+      URL.revokeObjectURL(href);
+      setDLWindow(false);
+
+    }
+  },[DBObj])
 
     useEffect(()=>{
       //if(dbId !== undefined){
@@ -128,6 +271,10 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
         setCurrentTblID(newValue);
         setCurrentTbl(Tables[newValue]);
     };
+
+    const handleExport = () => {
+      compileDB();
+    }
 
     useEffect(()=>{
       if(Tables[currentTblID] !== undefined || Tables[currentTblID] !== null){
@@ -182,7 +329,9 @@ export default function DatabasePage({stopLoading}:DatabasePageProps) {
                             <EditIcon/>
                         </div>
                     </div>
-                    <div className="iconTab" style={{display:"flex", fontSize:"18px", alignSelf:"flex-end", cursor:"pointer"}}>
+                    <div className="iconTab"
+                    onClick={handleExport}
+                    style={{display:"flex", fontSize:"18px", alignSelf:"flex-end", cursor:"pointer"}}>
                         EXPORT AS SQL
                     </div>
                     

@@ -492,11 +492,12 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
         const sd = sheetData as WorkbookData;
         let isNormalized = true;
         for (const s in visibleSheetNames){
+            console.log("checking sheet:", visibleSheetNames[s]);
             console.log("result: ", hasPossiblePrimaryKey(sd[visibleSheetNames[s]] as TableRow[]) && !canBeNormalized(sd[visibleSheetNames[s]] as [][]));
             console.log(visibleSheetNames[s]," has possible pk: ", hasPossiblePrimaryKey(sd[visibleSheetNames[s]] as TableRow[]), "can be normalized: ", canBeNormalized(sd[visibleSheetNames[s]] as [][]));
             //if block for normalized prompt
             console.log("prompt condition:", (!(hasPossiblePrimaryKey(sd[visibleSheetNames[s]] as TableRow[])) && canBeNormalized(sd[visibleSheetNames[s]] as [][])));
-            if(!(hasPossiblePrimaryKey(sd[visibleSheetNames[s]] as TableRow[])) && canBeNormalized(sd[visibleSheetNames[s]] as [][])){
+            if(!(hasPossiblePrimaryKey(sd[visibleSheetNames[s]] as TableRow[])) || canBeNormalized(sd[visibleSheetNames[s]] as [][])){
               console.log("this happened for ", visibleSheetNames[s]);
               isNormalized = false;
               console.log("current normList:", normSheets);

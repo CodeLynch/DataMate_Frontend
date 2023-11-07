@@ -557,7 +557,7 @@ function App() {
                   />
                   <Route
                     path="/database"
-                    element={<DatabasePage stopLoading={StopLoading} />}
+                    element={<DatabasePage startLoading={StartLoading} stopLoading={StopLoading} />}
                   />
                   <Route path="/databases" element={<DatabaseScreen setFileId={setFileId} />} />
                   <Route path="/delete-profile/" element={<DeleteProfile />} />
