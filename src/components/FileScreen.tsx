@@ -67,7 +67,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   const handleClickFileName = (file: any) => {
     let id = file?.fileId;
 
-    nav("/file", {
+    nav("/files/file", {
       state: {
         fileid: id,
       },
@@ -311,7 +311,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
           )}
 
           {isLargeScreen && (
-            <Link underline="none" href="/deleted-files" color={"black"}>
+            <Link underline="none" href="/files/deleted-files" color={"black"}>
               <IconButton
                 style={{
                   marginLeft: "24px",
@@ -328,7 +328,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
             </Link>
           )}
           {isLargeScreen && (
-            <Link underline="none" href="/file-logs" color={"black"}>
+            <Link underline="none" href="/files/file-logs" color={"black"}>
               <IconButton
                 style={{
                   marginLeft: "24px",
