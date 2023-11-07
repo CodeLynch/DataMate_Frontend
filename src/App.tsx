@@ -489,9 +489,29 @@ function App() {
                     path="/convert"
                     element={
                       <PrivateRoute>
-                        <ConvertFilePage />
-                      </PrivateRoute>
-                    }
+                      <>
+                      {/* modal for normalize tables here  */}
+                      <Modal open={NormalizeTable} onClose={()=>{
+                        toggleNormalized(false, -1);
+                      }}>
+                      <div>
+                        <NormalizePrompt
+                          toggleNormalized={toggleNormalized}
+                          fileId={uploadedFileId}
+                          reset={resetVariables}
+                          normList={normSheets}
+                          startLoading={StartLoading}
+                        />
+                      </div>
+                      </Modal>
+                      <ConvertFilePage 
+                      startLoading={StartLoading}
+                      updateNorm={updateNormList}
+                      normSheets={normSheets}
+                      toggleNormalized={toggleNormalized} />
+                      </>
+                      </PrivateRoute> 
+                      }
                   />
                   {/* nested for Templates */}
                   <Route path="templates">
@@ -585,49 +605,14 @@ function App() {
                       path="database"
                       element={
                         <PrivateRoute>
-                          <DatabasePage stopLoading={StopLoading} />
+                          <DatabasePage startLoading={StartLoading} stopLoading={StopLoading} />
                         </PrivateRoute>
                       }
                     />
                   </Route>
-                  <Route
-                    path="/file"
-                    element={
-                      <>
-                        <Filepage stopLoading={StopLoading} />
-                      </>
-                    }
-                  />
-                  <Route path="/template/" element={<SpecificTemplatePage />} />
-                  <Route
-                    path="/file/"
-                    element={<Filepage stopLoading={StopLoading} />}
-                  />
-                  <Route path="/convert" element={
-                  <>
-                  {/* modal for normalize tables here  */}
-                  <Modal open={NormalizeTable} onClose={()=>{
-                    toggleNormalized(false, -1);
-                  }}>
-                  <div>
-                    <NormalizePrompt
-                      toggleNormalized={toggleNormalized}
-                      fileId={uploadedFileId}
-                      reset={resetVariables}
-                      normList={normSheets}
-                      startLoading={StartLoading}
-                    />
-                  </div>
-                  </Modal>
-                  <ConvertFilePage 
-                  startLoading={StartLoading}
-                  updateNorm={updateNormList}
-                  normSheets={normSheets}
-                  toggleNormalized={toggleNormalized} />
-                  </> 
-                  }
-                  />
-                  <Route path="/templates" element={<TemplatesPage />} />
+
+
+                  
                   <Route
                     path="/files"
                     element={
@@ -642,7 +627,7 @@ function App() {
                     path="/database"
                     element={<DatabasePage startLoading={StartLoading} stopLoading={StopLoading} />}
                   />
-                  <Route path="/databases" element={<DatabaseScreen setFileId={setFileId} />} />
+                  <Route path="/databases" element={<DatabaseScreen setDatabaseId={setDatabaseId} />} />
                   <Route path="/delete-profile/" element={<DeleteProfile />} />
                   <Route path="/deleted-files" element={<DeletedFiles />} />
                   <Route
@@ -653,14 +638,25 @@ function App() {
                       </PrivateRoute>
                     }
                   ></Route>
-                  <Route
-                    path="/profile"
-                    element={
-                      <PrivateRoute>
-                        <Profile />
-                      </PrivateRoute>
-                    }
-                  />
+
+                  {/* nested for Profile  */}
+                  <Route path="profile">
+                    <Route
+                      index
+                      element={
+                        <PrivateRoute>
+                          <Profile />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="edit-profile"
+                      element={
+                        <PrivateRoute>
+                          <EditProfile />
+                        </PrivateRoute>
+                      }
+                    ></Route>
 
                     <Route
                       path="delete-profile"
