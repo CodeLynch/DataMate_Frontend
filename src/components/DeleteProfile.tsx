@@ -107,6 +107,10 @@ const DeleteProfile = () => {
     }
   };
 
+  const handleCancelClick = () => {
+    navigate("/profile");
+  };
+
   return (
     <section
       className="gradientbg"
@@ -118,7 +122,14 @@ const DeleteProfile = () => {
         height: "100%",
       }}
     >
-      <Grid container component="form" onSubmit={deleteAccount} justifyContent="center" alignItems="center" sx={{ width: '100%',  mt: 8 }}>
+      <Grid
+        container
+        component="form"
+        onSubmit={deleteAccount}
+        justifyContent="center"
+        alignItems="center"
+        sx={{ width: "100%", mt: 8 }}
+      >
         <Box
           // width={{ xl: "50%", sm: "85%", xs: "95%", lg: "50%" }}
           // height={{ xl: 500, sm: 550, xs: 650, lg: 500 }}
@@ -134,7 +145,7 @@ const DeleteProfile = () => {
             position: "relative",
             textAlign: "center",
             mt: 15,
-            mx: {xs: 5}
+            mx: { xs: 5 },
           }}
         >
           <Avatar
@@ -255,7 +266,7 @@ const DeleteProfile = () => {
               justifyContent: "flex-end",
               width: "100%",
               marginRight: "15%",
-              mb: 3
+              mb: 3,
             }}
           >
             <Button
@@ -268,9 +279,9 @@ const DeleteProfile = () => {
                 color: "white",
                 backgroundColor: "#CCCCCC",
                 boxShadow: "0px 4px 4px 0px #00000040",
-                "&:hover": {
-                  backgroundColor: "red",
-                },
+                // "&:hover": {
+                //   backgroundColor: "red",
+                // },
               }}
             >
               Delete
@@ -285,10 +296,11 @@ const DeleteProfile = () => {
                 color: "white",
                 marginLeft: "10px",
                 backgroundColor: "#71C887",
-                "&:hover": {
-                  backgroundColor: "green",
-                },
+                // "&:hover": {
+                //   backgroundColor: "green",
+                // },
               }}
+              onClick={handleCancelClick}
             >
               Cancel
             </Button>

@@ -1,14 +1,24 @@
 import { useEffect, useState } from "react";
-import FileService from "../services/FileService"
+import FileService from "../services/FileService";
 import { useLocation, useNavigate } from "react-router-dom";
-import * as XLSX from 'xlsx'
-import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Paper, Select, SelectChangeEvent,} from "@mui/material";
+import * as XLSX from "xlsx";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  SelectChangeEvent,
+} from "@mui/material";
 import { start } from "repl";
 import styled from "@emotion/styled";
 import axios from "axios";
 import ReactDataGrid from "@inovua/reactdatagrid-community";
-import '@inovua/reactdatagrid-community/index.css'
-import '@inovua/reactdatagrid-community/theme/green-light.css'
+import "@inovua/reactdatagrid-community/index.css";
+import "@inovua/reactdatagrid-community/theme/green-light.css";
 import ConvertService from "../services/ConvertService";
 import DatabaseService from "../services/DatabaseService";
 import TableService from "../services/TableService";
@@ -23,20 +33,21 @@ type ConvertProps = {
     toggleNormalized: (status:boolean, id: number) => void,
 }
 interface HeaderConfig {
-    name: string;
-    header: string;
-    defaultVisible?: boolean,
-    defaultFlex: number,
-    headerProps?: {
-        style: {
-        backgroundColor: string;
-        color: string;
-        fontWeight: string;
-    };},
+  name: string;
+  header: string;
+  defaultVisible?: boolean;
+  defaultFlex: number;
+  headerProps?: {
+    style: {
+      backgroundColor: string;
+      color: string;
+      fontWeight: string;
+    };
+  };
 }
 
 interface TableRow {
-    [key: string]: string | number | boolean | Date;
+  [key: string]: string | number | boolean | Date;
 }
 
 interface WorkbookData {
@@ -49,18 +60,18 @@ type ConvertCommand = {
     insertValues: string;
 }
 
-type DatabaseResponse ={
-    databaseId: number;
-    databaseName: string;
-    user: Object;
-}
+type DatabaseResponse = {
+  databaseId: number;
+  databaseName: string;
+  user: Object;
+};
 
-type TableResponse ={
-    tableId: number;
-    tableName: string;
-    database: Object;
-    user: Object;
-}
+type TableResponse = {
+  tableId: number;
+  tableName: string;
+  database: Object;
+  user: Object;
+};
 
 export default function ConvertFilePage({startLoading, normSheets, updateNorm, toggleNormalized}:ConvertProps) {
     const loc = useLocation();
@@ -94,120 +105,118 @@ export default function ConvertFilePage({startLoading, normSheets, updateNorm, t
 
 
 
-    // Sheet Data functions -----------------------------------------------------------------------
-    //function to remove empty rows in Sheet Object Data
-    function sheetjs_cleanEmptyRows(sd:XLSX.SheetType) {
-        const data = []
-            for (var row = 0; row < sd.length; row++) {
-                  var i = sd[row].length;
-                  var j = 0;
-                for ( var cell = 0; cell < sd[row].length; cell++){
-    
-                    if (sd[row][cell].length == 0 ) { j++}
-                }
-              if (j < i) {
-                data.push(sd[row]);
-              }
-            }
-            return data;
-     }
-
-    const readData = (wb: XLSX.WorkBook) => {
-        console.log("and this workbook is passed ", wb);
-        setSheetNames(wb.SheetNames)
-        let sheetdata:Object = {}
-        wb.SheetNames.map((sheet, i) => 
-        {
-            const worksheet = wb.Sheets[sheet];
-            const jsondata = XLSX.utils.sheet_to_json(worksheet,{
-                header: 1,
-                raw: false,
-                defval: "",
-            }) as unknown;
-            const sd = sheetjs_cleanEmptyRows(jsondata as XLSX.SheetType)
-            const js = sd as Object
-            sheetdata = {...sheetdata, [sheet]: js}            
-        })
-        console.log("sheetdata on readData: ",sheetdata)
-        setSData(sheetdata)
+  // Sheet Data functions -----------------------------------------------------------------------
+  //function to remove empty rows in Sheet Object Data
+  function sheetjs_cleanEmptyRows(sd: XLSX.SheetType) {
+    const data = [];
+    for (var row = 0; row < sd.length; row++) {
+      var i = sd[row].length;
+      var j = 0;
+      for (var cell = 0; cell < sd[row].length; cell++) {
+        if (sd[row][cell].length == 0) {
+          j++;
+        }
+      }
+      if (j < i) {
+        data.push(sd[row]);
+      }
     }
+    return data;
+  }
 
+  const readData = (wb: XLSX.WorkBook) => {
+    console.log("and this workbook is passed ", wb);
+    setSheetNames(wb.SheetNames);
+    let sheetdata: Object = {};
+    wb.SheetNames.map((sheet, i) => {
+      const worksheet = wb.Sheets[sheet];
+      const jsondata = XLSX.utils.sheet_to_json(worksheet, {
+        header: 1,
+        raw: false,
+        defval: "",
+      }) as unknown;
+      const sd = sheetjs_cleanEmptyRows(jsondata as XLSX.SheetType);
+      const js = sd as Object;
+      sheetdata = { ...sheetdata, [sheet]: js };
+    });
+    console.log("sheetdata on readData: ", sheetdata);
+    setSData(sheetdata);
+  };
 
-    //call backend for xlsx data
-    const fetchData = async () =>{
-        FileService.getFile(fileId).then((res)=>{
-            const wb = XLSX.read(res.data);
-            setFileName(res.fileName);
-            setWB(wb);
-        }).catch((err)=>{
-            console.log(err);
-        }) 
+  //call backend for xlsx data
+  const fetchData = async () => {
+    FileService.getFile(fileId)
+      .then((res) => {
+        const wb = XLSX.read(res.data);
+        setFileName(res.fileName);
+        setWB(wb);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  //fetch data on load
+  useEffect(() => {
+    setVSheets([]);
+    fetchData();
+  }, []);
+
+  //read workbook and toggle start count if workbook state and sheetnames state is changed
+  useEffect(() => {
+    if (workbook !== undefined) {
+      console.log("this is called");
+      readData(workbook!);
     }
+  }, [workbook]);
 
-    //fetch data on load
-    useEffect(()=>{
-        setVSheets([]);
-        fetchData();
-    },[])
-
-    
-
-    //read workbook and toggle start count if workbook state and sheetnames state is changed
-    useEffect(()=>{
-        if(workbook !== undefined){
-            console.log("this is called");
-           readData(workbook!); 
+  useEffect(() => {
+    if (sheetNames !== undefined && sheetNames !== null) {
+      sheetNames.map((name) => {
+        if (!visibleSheetNames.includes(name)) {
+          visibleSheetNames.push(name);
         }
-    },[workbook])
-
-    useEffect(()=>{
-        if(sheetNames !== undefined && sheetNames !== null){
-            sheetNames.map((name) => {
-                if(!visibleSheetNames.includes(name)){
-                   visibleSheetNames.push(name);     
-                }
-            })
-            setCurrentSheet(visibleSheetNames[0]);
-            console.log("sheetData state: ",sheetData);
-        }
-    }, [sheetData])
-
-    
-
-    const changeSheet = (event: SelectChangeEvent) =>{
-        setCurrSheetID(event.target.value);
-        let SheetName = workbook!.SheetNames[event.target.value as unknown as number];
-        setCurrentSheet(SheetName!);
+      });
+      setCurrentSheet(visibleSheetNames[0]);
+      console.log("sheetData state: ", sheetData);
     }
+  }, [sheetData]);
 
-    useEffect(()=>{
-        //typing currentSheet as key of sheetData
-        const currSheet = currentSheet as keyof typeof sheetData
-        //typing object value as unknown before converting to row
-        const row =  sheetData[currSheet] as unknown
-        let rowArr = row as [][]
-        setHArr(rowArr)
-    },[currentSheet])
+  const changeSheet = (event: SelectChangeEvent) => {
+    setCurrSheetID(event.target.value);
+    let SheetName =
+      workbook!.SheetNames[event.target.value as unknown as number];
+    setCurrentSheet(SheetName!);
+  };
 
-    useEffect(()=>{
-        if(HeaderArr !== undefined){
-            let rowsArr = [];
-            //copy rowArr
-            rowsArr = HeaderArr.slice(0); 
-            console.log("Before", rowsArr);
-            //remove header values
-            rowsArr.splice(1 - 1, 1);
-            console.log("After", rowsArr);
-            setBArr(rowsArr);
-        }
-    },[HeaderArr])
+  useEffect(() => {
+    //typing currentSheet as key of sheetData
+    const currSheet = currentSheet as keyof typeof sheetData;
+    //typing object value as unknown before converting to row
+    const row = sheetData[currSheet] as unknown;
+    let rowArr = row as [][];
+    setHArr(rowArr);
+  }, [currentSheet]);
 
-    useEffect(()=>{
-        if(HeaderArr !== undefined && BodyArr !== undefined){            
-            setConvertToDS(true);
-        }
-    }, [BodyArr])
-    //-----------------------------------------------------------------------------------------------------
+  useEffect(() => {
+    if (HeaderArr !== undefined) {
+      let rowsArr = [];
+      //copy rowArr
+      rowsArr = HeaderArr.slice(0);
+      console.log("Before", rowsArr);
+      //remove header values
+      rowsArr.splice(1 - 1, 1);
+      console.log("After", rowsArr);
+      setBArr(rowsArr);
+    }
+  }, [HeaderArr]);
+
+  useEffect(() => {
+    if (HeaderArr !== undefined && BodyArr !== undefined) {
+      setConvertToDS(true);
+    }
+  }, [BodyArr]);
+  //-----------------------------------------------------------------------------------------------------
 
     //Data Grid Functions----------------------------------------------------------------------------------
     useEffect(()=>{
@@ -422,27 +431,28 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
     // return buf;    
     // }
 
-    function getColumnType(value: any): string {
+  function getColumnType(value: any): string {
     console.log("Type of ", value, " is ", typeof value);
     if (typeof value === "string") {
-        return "VARCHAR(255)";
+      return "VARCHAR(255)";
     } else if (typeof value === "number") {
-        if (Number.isInteger(value)) {
-           if(value > 2000000000){
-            return "VARCHAR(255)";
-           }else{
-            return "INTEGER";
-           }
+      if (Number.isInteger(value)) {
+        if (value > 2000000000) {
+          return "VARCHAR(255)";
         } else {
-            return "DOUBLE";
+          return "INTEGER";
         }
+      } else {
+        return "DOUBLE";
+      }
     } else if (typeof value === "boolean") {
-        return "BOOLEAN";
+      return "BOOLEAN";
     } else if (value instanceof Date) {
-        return "DATE";
+      return "DATE";
     } else {
-        throw new Error(`Unsupported data type: ${typeof value}`);
-    }}
+      throw new Error(`Unsupported data type: ${typeof value}`);
+    }
+  }
 
     function generateConvertCommandObject(jsonData: TableRow[], tableName: string): ConvertCommand {
         if (jsonData.length === 0) {
@@ -461,14 +471,14 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
             }
             if (typeof value === "string") {
                 return `'${value}'`;
-            } else if (value instanceof Date) {
+              } else if (value instanceof Date) {
                 // Format date as 'YYYY-MM-DD'
-                return `'${value.toISOString().split('T')[0]}'`;
-            } else {
-                if(value as number > 2000000000){
-                    return `'${value}'`;
-                }else{
-                    return value;
+                return `'${value.toISOString().split("T")[0]}'`;
+              } else {
+                if ((value as number) > 2000000000) {
+                  return `'${value}'`;
+                } else {
+                  return value;
                 }
             }
         }).join(', ')})`).join(', ');
@@ -543,46 +553,44 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
                     setSQLCmds(sql2dArr);
             }).catch((err)=>{
                 console.log(err);
-            })
-            
+            });
+      }
     }
-        // using SQLizer API
-        // if(workbook !== undefined && workbook !== null){
-        //     let type = getFileType(fileName);
-        //     var wopts:XLSX.WritingOptions = { bookType:getFileType(fileName)? 'xlsx': getFileType(fileName) as XLSX.BookType, type:'binary' };
-        //     const wbString = XLSX.write(workbook, wopts);
-        //     var blob = new Blob([s2ab(wbString)],{type:"application/octet-stream"});
+    // using SQLizer API
+    // if(workbook !== undefined && workbook !== null){
+    //     let type = getFileType(fileName);
+    //     var wopts:XLSX.WritingOptions = { bookType:getFileType(fileName)? 'xlsx': getFileType(fileName) as XLSX.BookType, type:'binary' };
+    //     const wbString = XLSX.write(workbook, wopts);
+    //     var blob = new Blob([s2ab(wbString)],{type:"application/octet-stream"});
 
-        //     let dataID = "";
-        //     ConvertService.postFileEntity(fileName, type)
-        //     .then((res)=>{
-        //         console.log("postFileEntity RES:", res);
-        //         ConvertService.uploadFile(blob as File, res.ID)
-        //         .then((res)=>{
-        //             console.log("uploadFile RES:", res);
-        //             if(res.Status === "Ok"){
-        //                 ConvertService.putFileEntity(dataID)
-        //                 .then((res)=>{
-        //                     console.log("putFileEntity RES:", res);
-        //                     //set state of doneUploading to true
-        //                 }).catch((err)=>{
-        //                     console.log("PuFE",err);
-        //                 })
-        //             }else{
-        //                 alert("API Error in uploading file!");
-        //                 nav("/");
-        //             }
-        //         }).catch((err)=>{
-        //             console.log("UF", err);
-        //         })
-        //     }).catch((err)=>{
-        //         console.log("PFE",err);
-        //     })
-        //   }else{
-        //     alert("ERROR: Workbook is NULL or undefined");
-        // }
-        
-    }
+    //     let dataID = "";
+    //     ConvertService.postFileEntity(fileName, type)
+    //     .then((res)=>{
+    //         console.log("postFileEntity RES:", res);
+    //         ConvertService.uploadFile(blob as File, res.ID)
+    //         .then((res)=>{
+    //             console.log("uploadFile RES:", res);
+    //             if(res.Status === "Ok"){
+    //                 ConvertService.putFileEntity(dataID)
+    //                 .then((res)=>{
+    //                     console.log("putFileEntity RES:", res);
+    //                     //set state of doneUploading to true
+    //                 }).catch((err)=>{
+    //                     console.log("PuFE",err);
+    //                 })
+    //             }else{
+    //                 alert("API Error in uploading file!");
+    //                 nav("/");
+    //             }
+    //         }).catch((err)=>{
+    //             console.log("UF", err);
+    //         })
+    //     }).catch((err)=>{
+    //         console.log("PFE",err);
+    //     })
+    //   }else{
+    //     alert("ERROR: Workbook is NULL or undefined");
+    // }
 
     useEffect(()=>{
         if(SQLCommands !== null && SQLCommands.length > 0){

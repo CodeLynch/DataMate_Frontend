@@ -350,8 +350,8 @@ export default function DeletedFiles() {
         <Grid container>
           <Box my={5}>
               <Stack direction="row">
-                <ArrowBackIosNewIcon sx={{ fontSize: '30px', color: '#374248', cursor: 'pointer', mr: 2, mt: .8 }} onClick={() => { nav('/files'); }}/>
-                <Typography variant="h4" fontWeight="bold" color="#374248">
+                <ArrowBackIosNewIcon sx={{ fontSize: '25px', color: '#374248', cursor: 'pointer', mr: 2, mt: .6 }} onClick={() => { nav('/files'); }}/>
+                <Typography variant="h5" fontWeight="bold" color="#374248">
                   Deleted Files
                 </Typography>
               </Stack>

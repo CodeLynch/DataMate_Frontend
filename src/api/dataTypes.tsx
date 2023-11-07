@@ -41,3 +41,12 @@ export interface DatabaseEntity {
   databaseName: string,
   userId: number;
 }
+
+
+export interface FileActivityLogEntity {
+  logId: number;
+  activity: string;
+  timestamp: string;
+  fileId: number;
+  userId: number;
+}

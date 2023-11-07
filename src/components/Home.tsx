@@ -66,10 +66,12 @@ export default function Home({toggleImport}:HomeProps){
             </section>
 
             <section id="helpstart">
-                <div className='wrapper'>
-                    <h2 className='h2-style'>How can we help you?</h2>
-                    <p className='pHome-style'>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
-                </div>
+                <Box sx={{ my: {xs: 3, sm: 5, md: 7} }}>
+                    <div className='wrapper'>
+                        <h2 className='h2-style' >How can we help you?</h2>
+                        <p className='pHome-style'>Get more done in less time with our downloadable templates - Boost Your Productivity Now!</p>
+                    </div>
+                </Box>
 
                 <div className='template-content-holder'>
                     <div className='wrapper-template'>
