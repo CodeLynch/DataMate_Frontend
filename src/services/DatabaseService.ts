@@ -30,11 +30,7 @@ class DatabaseService{
     }
 
     async getDBsByUser(userid: number){
-<<<<<<< HEAD
-        return axios.get(`${API_URL}/getUserDBs?userId=${userid}`)
-=======
         return axios.get(`${API_URL}/getUserDBs/${userid}`)
->>>>>>> 22d3a7f2b75f27d5d359755c8da4f74f83901382
         .then((res)=>{
             if (res.data) {
                 return res.data;
