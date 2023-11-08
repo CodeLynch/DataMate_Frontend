@@ -523,14 +523,6 @@ function App() {
                         </PrivateRoute>
                       }
                     />
-                    <Route
-                      path="template"
-                      element={
-                        <PrivateRoute>
-                          <SpecificTemplatePage />
-                        </PrivateRoute>
-                      }
-                    />
                     <Route path="1">
                       <Route
                         index

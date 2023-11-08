@@ -85,8 +85,9 @@ export default function EditProfile() {
       className="gradientbg edit-spacing"
       style={{
         width: "100%",
-        height: "100%",
+        height: "100%", 
       }}
+     
     >
       <Stack
         direction="row"
@@ -94,20 +95,23 @@ export default function EditProfile() {
         alignItems="center"
         width="100%"
         height="100%"
+        marginTop="10px"
       >
-        <Grid container direction="row" paddingTop="26px" marginBottom="2px">
+        
+        <Grid container direction="row" paddingTop="26px" marginBottom="2px" >
           <Box
             sx={{
               backgroundColor: "white",
-              margin: { xs: "115px" },
+              margin: { xs: "115px"  },
               // padding: {
               //   md: "145px 105px 80px 55px",
               // },
               borderRadius: "45px",
               boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
+              marginLeft: {md: "200px"}
             }}
           >
-            <Grid container justifyContent="center" alignItems="center">
+            <Grid container justifyContent="center" alignItems="center" >
               <Grid
                 container
                 justifyContent="center"
@@ -130,6 +134,7 @@ export default function EditProfile() {
                     borderRadius: "50%",
                     position: "absolute",
                     top: 65,
+                    marginTop: "10px"
                   }}
                 />
                 {/* <IconButton sx={{ backgroundColor: "#71C887" }}>
@@ -212,19 +217,21 @@ export default function EditProfile() {
           </Box>
         </Grid>
 
-        <Grid container>
-          <Grid container justifyContent="center" alignItems="center">
+        <Grid container mr={"100px"}>
+          <Grid container justifyContent="center" alignItems="center"   >
             <Box
               sx={{
                 backgroundColor: "white",
-                margin: { xs: "60px" },
+                margin: { xs: "60px", },
                 padding: {
                   xs: "80px 30px 25px 25px",
-                  md: "55px 35px 85px 35px",
+                  md: "55px 35px 50px 35px",
                 },
                 borderRadius: "20px",
                 boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
+                
               }}
+
             >
               <Stack
                 direction="column"

@@ -11,7 +11,7 @@ export default function TemplateItem({templateId, templateName}: TemplateItemTyp
     const nav = useNavigate();
     
     const handleSpecificTemplateClick = () => {
-        const url = "/template/" + templateId.toString()
+        const url = "/templates/" + templateId.toString()
         nav(url);
     }
 

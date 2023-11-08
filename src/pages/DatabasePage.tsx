@@ -102,10 +102,19 @@ export default function DatabasePage({stopLoading, startLoading}:DatabasePagePro
     });
   }
 
+  function isValidDate(dateString: string): boolean {
+    const parsedDate = new Date(dateString);
+    return !isNaN(parsedDate.getTime());
+  }
+
   function getColumnType(value: (string | number | boolean | Date)): string {
     console.log("Type of ", value, " is ", typeof value);
     if (typeof value === "string") {
+      if(isValidDate(value)){
+        return "DATE";
+      }else{
         return "VARCHAR(255)";
+      }
     } else if (typeof value === "number") {
         if (Number.isInteger(value)) {
            if(value > 2000000000){
@@ -118,8 +127,6 @@ export default function DatabasePage({stopLoading, startLoading}:DatabasePagePro
         }
     } else if (typeof value === "boolean") {
         return "BOOLEAN";
-    } else if (value instanceof Date) {
-        return "DATE";
     } else {
         throw new Error(`Unsupported data type: ${typeof value}`);
     }}

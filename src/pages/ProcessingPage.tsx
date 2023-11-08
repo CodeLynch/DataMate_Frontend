@@ -91,11 +91,15 @@ export default function ProcessingPage ({reset, stopLoading, startProcessing, to
                 header: 1,
                 raw: true,
                 defval: "",
+                dateNF:"D-M-YYYY"
+
             }) as unknown;
             const sd = sheetjs_cleanEmptyRows(jsondata as XLSX.SheetType)
-            const js = sd as Object
-            sheetdata = {...sheetdata, [sheet]: js}            
+            const js = sd as Object;
+            let parsedJs = parseDatesToStrings(js as (string|number|boolean|Date)[][]);
+            sheetdata = {...sheetdata, [sheet]: parsedJs}            
         })
+        console.log(sheetdata, "this one right here");
         setSData(sheetdata)
          //typing currentSheet as key of sheetData
          const currSheet = currentSheet as keyof typeof sheetData
@@ -114,7 +118,7 @@ export default function ProcessingPage ({reset, stopLoading, startProcessing, to
     //call backend for xlsx data
     const fetchData = async () =>{
         FileService.getFile(fileId).then((res)=>{
-            const wb = XLSX.read(res.data);
+            const wb = XLSX.read(res.data,{cellDates:true});
             setFileName(res.fileName);
             setWB(wb);
         }).catch((err)=>{
@@ -151,6 +155,28 @@ export default function ProcessingPage ({reset, stopLoading, startProcessing, to
         }
        
     },[workbook, sheetNames])
+
+    function parseDatesToStrings(table: (string | number | boolean | Date)[][]): (string | number | boolean | string)[][] {
+        const parsedTable: (string | number | boolean | string)[][] = [];
+      
+        for (const row of table) {
+          const parsedRow: (string | number | boolean | string)[] = [];
+      
+          for (const cell of row) {
+            if (cell instanceof Date) {
+              // If the cell is a Date, convert it to a string
+              parsedRow.push(cell.toISOString().split('T')[0]);
+            } else {
+              // If the cell is not a Date, keep its original value
+              parsedRow.push(cell);
+            }
+          }
+      
+          parsedTable.push(parsedRow);
+        }
+      
+        return parsedTable;
+    }
 
     function delete_ws(wb:XLSX.WorkBook, wsname:string) {
         const sidx = wb.SheetNames.indexOf(wsname);
@@ -315,7 +341,7 @@ export default function ProcessingPage ({reset, stopLoading, startProcessing, to
                                             <>
                                             {cell !== ""?
                                             <TableCell key={j} align='left'>
-                                            {cell === true? "TRUE": cell === false? "FALSE":cell}
+                                            {cell === true? "TRUE": cell === false? "FALSE": cell}
                                             </TableCell>:
                                             <></>
                                             }
