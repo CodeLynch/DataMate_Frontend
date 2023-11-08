@@ -216,169 +216,98 @@ export default function Filepage({ stopLoading }: FilePageProps) {
     console.log("BArr", BodyArr);
   }, [HeaderArr]);
 
-  const handleConvert = () => {
-    nav("/convert", {
-      state: {
-        fileid: fileId,
-      },
-    });
-  };
+    const handleConvert = () => {
+        nav('/convert',{
+            state:{
+              fileid: fileId
+            }
+        });
+    }
+    
 
-  return (
-    <>
-      {HeaderArr !== undefined && BodyArr !== undefined ? (
+    return(
         <>
-          <div
-            style={{
-              marginRight: "50px",
-              marginLeft: "50px",
-              height: "80vh",
-              marginTop: "120px",
-            }}
-          >
-            <ArrowBackIosNewIcon
-              sx={{
-                fontSize: "25px",
-                color: "#374248",
-                cursor: "pointer",
-                mr: 2,
-                mt: 0.6,
-                display: "inline-block",
-              }}
-              onClick={() => {
-                nav("/files");
-              }}
-            />
-            <h1 style={{ display: "inline-block", marginLeft: "5px" }}>
-              {fileName}
-            </h1>
-
-            <div style={{ marginTop: "1em" }}>
-              <Paper sx={{ width: "100%", overflow: "hidden" }}>
-                <TableContainer sx={{ maxHeight: 470, width: "90vw" }}>
-                  <Table stickyHeader aria-label="sticky table">
-                    <TableHead>
-                      <tr>
-                        {HeaderArr[0].map((col, i) => (
-                          <TableCell
-                            key={i}
-                            align="left"
-                            style={{ minWidth: 100 }}
-                          >
-                            <b>{col}</b>
-                          </TableCell>
-                        ))}
-                      </tr>
-                    </TableHead>
-                    <TableBody>
-                      {BodyArr.slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      ).map((row, i) => {
-                        return (
-                          <TableRow hover role="checkbox" tabIndex={-1} key={i}>
-                            {row.map((cell, j) => {
-                              return (
-                                <>
-                                  {cell !== "" ? (
-                                    <TableCell key={j} align="left">
-                                      {cell === true
-                                        ? "TRUE"
-                                        : cell === false
-                                        ? "FALSE"
-                                        : cell}
-                                    </TableCell>
-                                  ) : (
-                                    <></>
-                                  )}
-                                </>
-                              );
+        {HeaderArr !== undefined && BodyArr !== undefined? <>
+            <div style={{marginRight:'50px', marginLeft:'50px', height:'80vh', marginTop:'100px'}}>
+            <h1>{fileName}</h1>
+                <div style={{marginTop:"1em"}}>
+                    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                    <TableContainer sx={{ maxHeight: 470, width: '90vw'}}>
+                        <Table stickyHeader aria-label="sticky table">
+                        <TableHead>
+                            <tr>
+                                {
+                                HeaderArr[0].map((col,i) => <TableCell
+                                key={i}
+                                align='left'
+                                style={{ minWidth: 100 }}><b>{col}</b></TableCell>)
+                                }
+                            </tr>
+                        </TableHead>
+                        <TableBody>
+                            {BodyArr
+                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .map((row, i) => {
+                                return (
+                                <TableRow hover role="checkbox" tabIndex={-1} key={i}>
+                                    {row.map((cell, j) => {
+                                    return (
+                                        <>
+                                        {cell !== ""?
+                                        <TableCell key={j} align='left'>
+                                        {cell === true? "TRUE": cell === false? "FALSE":cell}
+                                        </TableCell>:
+                                        <TableCell key={j} align='left'>
+                                        </TableCell>
+                                        }
+                                        </>
+                                    );
+                                    })}
+                                </TableRow>
+                                );
                             })}
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                <TablePagination
-                  rowsPerPageOptions={[10, 25, 100]}
-                  component="div"
-                  count={BodyArr.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                />
-              </Paper>
-              <Box
-                sx={{ width: "100%", marginBottom: "1em", marginTop: "1px" }}
-              >
-                <Tabs
-                  value={currentSheet}
-                  onChange={changeSheet}
-                  TabIndicatorProps={{
-                    sx: { backgroundColor: "rgba(0,0,0,0)" },
-                  }}
-                  sx={{
-                    "& button": {
-                      borderRadius: 2,
-                      color: "black",
-                      backgroundColor: "white",
-                    },
-                    "& button.Mui-selected": {
-                      backgroundColor: "#D9D9D9",
-                      color: "black",
-                    },
-                  }}
-                  aria-label="secondary tabs example"
-                >
-                  {visibleSheetNames.length > 0 ? (
-                    visibleSheetNames.map((sheet, i) => {
-                      return (
-                        <Tab
-                          sx={{ backgroundColor: "#D9D9D9" }}
-                          value={sheet}
-                          label={sheet}
-                        />
-                      );
-                    })
-                  ) : (
-                    <></>
-                  )}
-                </Tabs>
-              </Box>
-              <div style={{ display: "flex", flexDirection: "row" }}>
-                <Button
-                  variant="contained"
-                  onClick={handleConvert}
-                  sx={{
-                    fontWeight: "bold",
-                    backgroundColor: "#347845",
-                    color: "white",
-                    paddingInline: 4,
-                    margin: "5px",
-                  }}
-                >
-                  Convert to Database
-                </Button>
-                <Button
-                  onClick={downloadFile}
-                  sx={{
-                    fontWeight: "bold",
-                    color: "black",
-                    paddingInline: 4,
-                    margin: "5px",
-                  }}
-                >
-                  Download
-                </Button>
-              </div>
+                        </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <TablePagination
+                        rowsPerPageOptions={[10, 25, 100]}
+                        component="div"
+                        count={BodyArr.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                        </Paper>
+                        <Box sx={{ width: '100%', marginBottom:'1em', marginTop:'1px' }}>
+                        <Tabs
+                        value = {currentSheet}
+                        onChange={changeSheet}
+                        TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
+                        sx={{
+                        "& button":{borderRadius: 2, color: 'black', backgroundColor: 'white'},
+                        "& button.Mui-selected":{backgroundColor: '#D9D9D9', color: 'black'},
+                        }}
+                        aria-label="secondary tabs example"
+                        >
+                        {visibleSheetNames.length > 0? visibleSheetNames.map((sheet,i) =>{
+                            return(                                
+                                <Tab sx={{backgroundColor:"#D9D9D9"}}value={sheet} label={sheet} />
+                            )
+                        }):<></>}
+                    </Tabs>
+                    </Box>
+                        <div style={{display:"flex", flexDirection:'row'}}>
+                            <Button variant="contained" 
+                            onClick={handleConvert}
+                            sx={{fontWeight: 'bold', backgroundColor: '#347845', color:'white', paddingInline: 4, margin:'5px'}}>Convert to Database</Button>
+                            <Button
+                            onClick={downloadFile} 
+                            sx={{fontWeight: 'bold', color:'black', paddingInline: 4, margin:'5px'}} >Download</Button>
+                        </div>            
+                </div>
             </div>
-          </div>
-        </>
-      ) : (
-        <></>
-      )}
-    </>
-  );
+        </>:<></>}
+        </> 
+    )
 }

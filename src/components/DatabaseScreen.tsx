@@ -68,7 +68,7 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
   const nav = useNavigate();
 
   // const itemsPerRow = Math.min(searchResult.length, 3); // Maximum 3 items per row
-  const itemsPerRow = Math.min(databases.length, 3);
+  const itemsPerRow = Math.min(databases?.length, 3);
   const lgValue = Math.floor(12 / itemsPerRow);
   const xlValue = Math.floor(12 / itemsPerRow);
 
@@ -209,6 +209,8 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
     setAnchorE2(null);
   };
   return (
+    <>
+    {databases?.length <= 0 ? <h1>No or empty Response Received</h1>:
     <Grid
       paddingX={{ xs: 5, sm: 5, lg: 10 }}
       style={{
@@ -716,6 +718,8 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
         </div>
       )}
     </Grid>
+  }
+  </>
   );
 };
 

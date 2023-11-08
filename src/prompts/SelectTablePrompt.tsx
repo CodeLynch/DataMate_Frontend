@@ -29,7 +29,6 @@ type SelectProps = {
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
     toggleImportSuccess: (status:boolean) => void,
-    toggleNormalized: (status:boolean) => void,
     tblCount: number,
     fileId: number,
     vsheets:string[],
@@ -43,7 +42,6 @@ type SelectProps = {
     wb: XLSX.WorkBook | null | undefined,
     sheetIndex: number,
     updateNorm: (sheet:string) => void,
-    normSheets: string[],
   }
 
 interface WorkbookData {
@@ -70,9 +68,9 @@ type TableMapRow = Record<string, string>;
 type TableMap = TableMapRow[];
 type SelectedCell = Record<string, boolean>;
 
-const SelectTablePrompt = ({toggleSelect, toggleTableDetect, toggleNormalized, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
+const SelectTablePrompt = ({toggleSelect, toggleTableDetect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
     toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb,
-  sheetIndex, updateNorm, normSheets}: SelectProps) => {  
+  sheetIndex, updateNorm}: SelectProps) => {  
     const [currentSheet, setCurrentSheet] = useState("");
     const [currentTab, setCurrentTab] = useState("");
     const [currentTabID, setTabID] = useState(-1);
@@ -90,13 +88,14 @@ const SelectTablePrompt = ({toggleSelect, toggleTableDetect, toggleNormalized, t
     const [columns, setColumns] = useState<HeaderConfig[]>([]);
     const [dataSource, setDataSrc] = useState<Object[]>([]);
     const [overwriteStatus, setOWStat] = useState(false);
-    const dynamicHeight = Math.min(dataSource.length * 5.5, 80) + 'vh'
+    const dynamicHeight = (createdSheets.length * 60);
     const tabsRef = useRef<HTMLDivElement[]>([]);
     const [isEditing, setEditing] = useState(false);
   const nav = useNavigate();
   const gridstyle = {
     fontSize:"10px",
     height:dynamicHeight,
+    maxHeight:520,
   }
 
   //set currentSheet and header array on load based from props
@@ -205,10 +204,6 @@ useEffect(()=>{
           toggleSelect(false,0);
           toggleInconsistentDetect(true);
           console.log("Inconsistency triggered");
-        }else if(notNormalized){
-          toggleTableDetect(false);
-          toggleNormalized(true);
-          console.log("Normalized Prompt triggered");
         }
         else{
           toggleSelect(false,0);
@@ -572,16 +567,6 @@ function canBeNormalized(rows: (string | number)[][]): boolean {
           SetInconsistent(true);
         }
       }
-
-      //if block for normalized prompt
-      if(!(hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as [][]))){
-        console.log("this happened");
-        if(!normSheets.includes(vsheets[s])){
-          updateNorm(vsheets[s]);
-          setNotNormalized(true);
-        }
-        
-      }
     }
     setCheckDone(true);
   }
@@ -710,7 +695,7 @@ function canBeNormalized(rows: (string | number)[][]): boolean {
                   <Tabs
                     orientation="vertical"
                     variant="scrollable"
-                    scrollButtons={createdSheets.length < 4? false: "auto"}
+                    scrollButtons={createdSheets.length < 8? false: "auto"}
                     value= {currentTabID}
                     onChange={changeTab}
                     TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
@@ -737,7 +722,7 @@ function canBeNormalized(rows: (string | number)[][]): boolean {
                           value={sheet.id} 
                           label={
                             <span style={{display:"flex", flexDirection:"row", maxHeight:"20px"}}>
-                              <div style={{fontSize:"16px", textAlign:"center",display:"flex", alignItems:"center", width:"70px"}}>
+                              <div style={{fontSize:"16px", textAlign:"center",display:"flex", alignItems:"center", width:"70px", textOverflow:"ellipsis"}}>
                               {isEditing && currentTabID === sheet.id ? <TextField variant="standard" onChange={(e)=>{handleNameChange(e, e.target.value)}} placeholder="Table Name"></TextField>:sheet.name}
                               </div>
 

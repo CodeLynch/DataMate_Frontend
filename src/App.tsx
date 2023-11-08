@@ -170,8 +170,9 @@ function App() {
     setSelect(status);
   };
 
-  const toggleNormalized = (status: boolean) => {
+  const toggleNormalized = (status: boolean, fileId: number) => {
     setNormTable(status);
+    setFileId(fileId);
   };
 
   const StartLoading = () => {
@@ -334,13 +335,12 @@ function App() {
                         }
                         <Modal
                           open={TableDetect}
-                          onClose={() => {
-                            toggleTableDetect(false);
-                          }}
+                          // onClose={() => {
+                          //   toggleTableDetect(false);
+                          // }}
                         >
                           <div>
                             <TableDetectPrompt
-                              toggleNormalized={toggleNormalized}
                               toggleTableDetect={toggleTableDetect}
                               toggleSelect={toggleSelect}
                               toggleEmptyDetect={toggleEmptyDetect}
@@ -353,10 +353,8 @@ function App() {
                               updateEmpty={updateEmptyList}
                               updateInc={updateIncList}
                               updateSData={updateSheetData}
-                              updateNorm={updateNormList}
                               emptySheets={SheetsWithEmpty}
                               incSheets={IncSheets}
-                              normSheets={normSheets}
                               reset={resetVariables}
                               wb={workbook}
                             />
@@ -368,13 +366,12 @@ function App() {
                         }
                         <Modal
                           open={SelectTable}
-                          onClose={() => {
-                            toggleSelect(false, 0);
-                          }}
+                          // onClose={() => {
+                          //   toggleSelect(false, 0);
+                          // }}
                         >
                           <div>
                             <SelectTablePrompt
-                              toggleNormalized={toggleNormalized}
                               toggleSelect={toggleSelect}
                               toggleTableDetect={toggleTableDetect}
                               toggleEmptyDetect={toggleEmptyDetect}
@@ -392,7 +389,6 @@ function App() {
                               reset={resetVariables}
                               wb={workbook}
                               sheetIndex={sheetIndex}
-                              normSheets={normSheets}
                               updateNorm={updateNormList}
                             />
                           </div>
@@ -401,7 +397,7 @@ function App() {
                         {/* modal for no tables detected here  */}
                         <Modal
                           open={NoTableDetect}
-                          onClose={toggleNoTableDetect}
+                          // onClose={toggleNoTableDetect}
                         >
                           <div>
                             <NoTablesDetectPrompt
@@ -412,37 +408,15 @@ function App() {
                           </div>
                         </Modal>
 
-                        {/* modal for normalize tables here  */}
-                        <Modal open={NormalizeTable} onClose={toggleUpload}>
-                          <div>
-                            <NormalizePrompt
-                              toggleNormalized={toggleNormalized}
-                              toggleEmptyDetect={toggleEmptyDetect}
-                              toggleInconsistentDetect={toggleInconsistent}
-                              toggleImportSuccess={toggleImportSuccess}
-                              fileId={uploadedFileId}
-                              vsheets={visibleSheetNames}
-                              sheetdata={sheetData}
-                              updateSData={updateSheetData}
-                              updateWB={updateWorkbook}
-                              reset={resetVariables}
-                              workbook={workbook}
-                              normList={normSheets}
-                              inclist={IncSheets}
-                              sheets={sheetNames}
-                            />
-                          </div>
-                        </Modal>
-
                         <Modal
                           open={EmptyDetect}
-                          onClose={() => {
-                            toggleEmptyDetect(false);
-                          }}
+                          // onClose={() => {
+                          //   resetVariables();
+                          //   toggleEmptyDetect(false);
+                          // }}
                         >
                           <div>
                             <EmptyDetectPrompt
-                              toggleNormalized={toggleNormalized}
                               toggleEmptyDetect={toggleEmptyDetect}
                               toggleInconsistentDetect={toggleInconsistent}
                               toggleImportSuccess={toggleImportSuccess}
@@ -455,20 +429,19 @@ function App() {
                               reset={resetVariables}
                               inclist={IncSheets}
                               updateSData={updateSheetData}
-                              normSheets={normSheets}
                             />
                           </div>
                         </Modal>
 
                         <Modal
                           open={InconsistentDetect}
-                          onClose={() => {
-                            toggleInconsistent(false);
-                          }}
+                          // onClose={() => {
+                          //   resetVariables();
+                          //   toggleInconsistent(false);
+                          // }}
                         >
                           <div>
                             <InconsistentDetectPrompt
-                              toggleNormalized={toggleNormalized}
                               toggleInconsistentDetect={toggleInconsistent}
                               toggleImportSuccess={toggleImportSuccess}
                               fileId={uploadedFileId}
@@ -479,16 +452,15 @@ function App() {
                               reset={resetVariables}
                               inclist={IncSheets}
                               updateSData={updateSheetData}
-                              normSheets={normSheets}
                             />
                           </div>
                         </Modal>
 
                         <Modal
                           open={ImportSuccess}
-                          onClose={() => {
-                            toggleImportSuccess(false);
-                          }}
+                          // onClose={() => {
+                          //   toggleImportSuccess(false);
+                          // }}
                         >
                           <div>
                             <SuccessPrompt
@@ -517,9 +489,29 @@ function App() {
                     path="/convert"
                     element={
                       <PrivateRoute>
-                        <ConvertFilePage />
-                      </PrivateRoute>
-                    }
+                      <>
+                      {/* modal for normalize tables here  */}
+                      <Modal open={NormalizeTable} onClose={()=>{
+                        toggleNormalized(false, -1);
+                      }}>
+                      <div>
+                        <NormalizePrompt
+                          toggleNormalized={toggleNormalized}
+                          fileId={uploadedFileId}
+                          reset={resetVariables}
+                          normList={normSheets}
+                          startLoading={StartLoading}
+                        />
+                      </div>
+                      </Modal>
+                      <ConvertFilePage 
+                      startLoading={StartLoading}
+                      updateNorm={updateNormList}
+                      normSheets={normSheets}
+                      toggleNormalized={toggleNormalized} />
+                      </>
+                      </PrivateRoute> 
+                      }
                   />
                   {/* nested for Templates */}
                   <Route path="templates">
@@ -613,11 +605,40 @@ function App() {
                       path="database"
                       element={
                         <PrivateRoute>
-                          <DatabasePage stopLoading={StopLoading} />
+                          <DatabasePage startLoading={StartLoading} stopLoading={StopLoading} />
                         </PrivateRoute>
                       }
                     />
                   </Route>
+
+
+                  
+                  <Route
+                    path="/files"
+                    element={
+                      isLoggedIn ? (
+                        <FileScreenPage setFileId={setFileId} />
+                      ) : (
+                        <Navigate to="/login" replace={true} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/database"
+                    element={<DatabasePage startLoading={StartLoading} stopLoading={StopLoading} />}
+                  />
+                  <Route path="/databases" element={<DatabaseScreen setDatabaseId={setDatabaseId} />} />
+                  <Route path="/delete-profile/" element={<DeleteProfile />} />
+                  <Route path="/deleted-files" element={<DeletedFiles />} />
+                  <Route
+                    path="/edit-profile"
+                    element={
+                      <PrivateRoute>
+                        <EditProfile />
+                      </PrivateRoute>
+                    }
+                  ></Route>
+
                   {/* nested for Profile  */}
                   <Route path="profile">
                     <Route

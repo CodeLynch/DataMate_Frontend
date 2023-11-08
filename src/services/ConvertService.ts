@@ -4,8 +4,8 @@ import axios from "axios";
 const API_KEY = 'KowVpR9gEn3n3ga0ORmZEgVHS2Z3mMslTP3jj6v6AdTwtohxfPrSuglg77zXP17rEAHS4FwtwMdsB2dwZBz5A';
 class ConvertService{
 
-    async postCommand(cmd:string){
-        return axios.post(`http://localhost:8080/convert?sql=${cmd}`)
+    async postCommand(tblName:string, strVals:string, op:number){
+        return axios.post(`http://localhost:8080/convert?tblName=${tblName}&vals=${strVals}&op=${op}`)
         .then((res)=>{
             return res.data
         }).catch((err)=>{
@@ -13,62 +13,65 @@ class ConvertService{
         })
     }
 
-    async postFileEntity(filename:string, filetype:string){
-        return axios.post('https://sqlizer.io/api/files', {
-            "FileType": filetype,
-            "FileName": filename,
-            "TableName": filename.replace(/\.[^/.]+$/, ""),
-            "DatabaseType": "mySQL",
-            "FileHasHeaders": true
-        },{
-            headers:{
-                'Authorization':`Bearer ${API_KEY}`
-            }
-        }).then((res)=>{
-            return res.data;
-        }).catch((err)=>{
-            console.log(err);
-        })
-    }
+    //Using SQLizer API (did not work) ---------------------------------------------------------------
 
-    async uploadFile(file:File, dataID:string){
-        return axios.post(`https://sqlizer.io/api/files/${dataID}/data`, {
-            "file": file,
-        }, {
-            headers:{
-            'Authorization':`Bearer ${API_KEY}`
-        }
-    }).then((res)=>{
-        return res.data;
-    }).catch((err)=>{
-        console.log(err);
-    })
-    }
+    // async postFileEntity(filename:string, filetype:string){
+    //     return axios.post('https://sqlizer.io/api/files', {
+    //         "FileType": filetype,
+    //         "FileName": filename,
+    //         "TableName": filename.replace(/\.[^/.]+$/, ""),
+    //         "DatabaseType": "mySQL",
+    //         "FileHasHeaders": true
+    //     },{
+    //         headers:{
+    //             'Authorization':`Bearer ${API_KEY}`
+    //         }
+    //     }).then((res)=>{
+    //         return res.data;
+    //     }).catch((err)=>{
+    //         console.log(err);
+    //     })
+    // }
 
-    async putFileEntity(dataID:string){
-        return axios.put(`https://sqlizer.io/api/files/${dataID}`,{
-            "Status": "Uploaded",
-        },{
-            headers:{
-                'Authorization':`Bearer ${API_KEY}`
-            }
-        }).then((res)=>{
-            return res.data;
-        }).catch((err)=>{
-            console.log(err);
-        })
-    }
+    // async uploadFile(file:File, dataID:string){
+    //     return axios.post(`https://sqlizer.io/api/files/${dataID}/data`, {
+    //         "file": file,
+    //     }, {
+    //         headers:{
+    //         'Authorization':`Bearer ${API_KEY}`
+    //     }
+    // }).then((res)=>{
+    //     return res.data;
+    // }).catch((err)=>{
+    //     console.log(err);
+    // })
+    // }
 
-    async getConverion(dataID:string){
-        return axios.get(`https://sqlizer.io/api/files/${dataID}`,{
-            headers:{
-                'Authorization':`Bearer ${API_KEY}`
-            }
-        }).then((res)=>{
-            return res.data;
-        }).catch((err)=>{
-            console.log(err);
-        })
-    }
+    // async putFileEntity(dataID:string){
+    //     return axios.put(`https://sqlizer.io/api/files/${dataID}`,{
+    //         "Status": "Uploaded",
+    //     },{
+    //         headers:{
+    //             'Authorization':`Bearer ${API_KEY}`
+    //         }
+    //     }).then((res)=>{
+    //         return res.data;
+    //     }).catch((err)=>{
+    //         console.log(err);
+    //     })
+    // }
+
+    // async getConverion(dataID:string){
+    //     return axios.get(`https://sqlizer.io/api/files/${dataID}`,{
+    //         headers:{
+    //             'Authorization':`Bearer ${API_KEY}`
+    //         }
+    //     }).then((res)=>{
+    //         return res.data;
+    //     }).catch((err)=>{
+    //         console.log(err);
+    //     })
+    // }
+    //-----------------------------------------------------------------------------------------
 }
 export default new ConvertService();
