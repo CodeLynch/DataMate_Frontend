@@ -91,7 +91,7 @@ export default function ProcessingPage ({reset, stopLoading, startProcessing, to
                 header: 1,
                 raw: true,
                 defval: "",
-                dateNF:"D-M-YYYY"
+                dateNF:"YYYY-M-D"
 
             }) as unknown;
             const sd = sheetjs_cleanEmptyRows(jsondata as XLSX.SheetType)

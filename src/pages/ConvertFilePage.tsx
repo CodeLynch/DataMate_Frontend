@@ -260,7 +260,7 @@ export default function ConvertFilePage({startLoading, normSheets, updateNorm, t
                 row[header] = parseFloat(value);
             } else if (!isNaN(Date.parse(value))) {
                 // Check if the value is a valid date
-                row[header] = new Date(value).toDateString();
+                row[header] = new Date(value).toISOString().split('T')[0];
             }else {
                 // If not a number, date, or boolean, keep it as a string
                 row[header] = value;
@@ -410,7 +410,7 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
     //-----------------------------------------------------------------------------------------------------
     //Button functions ------------------------------------------------------------------------------------
     function handleBack(){
-        nav('/file',{
+        nav('/files/file',{
             state:{
               fileid: fileId
             }

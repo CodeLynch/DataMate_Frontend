@@ -85,6 +85,7 @@ export default function DatabasePage({stopLoading, startLoading}:DatabasePagePro
   }
 
   function createObjects(keys: string[], arrayOfArrays: (number | string | Date | boolean)[][]): Object[] {
+    console.log("received array of arrays", arrayOfArrays);
     if (keys.length === 0 || arrayOfArrays.length === 0) {
       return [];
     }
@@ -96,6 +97,12 @@ export default function DatabasePage({stopLoading, startLoading}:DatabasePagePro
     return arrayOfArrays.map((arr) => {
       const obj: { [key: string]: (number | string | Date | boolean) } = {};
       keys.forEach((key, index) => {
+        if(isValidDate(arr[index] as string)){
+          console.log("arr[index] is ", arr[index]);
+          let dateVar = new Date(arr[index] as string);
+          obj[key] = dateVar.toISOString().slice(0, 19).replace('T', ' ');
+        }
+        
         obj[key] = arr[index];
       });
       return obj;
