@@ -1,4 +1,19 @@
-import { Avatar, Badge, Box, Divider, Drawer, Grid, IconButton, List, ListItem, Popover, Stack, Toolbar, Tooltip, Typography } from "@mui/material";
+import {
+  Avatar,
+  Badge,
+  Box,
+  Divider,
+  Drawer,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  Popover,
+  Stack,
+  Toolbar,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import Logo from "../images/datamate-logo.png";
 import WLogo from "../images/DMLogoWhiteNoBG.png";
 import { AccountCircle, ExitToApp, Menu } from "@mui/icons-material";
@@ -10,8 +25,8 @@ import { RootState } from "../helpers/Store";
 import UserService from "../api/UserService";
 import React from "react";
 import { logout } from "../helpers/AuthAction";
-import SettingsIcon from '@mui/icons-material/Settings';
-import FeedbackIcon from '@mui/icons-material/Feedback';
+import SettingsIcon from "@mui/icons-material/Settings";
+import FeedbackIcon from "@mui/icons-material/Feedback";
 
 type TopbarProps = {
   open: boolean;
@@ -25,23 +40,21 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
   const [userImage, setUserImage] = useState<string | undefined>(undefined);
   const dispatch = useDispatch();
 
-
   const handleProfileClick = () => {
     navigate("/profile");
   };
-  
 
   useEffect(() => {
-    if(userId){
+    if (userId) {
       UserService.getUserById(userId)
         .then(async (res) => {
-          setUserImage(res.data.userImage)
-        }).catch((error) => {
+          setUserImage(res.data.userImage);
+        })
+        .catch((error) => {
           console.log(error);
-      })
+        });
     }
-
-  },[userId, setUserImage]);
+  }, [userId, setUserImage]);
 
   // useEffect(() => {
   //   console.log('Profile pic:',userImage);
@@ -67,7 +80,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
     navigate("/login", { replace: true });
   };
 
-  const [data, setData]= useState({
+  const [data, setData] = useState({
     firstName: "",
     lastName: "",
     email: "",
@@ -76,19 +89,28 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
     password: "",
     businessName: "",
     businessType: "",
-})
+  });
 
-  const { firstName, lastName, email, address, username, password, businessName, businessType } = data;
+  const {
+    firstName,
+    lastName,
+    email,
+    address,
+    username,
+    password,
+    businessName,
+    businessType,
+  } = data;
 
   useEffect(() => {
     if (userId) {
-        UserService.getUserById(userId)
-            .then(response => {
-                setData(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching user data:', error);
-            });
+      UserService.getUserById(userId)
+        .then((response) => {
+          setData(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching user data:", error);
+        });
     }
   }, [userId]);
 
@@ -101,7 +123,14 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
       <Toolbar
         sx={{
           backgroundColor:
-            location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database" || location.pathname === "/file-logs" || location.pathname === "/deleted-files" || location.pathname === "/files" ? "#71C887" : "#FFFFFF",
+            location.pathname === "/file" ||
+            location.pathname === "/convert" ||
+            location.pathname === "/database" ||
+            location.pathname === "/file-logs" ||
+            location.pathname === "/deleted-files" ||
+            location.pathname === "/files"
+              ? "#FFFFFF"
+              : "",
         }}
       >
         <IconButton
@@ -110,7 +139,15 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
           edge="start"
           sx={{
             width: "4%",
-            color: location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database" || location.pathname === "/file-logs" || location.pathname === "/deleted-files" || location.pathname === "/files" ? "#FFFFFF" : "#000000",
+            color:
+              location.pathname === "/file" ||
+              location.pathname === "/convert" ||
+              location.pathname === "/database" ||
+              location.pathname === "/file-logs" ||
+              location.pathname === "/deleted-files" ||
+              location.pathname === "/files"
+                ? "#000000"
+                : "",
             marginRight: 1,
             ...(open && { display: "none" }),
           }}
@@ -121,7 +158,16 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
         <Box sx={{ width: "100%" }}>
           <a href="/">
             <img
-              src={location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database" || location.pathname === "/file-logs" || location.pathname === "/deleted-files" || location.pathname === "/files" ?  WLogo : Logo}
+              src={
+                location.pathname === "/file" ||
+                location.pathname === "/convert" ||
+                location.pathname === "/database" ||
+                location.pathname === "/file-logs" ||
+                location.pathname === "/deleted-files" ||
+                location.pathname === "/files"
+                  ? Logo //WLogo
+                  : Logo
+              }
               alt={"datamate logo"}
               style={{
                 width: "100px",
@@ -136,18 +182,33 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
         <Box>
           <Tooltip title="Account">
             <IconButton
-              sx={{ color: location.pathname === "/file" || location.pathname === "/convert" || location.pathname === "/database"? "#FFFFFF" : "#000000" }}
+              sx={{
+                color:
+                  location.pathname === "/file" ||
+                  location.pathname === "/convert" ||
+                  location.pathname === "/database"
+                    ? "#FFFFFF"
+                    : "#000000",
+              }}
               onClick={handleAvatarClick}
-              aria-controls={open ? 'account-menu' : undefined}
+              aria-controls={open ? "account-menu" : undefined}
               aria-haspopup="true"
-              aria-expanded={open ? 'true' : undefined}
+              aria-expanded={open ? "true" : undefined}
             >
               <div className="hover-style">
                 <Avatar
-                  sx={{ bgcolor: '#3DB1BA',  width: {xs: 30, sm: 37, md: 40}, height: {xs: 30, sm: 37, md: 40} }}
+                  sx={{
+                    bgcolor: "#3DB1BA",
+                    width: { xs: 30, sm: 37, md: 40 },
+                    height: { xs: 30, sm: 37, md: 40 },
+                  }}
                   alt="User"
-                  src={userImage ? `data:image/jpeg;base64,${userImage}` : undefined}>
-                </Avatar>
+                  src={
+                    userImage
+                      ? `data:image/jpeg;base64,${userImage}`
+                      : undefined
+                  }
+                ></Avatar>
               </div>
             </IconButton>
           </Tooltip>
@@ -157,46 +218,74 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
             anchorEl={anchorEl}
             onClose={handleAvatarClose}
             anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
+              vertical: "bottom",
+              horizontal: "right",
             }}
             transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
+              vertical: "top",
+              horizontal: "right",
             }}
           >
             <Box sx={{ p: 2 }}>
-              <Grid container direction="column" justifyContent="flex-start" alignItems="flex-start">
+              <Grid
+                container
+                direction="column"
+                justifyContent="flex-start"
+                alignItems="flex-start"
+              >
                 <Stack>
                   <IconButton onClick={handleMyProfileClick}>
-                    <Grid container >
-                    <Avatar
-                      sx={{ bgcolor: '#3DB1BA', mr:2,  width: {xs: 19, sm: 29, md: 32}, height: {xs: 19, sm: 29, md: 32} }}
-                      alt="User"
-                      src={userImage ? `data:image/jpeg;base64,${userImage}` : undefined}>
-                    </Avatar>
+                    <Grid container>
+                      <Avatar
+                        sx={{
+                          bgcolor: "#3DB1BA",
+                          mr: 2,
+                          width: { xs: 19, sm: 29, md: 32 },
+                          height: { xs: 19, sm: 29, md: 32 },
+                        }}
+                        alt="User"
+                        src={
+                          userImage
+                            ? `data:image/jpeg;base64,${userImage}`
+                            : undefined
+                        }
+                      ></Avatar>
                     </Grid>
-                    <Typography sx={{fontSize: '15px', whiteSpace: 'nowrap', fontWeight: 'bold'}}>{firstName + " " + lastName}</Typography>            
+                    <Typography
+                      sx={{
+                        fontSize: "15px",
+                        whiteSpace: "nowrap",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {firstName + " " + lastName}
+                    </Typography>
                   </IconButton>
                   <Divider orientation="horizontal" />
                 </Stack>
                 <List>
                   <ListItem>
                     <IconButton>
-                      <SettingsIcon sx={{ fontSize: '21px' }} />
-                      <Typography sx={{ml: 2, fontSize: '15px'}}>Settings</Typography>                
+                      <SettingsIcon sx={{ fontSize: "21px" }} />
+                      <Typography sx={{ ml: 2, fontSize: "15px" }}>
+                        Settings
+                      </Typography>
                     </IconButton>
                   </ListItem>
                   <ListItem>
                     <IconButton>
-                      <FeedbackIcon sx={{ fontSize: '21px' }} />
-                      <Typography sx={{ml: 2, fontSize: '15px'}}>Feedback</Typography>                
+                      <FeedbackIcon sx={{ fontSize: "21px" }} />
+                      <Typography sx={{ ml: 2, fontSize: "15px" }}>
+                        Feedback
+                      </Typography>
                     </IconButton>
                   </ListItem>
                   <ListItem>
                     <IconButton onClick={handleLogoutClick}>
-                      <ExitToApp sx={{ fontSize: '21px' }} />
-                      <Typography sx={{ml: 2, fontSize: '15px'}}>Logout</Typography>                
+                      <ExitToApp sx={{ fontSize: "21px" }} />
+                      <Typography sx={{ ml: 2, fontSize: "15px" }}>
+                        Logout
+                      </Typography>
                     </IconButton>
                   </ListItem>
                 </List>
@@ -204,10 +293,7 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
             </Box>
           </Popover>
         </Box>
-        
       </Toolbar>
-
-      
     </AppBar>
   );
 };
