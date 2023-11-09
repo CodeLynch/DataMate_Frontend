@@ -336,9 +336,7 @@ useEffect(()=>{
         table.forEach(row => {
           for (const columnName in row) {
             const majType = findMajorityDataType(columnTypes[columnName]);
-            if(!majTypes.includes(majType)){
-              majTypes.push(majType);
-            }
+            majTypes.push(majType);
           }
         });
       
