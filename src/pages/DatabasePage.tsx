@@ -97,13 +97,14 @@ export default function DatabasePage({stopLoading, startLoading}:DatabasePagePro
     return arrayOfArrays.map((arr) => {
       const obj: { [key: string]: (number | string | Date | boolean) } = {};
       keys.forEach((key, index) => {
-        if(isValidDate(arr[index] as string)){
+        if(arr[index].toString().length > 9 &&  isValidDate(arr[index] as string)){
           console.log("arr[index] is ", arr[index]);
           let dateVar = new Date(arr[index] as string);
-          obj[key] = dateVar.toISOString().slice(0, 19).replace('T', ' ');
+          obj[key] = dateVar.toISOString().slice(0, 10).replace('T', ' ');
+          console.log("here:",obj[key])
+        }else{
+          obj[key] = arr[index];
         }
-        
-        obj[key] = arr[index];
       });
       return obj;
     });
@@ -392,7 +393,7 @@ export default function DatabasePage({stopLoading, startLoading}:DatabasePagePro
                             {currentTbl === "" || currentTbl === undefined? "Table" : currentTbl}
                         </Box>
                         <Box sx={{ width: '100%', display:"flex", justifyContent:"center", marginTop:0}}>
-                            <Box style={{backgroundColor:"#347845",width: '100%', height:"100%", display:"flex" }}>
+                            <Box style={{backgroundColor:"#347845",width: '100%', display:"flex" }}>
                                 <div style={{width: '100%', display:"flex", justifyContent:"center"}}>
                                 {/* for table preview */}
                                 {colsData.length > 0 && tblData.length > 0? <>
@@ -400,7 +401,7 @@ export default function DatabasePage({stopLoading, startLoading}:DatabasePagePro
                                     {/* //code for the table */}
                                     <ReactDataGrid
                                         idProperty="id"
-                                        style={{width:"100%", height:tblHeight}}
+                                        style={{width:"100%", height:tblHeight, maxHeight:450}}
                                         columns={colsData}
                                         dataSource={tblData}
                                         theme="green-light"

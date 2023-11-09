@@ -81,9 +81,9 @@ export default function Templates(){
               </Grid>
               <Grid container>
                 {recentDownloads.length === 0 ? (
-                  <Box sx={{ margin: '3rem', justifyContent: 'center', display: 'flex' }}>
+                  <Grid container sx={{ margin: '3rem', justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
                     <img src={noRecentFiles} style={{ width: 200, height: 200 }} />
-                  </Box>
+                  </Grid>
                 ) : (
                   <Grid container>
                     {recentDownloads.map((template, i) => {

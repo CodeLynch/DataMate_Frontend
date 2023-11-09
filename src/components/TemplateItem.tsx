@@ -29,7 +29,7 @@ export default function TemplateItem({templateId, templateName}: TemplateItemTyp
             </Box>
           </Grid>
             <Box sx={{ maxWidth: 250, mt: 1 }}>
-              <Typography variant="body2" sx={{padding:0, color:"white", textAlign:"center" }}>
+              <Typography variant="body2" sx={{padding:0, color:"white", textAlign:"center", whiteSpace: 'nowrap' }}>
                   <b>{templateName}</b>
               </Typography>
             </Box>
