@@ -913,7 +913,7 @@ useEffect(()=>{
           <div style={{display:'flex', flexDirection:'row'}}>
             <div style={{width: '85%'}}>
             {HeaderArr !== undefined && BodyArr !== undefined? <>
-                          <Paper elevation={0} sx={{ height:TableHeight, overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
+                          <Paper elevation={0} sx={{ height:vsheets.length > 3? {TableHeight}:150, overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
                           <TableContainer>
                               <Table stickyHeader aria-label="sticky table">
                               <TableHead >

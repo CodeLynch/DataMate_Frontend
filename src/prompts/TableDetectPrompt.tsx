@@ -133,7 +133,6 @@ toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, u
       }
       return false;
     }
-
   }
 
   
