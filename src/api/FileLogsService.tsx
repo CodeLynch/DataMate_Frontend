@@ -6,7 +6,7 @@ const FILELOGS_BASE_URL = "http://localhost:8080";
 
 const FileLogsService = {
 
-    getFileActivityLogsByUserId: async (userId: number): Promise<FileActivityLogEntity[]> => {
+    getFileActivityLogsByUserId: async (userId: string): Promise<FileActivityLogEntity[]> => {
         try {
           const response: AxiosResponse<FileActivityLogEntity[]> = await axios.get(
             `${FILELOGS_BASE_URL}/getFileActivityLogsByUserId?userId=${userId}`

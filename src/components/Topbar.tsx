@@ -27,6 +27,7 @@ import React from "react";
 import { logout } from "../helpers/AuthAction";
 import SettingsIcon from "@mui/icons-material/Settings";
 import FeedbackIcon from "@mui/icons-material/Feedback";
+import CryptoJS from 'crypto-js';
 
 type TopbarProps = {
   open: boolean;
@@ -45,8 +46,11 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
   };
 
   useEffect(() => {
-    if (userId) {
-      UserService.getUserById(userId)
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+
+    if (decryptedUserId) {
+      UserService.getUserById(decryptedUserId)
         .then(async (res) => {
           setUserImage(res.data.userImage);
         })
@@ -103,8 +107,10 @@ const Topbar = ({ open, handleDrawerOpen }: TopbarProps) => {
   } = data;
 
   useEffect(() => {
-    if (userId) {
-      UserService.getUserById(userId)
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    if (decryptedUserId) {
+      UserService.getUserById(decryptedUserId)
         .then((response) => {
           setData(response.data);
         })

@@ -30,6 +30,7 @@ import Topbar from "./Topbar";
 import { useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
 import DatabaseService from "../services/DatabaseService";
+import CryptoJS from 'crypto-js';
 
 type DatabaseId = string;
 
@@ -137,8 +138,10 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
   }, [databases, searchQuery]);
 
   useEffect(() => {
-    if (userId) {
-      DatabaseService.getDBsByUser(userId)
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    if (decryptedUserId) {
+      DatabaseService.getDBsByUser(decryptedUserId)
         .then((res) => {
           console.log(res);
           setDatabases(res);
@@ -189,8 +192,11 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
     setCurrentSortOption("All");
     setSelectedOption("All");
 
-    if (userId) {
-      DatabaseService.getDBsByUser(userId)
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+
+    if (decryptedUserId) {
+      DatabaseService.getDBsByUser(decryptedUserId)
         .then((res) => {
           console.log(res);
           setDatabase(res);

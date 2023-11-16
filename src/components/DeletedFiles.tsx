@@ -42,6 +42,7 @@ import Navbar from "./Navbar";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
 import CloseIcon from '@mui/icons-material/Close';
+import CryptoJS from 'crypto-js';
 
 
 export default function DeletedFiles() {
@@ -90,8 +91,10 @@ export default function DeletedFiles() {
 
   useEffect(() => {
     const fetchDeletedFiles = async () => {
+      const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+      const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
       try {
-        const files = await FileService.getDeletedFilesById(userId);
+        const files = await FileService.getDeletedFilesById(decryptedUserId);
         setDeletedFiles(files);
       } catch (error) {
         console.error("Error fetching deleted files:", error);
@@ -326,7 +329,9 @@ export default function DeletedFiles() {
       );
   
       if (successfulRestorations.length > 0) {
-        const files = await FileService.getDeletedFilesById(userId);
+        const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+        const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+        const files = await FileService.getDeletedFilesById(decryptedUserId);
         setDeletedFiles(files);
   
         setSelectedRows([]);

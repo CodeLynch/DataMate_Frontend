@@ -11,6 +11,7 @@ import FileLogsService from "../api/FileLogsService";
 import { useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
 import { FileActivityLogEntity } from "../api/dataTypes";
+import CryptoJS from 'crypto-js';
 
 
 export default function FileLogs(){
@@ -58,11 +59,14 @@ export default function FileLogs(){
 
     useEffect(() => {
     const fetchLogs = async () => {
+        const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+        const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+        
         try {
-        const logs = await FileLogsService.getFileActivityLogsByUserId(userId);
-        setTimelineData(logs);
+            const logs = await FileLogsService.getFileActivityLogsByUserId(decryptedUserId);
+            setTimelineData(logs);
         } catch (error) {
-        console.error("Error fetching logs:", error);
+            console.error("Error fetching logs:", error);
         }
     };
 

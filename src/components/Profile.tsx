@@ -27,6 +27,7 @@ import { logout } from "../helpers/AuthAction";
 import { Link } from "react-router-dom";
 import { RootState } from "../helpers/Store";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+import CryptoJS from 'crypto-js';
 
 export default function EditProfile() {
   const [showPassword, setShowPassword] = useState(false);
@@ -68,8 +69,10 @@ export default function EditProfile() {
   } = data;
 
   useEffect(() => {
-    if (para.id) {
-      UserService.getUserById(para.id)
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(para.id, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    if (decryptedUserId) {
+      UserService.getUserById(decryptedUserId)
         .then((response) => {
           setData(response.data);
           setUserImage(response.data.userImage);

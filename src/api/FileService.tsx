@@ -72,7 +72,7 @@ const FileService = {
     }
   },
 
-  getFilesByUserId: async (userId: number): Promise<ResponseFile[]> => {
+  getFilesByUserId: async (userId: string): Promise<ResponseFile[]> => {
     try {
       const response: AxiosResponse<ResponseFile[]> = await axios.get(
         `${FILE_BASE_URL}/filesByUserId/${userId}`
@@ -168,7 +168,7 @@ const FileService = {
   },
 
   // get deleted files by user id
-  getDeletedFilesById: async (userId: number): Promise<FileEntity[]> => {
+  getDeletedFilesById: async (userId: string): Promise<FileEntity[]> => {
     try {
       const response: AxiosResponse<FileEntity[]> = await axios.get(
         `${FILE_BASE_URL}/deletedFilesByUserId?userId=${userId}`

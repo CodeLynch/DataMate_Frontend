@@ -24,6 +24,7 @@ import DatabaseService from "../services/DatabaseService";
 import TableService from "../services/TableService";
 import { RootState } from "../helpers/Store";
 import { useSelector } from "react-redux";
+import CryptoJS from 'crypto-js';
 
 
 type ConvertProps = {
@@ -531,7 +532,11 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
             let dbname = fileName.replace(/\.[^/.]+$/, "");
             console.log("dbname val: ", dbname);
             startLoading();
-            DatabaseService.postDatabase(dbname, userId).then((res)=>{
+
+            const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+            const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+
+            DatabaseService.postDatabase(dbname, decryptedUserId).then((res)=>{
                     console.log("post res:", res);
                     let dbres = res as unknown as DatabaseResponse;
                     let dbId = dbres.databaseId;
@@ -542,7 +547,7 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
                         let dataCols = createColumns(headers);
                         let dataSrc = createDataSrc(dataCols, sheetSD);
                         let uniquetblName = sheet.replace(/[^a-zA-Z0-9]/g,'_') + "_" + uid();
-                        TableService.postTable(uniquetblName, dbId, 1, headers)
+                        TableService.postTable(uniquetblName, dbId, decryptedUserId, headers)
                         .then((res)=>{
                             console.log("post table res:", res);
                         }).catch((err)=>{

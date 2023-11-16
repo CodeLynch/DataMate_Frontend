@@ -16,6 +16,7 @@ import UserService from "../api/UserService";
 import { useDispatch } from "react-redux";
 import { logout } from "../helpers/AuthAction";
 import { Grid } from "@mui/material";
+import CryptoJS from 'crypto-js';
 
 const DeleteProfile = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -38,8 +39,10 @@ const DeleteProfile = () => {
   });
 
   useEffect(() => {
-    if (userId) {
-      UserService.getUserById(userId)
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    if (decryptedUserId) {
+      UserService.getUserById(decryptedUserId)
         .then((response) => {
           setData(response.data);
           setUserImage(response.data.userImage);
@@ -91,7 +94,9 @@ const DeleteProfile = () => {
 
   const deleteAccount = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    if (!userId) {
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    if (!decryptedUserId) {
       console.error("User ID is undefined");
       return;
     }
@@ -99,7 +104,7 @@ const DeleteProfile = () => {
       return;
     }
     try {
-      await UserService.deleteUser(userId);
+      await UserService.deleteUser(decryptedUserId);
       await dispatch(logout());
       navigate("/");
     } catch (error) {

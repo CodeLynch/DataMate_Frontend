@@ -27,6 +27,7 @@ import Navbar from "./Navbar";
 import Topbar from "./Topbar";
 import { useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
+import CryptoJS from 'crypto-js';
 
 type FileId = string;
 
@@ -152,8 +153,11 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     setCurrentSortOption("All");
     setSelectedOption("All");
 
-    if (userId) {
-      FileService.getFilesByUserId(userId)
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+
+    if (decryptedUserId ) {
+      FileService.getFilesByUserId(decryptedUserId)
         .then((res) => {
           console.log(res);
           setFiles(res);
@@ -206,8 +210,11 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   );
 
   useEffect(() => {
-    if (userId) {
-      FileService.getFilesByUserId(userId)
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+
+    if (decryptedUserId ) {
+      FileService.getFilesByUserId(decryptedUserId)
         .then((res) => {
           console.log(res);
           setFiles(res);

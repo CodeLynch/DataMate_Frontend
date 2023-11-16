@@ -6,6 +6,7 @@ import FileService from "../services/FileService";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
+import CryptoJS from 'crypto-js';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 
 type ImportProps = {
@@ -54,7 +55,10 @@ const ImportFile = ({ toggleImport, startLoading, setFileId }: ImportProps) => {
         return;
       } else {
         startLoading();
-        FileService.uploadFile(file[0], userId)
+
+        const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+        const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+        FileService.uploadFile(file[0], decryptedUserId)
           .then((res) => {
             toggleImport();
             // nav('/file',{
