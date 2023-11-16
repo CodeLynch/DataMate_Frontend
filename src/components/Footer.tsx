@@ -45,8 +45,12 @@ export default function Footer(){
                                                 <Link to="/about-us" style={{ textDecoration: 'none' }}>
                                                     <Typography sx={{ color: "white", fontSize: "15px", lineHeight: 2}}>About</Typography>
                                                 </Link>
-                                                <Typography sx={{ color: "white", fontSize: "15px", lineHeight: 2}}>Culture</Typography>     
-                                                <Typography sx={{ color: "white", fontSize: "15px"}}>Join Us</Typography>
+                                                <Link to="#" style={{ textDecoration: 'none' }}>
+                                                    <Typography sx={{ color: "white", fontSize: "15px", lineHeight: 2}}>Culture</Typography> 
+                                                </Link>
+                                                <Link to="#" style={{ textDecoration: 'none' }}>   
+                                                    <Typography sx={{ color: "white", fontSize: "15px"}}>Join Us</Typography>
+                                                </Link> 
                                             </Grid>
                                         </Stack>
                                     </Grid>
@@ -57,9 +61,15 @@ export default function Footer(){
                                         </Typography>
                                         <Stack direction="row" mt={1}>
                                             <Grid container direction="column">
-                                                <Typography sx={{ color: "white", fontSize: "15px", lineHeight: 2}}>Blog</Typography>
-                                                <Typography sx={{ color: "white", fontSize: "15px", lineHeight: 2}}>Press</Typography>     
-                                                <Typography sx={{ color: "white", fontSize: "15px"}}>Services</Typography>
+                                                <Link to="#" style={{ textDecoration: 'none' }}>
+                                                    <Typography sx={{ color: "white", fontSize: "15px", lineHeight: 2}}>Blog</Typography>
+                                                </Link>
+                                                <Link to="#" style={{ textDecoration: 'none' }}>
+                                                    <Typography sx={{ color: "white", fontSize: "15px", lineHeight: 2}}>Press</Typography>     
+                                                </Link>
+                                                <Link to="#" style={{ textDecoration: 'none' }}>
+                                                    <Typography sx={{ color: "white", fontSize: "15px"}}>Services</Typography>
+                                                </Link>
                                             </Grid>
                                         </Stack>
                                     </Grid>
@@ -70,8 +80,16 @@ export default function Footer(){
                                         </Typography>
                                         <Stack direction="row" mt={1}>
                                             <Grid container direction="column">
-                                                <Typography sx={{ color: "white", fontSize: "15px", lineHeight: 2}}>+ 263-2509</Typography>
-                                                <Typography sx={{ color: "white", fontSize: "15px"}}>datamate@gmail.com</Typography>     
+                                            <Typography sx={{ color: "white", fontSize: "15px"}}>
+                                                <Link to="tel:+263-2509" color="inherit" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                                +263-2509
+                                                </Link>
+                                            </Typography>
+                                                <Typography sx={{ color: "white", fontSize: "15px"}}>
+                                                    <Link to="mailto:datamate001@gmail.com" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                                        datamate001@gmail.com
+                                                    </Link>
+                                                </Typography>     
                                             </Grid>
                                         </Stack>
                                     </Grid>
@@ -81,9 +99,15 @@ export default function Footer(){
                                             Follow us
                                         </Typography>
                                         <Stack direction="row" mt={1}>
-                                            <FacebookIcon sx={{ color: "white", width: 25, height: 25, mr: 2 }}/>
-                                            <InstagramIcon sx={{ color: "white", width: 25, height: 25, mr: 2 }}/>
-                                            <LinkedInIcon sx={{ color: "white", width: 25, height: 25 }}/>
+                                            <Link to="https://www.facebook.com/cara.q.encabo" style={{ textDecoration: 'none' }}>
+                                                <FacebookIcon sx={{ color: "white", width: 25, height: 25, mr: 2 }}/>
+                                            </Link>
+                                            <Link to="#" style={{ textDecoration: 'none' }}>
+                                                <InstagramIcon sx={{ color: "white", width: 25, height: 25, mr: 2 }}/>
+                                            </Link>
+                                            <Link to="#" style={{ textDecoration: 'none' }}>
+                                                <LinkedInIcon sx={{ color: "white", width: 25, height: 25 }}/>
+                                            </Link>
                                         </Stack>
                                     </Grid>
 
@@ -94,8 +118,8 @@ export default function Footer(){
                         <Grid container justifyContent= 'center' alignItems= 'center'>
                             <Stack direction="row" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', pt: '1rem' }}>
                                 <p style={{ fontSize: 12, color: 'white' }}>© DataMate. 2023. All Rights Reserved.</p>
-                                <Link to="/about-us" style={{ color:"white" }}><p style={{ fontSize: 12, color: 'white', marginLeft: 15 }}> Privacy Policy</p></Link>
-                                <Link to="/about-us" style={{ color:"white" }}><p style={{ fontSize: 12, color: 'white', marginLeft: 15 }}> Terms of Service</p></Link>
+                                <Link to="#" style={{ color:"white" }}><p style={{ fontSize: 12, color: 'white', marginLeft: 15 }}> Privacy Policy</p></Link>
+                                <Link to="#" style={{ color:"white" }}><p style={{ fontSize: 12, color: 'white', marginLeft: 15 }}> Terms of Service</p></Link>
                             </Stack>
                         </Grid>
                     </>
@@ -107,21 +131,21 @@ export default function Footer(){
                             <Box maxHeight={50}>
                                 <img src={WLogo} alt="datamate-logo" style={{ width: 181, height: 61 }}></img>
                             </Box>
-                            {isLoggedIn &&(
+                            {/* {isLoggedIn &&( */}
                                 <Stack direction="row" mt={2}>
-                                    <LinkXs href="#" underline="hover" style={{ color:"white" }}><Typography sx={{ color: "white", fontSize: "15px", fontWeight: "medium", mr: 4}}>About</Typography></LinkXs>
-                                    <LinkXs href="#" underline="hover" style={{ color:"white" }}><Typography sx={{ color: "white", fontSize: "15px", fontWeight: "medium", mr: 4}}>Explore</Typography></LinkXs>
-                                    <LinkXs href="#" underline="hover" style={{ color:"white" }}><Typography sx={{ color: "white", fontSize: "15px", fontWeight: "medium", mr: 4}}>Let's Talk</Typography></LinkXs>
-                                    <LinkXs href="#" underline="hover" style={{ color:"white" }}><Typography sx={{ color: "white", fontSize: "15px", fontWeight: "medium"}}>Follow Us</Typography></LinkXs>
+                                    <LinkXs href="/about-us" underline="hover" style={{ color:"white" }}><Typography sx={{ color: "white", fontSize: "15px", fontWeight: "medium", mr: 4}}>About</Typography></LinkXs>
+                                    <LinkXs href="_blank" underline="hover" style={{ color:"white" }}><Typography sx={{ color: "white", fontSize: "15px", fontWeight: "medium", mr: 4}}>Explore</Typography></LinkXs>
+                                    <LinkXs href="_blank" underline="hover" style={{ color:"white" }}><Typography sx={{ color: "white", fontSize: "15px", fontWeight: "medium", mr: 4}}>Let's Talk</Typography></LinkXs>
+                                    <LinkXs href="_blank" underline="hover" style={{ color:"white" }}><Typography sx={{ color: "white", fontSize: "15px", fontWeight: "medium"}}>Follow Us</Typography></LinkXs>
                                 </Stack>
-                            )}
+                            {/* )} */}
                         </Stack>
                         <Divider orientation="horizontal" flexItem sx={{ borderBottomWidth: '1px', borderColor: 'white', mt: 2 }} />
                         <Grid container justifyContent= 'center' alignItems= 'center'>
                             <Stack direction="row" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', pt: '1rem' }}>
                                 <p style={{ fontSize: 12, color: 'white' }}>© DataMate. 2023. All Rights Reserved.</p>
-                                <Link to="/about-us" style={{ color:"white" }}><p style={{ fontSize: 12, color: 'white', marginLeft: 15 }}> Privacy Policy</p></Link>
-                                <Link to="/about-us" style={{ color:"white" }}><p style={{ fontSize: 12, color: 'white', marginLeft: 15 }}> Terms of Service</p></Link>
+                                <Link to="#" style={{ color:"white" }}><p style={{ fontSize: 12, color: 'white', marginLeft: 15 }}> Privacy Policy</p></Link>
+                                <Link to="#" style={{ color:"white" }}><p style={{ fontSize: 12, color: 'white', marginLeft: 15 }}> Terms of Service</p></Link>
                             </Stack>
                         </Grid>
                     </>
