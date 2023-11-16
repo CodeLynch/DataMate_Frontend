@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = 'http://localhost:8080'
+const API_URL = 'https://datamate-api.onrender.com'
 
 class TableService{
     async postTable(tblName:string, dbid:number, userid:string, cols:string[]){

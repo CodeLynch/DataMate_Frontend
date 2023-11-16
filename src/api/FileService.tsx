@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { FileEntity, ResponseFile } from "./dataTypes";
 
-const FILE_BASE_URL = "http://localhost:8080";
+const FILE_BASE_URL = "https://datamate-api.onrender.com";
 
 const FileService = {
   //upload FIle

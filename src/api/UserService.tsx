@@ -1,7 +1,7 @@
 import axios from "axios";
 import { User } from "./dataTypes";
 
-const USER_BASE_URL = "http://localhost:8080/user";
+const USER_BASE_URL = "https://datamate-api.onrender.com/user";
 
 const config = {
   headers: {

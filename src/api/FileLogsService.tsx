@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from "axios";
 import { FileActivityLogEntity } from "./dataTypes";
 
 
-const FILELOGS_BASE_URL = "http://localhost:8080";
+const FILELOGS_BASE_URL = "https://datamate-api.onrender.com";
 
 const FileLogsService = {
 
