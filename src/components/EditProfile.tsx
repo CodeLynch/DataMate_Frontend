@@ -83,7 +83,6 @@ export default function EditProfile() {
     };
 
     useEffect(() => {
-        console.log("This is key:", process.env.REACT_APP_ENCRYPTION_KEY);
         const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
         const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
     
