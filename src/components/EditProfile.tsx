@@ -105,7 +105,7 @@ export default function EditProfile() {
             return;
         }
 
-        await axios.put(`http://localhost:8080/user/putUser?userId=${userId}`,{
+        await axios.put(`https://datamate-api.onrender.com/user/putUser?userId=${userId}`,{
             firstName: data.firstName,
             lastName: data.lastName,
             email: data.email,
