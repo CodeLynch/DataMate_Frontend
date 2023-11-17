@@ -113,7 +113,7 @@ export default function Filepage({ stopLoading }: FilePageProps) {
 
   const downloadFile = async () => {
     axios({
-      url: "http://localhost:8080/downloadFile/" + fileId,
+      url: "https://datamate-api.onrender.com/downloadFile/" + fileId,
       method: "GET",
       responseType: "arraybuffer",
     }).then(async (response) => {
