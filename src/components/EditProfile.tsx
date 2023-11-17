@@ -100,11 +100,14 @@ export default function EditProfile() {
     const putUser = async (e: { preventDefault: () => void; }) => {
         e.preventDefault()
 
+        const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+        const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+
         if (passwordLengthError) {
             return;
         }
 
-        await axios.put(`https://datamate-api.onrender.com/user/putUser?userId=${userId}`,{
+        await axios.put(`https://datamate-api.onrender.com/user/putUser?userId=${decryptedUserId}`,{
             firstName: data.firstName,
             lastName: data.lastName,
             email: data.email,
