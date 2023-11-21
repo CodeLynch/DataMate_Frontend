@@ -14,7 +14,7 @@ export default function Templates(){
     const [recentDownloads, setRecentDownloads] = React.useState<TemplateItemType[]>([]);
 
     React.useEffect(()=>{
-      axios.get("http://localhost:8080/templates"
+      axios.get("https://datamate-api.onrender.com/templates"
       ).then((res)=>{
           console.log(res.data);
           if(res.data){
@@ -26,7 +26,7 @@ export default function Templates(){
     },[])
 
     React.useEffect(() => {
-      axios.get("http://localhost:8080/recentDownloads"
+      axios.get("https://datamate-api.onrender.com/recentDownloads"
       ).then((res) => {
         console.log(res.data);
         if (res.data) {

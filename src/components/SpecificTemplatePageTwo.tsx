@@ -55,7 +55,7 @@ export default function SpecificTemplate(){
 
     const downloadFile = async () =>{
       axios({
-          url: "http://localhost:8080/downloadTemplate/2",
+          url: "https://datamate-api.onrender.com/downloadTemplate/2",
           method: 'GET',
           responseType: 'arraybuffer', 
       }).then(async (response) => {
