@@ -444,12 +444,12 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
           return "INTEGER";
         }
       } else {
-        return "DOUBLE";
+        return "DECIMAL";
       }
     } else if (typeof value === "boolean") {
       return "BOOLEAN";
     } else if (value instanceof Date) {
-      return "DATE";
+      return "TIMESTAMP";
     } else {
       throw new Error(`Unsupported data type: ${typeof value}`);
     }
