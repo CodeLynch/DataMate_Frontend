@@ -107,7 +107,7 @@ export default function EditProfile() {
         marginTop="10px"
       >
         { isLoading?<>
-       <Box height="100vh" justifyContent="center"
+       <Box height="100vh" justifyContent="center" paddingTop={500}
         alignItems="center">
         <CircularProgress size="10rem" color="success" />
        </Box>
