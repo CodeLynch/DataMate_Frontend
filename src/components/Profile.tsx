@@ -74,8 +74,6 @@ export default function EditProfile() {
     if(data.firstName === ""){
       setLoading(true);
     }
-    if (para.id) {
-      UserService.getUserById(para.id)
       const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
       const decryptedUserId = CryptoJS.AES.decrypt(para.id, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
       if (decryptedUserId) {
@@ -88,7 +86,6 @@ export default function EditProfile() {
           .catch((error) => {
             console.error("Error fetching user data:", error);
           });
-       }
     }
   },[para]);
 
@@ -113,8 +110,14 @@ export default function EditProfile() {
         marginTop="10px"
       >
         
-        <Grid container direction="row" paddingTop="26px" marginBottom="2px" >
-          <Box
+       { isLoading?<>
+       <Box height="100vh" justifyContent="center"
+        alignItems="center">
+        <CircularProgress size="10rem" color="success" />
+       </Box>
+       </>
+       :<><Grid container direction="row" paddingTop="26px" marginBottom="2px" >
+        <Box
             sx={{
               backgroundColor: "white",
               margin: { xs: "115px"  },
@@ -395,7 +398,7 @@ export default function EditProfile() {
               </Stack>
             </Box>
           </Grid>
-        </Grid>
+        </Grid></> }
       </Stack>
       <Outlet />
     </div>
