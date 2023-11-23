@@ -126,9 +126,12 @@ export default function Registration({startLoading, stopLoading,}: RegisterProps
         }
         console.log(formData)
         console.log(formData.keys())
+        
+        startLoading();
         UserService.postUser(formData)
         .then((res:any)=> {
             console.log('Posting Data')
+            stopLoading();
             navigate("/login")
         })
         .catch((err:string) => console.log(err))
