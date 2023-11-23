@@ -612,6 +612,10 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
           justifyContent: "center",
         }}
       >
+        {files.length <= 0? 
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+        No files uploaded.
+        </div>:
         <Grid
           container
           spacing={{ sm: 3, md: 2, lg: -10, xl: -50 }}
@@ -805,6 +809,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
             </Grid>
           ))}
         </Grid>
+        }
       </section>
       {searchResult.length === 0 && (
         <div style={{ textAlign: "center", marginTop: "20px" }}>
