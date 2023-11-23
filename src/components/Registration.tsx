@@ -7,7 +7,12 @@ import TopbarInit from './TopbarInit';
 import UserService from '../api/UserService';
 import { SnackbarContext, SnackbarContextType } from '../helpers/SnackbarContext';
 
-export default function Registration() {
+
+type RegisterProps = {
+    startLoading: () => void,
+    stopLoading: () => void,
+}
+export default function Registration({startLoading, stopLoading,}: RegisterProps) {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     // const [businessType, setBusinessType] = React.useState('');

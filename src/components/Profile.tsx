@@ -16,6 +16,7 @@ import {
   Stack,
   TextField,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import * as React from "react";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -36,6 +37,7 @@ export default function EditProfile() {
   const [userImage, setUserImage] = useState<string | undefined>(undefined);
   //const {user} = useContext(UserContext) as UserContextType;
   const dispatch = useDispatch();
+  const [isLoading, setLoading] = useState(true);
 
   const [data, setData] = useState({
     firstName: "",
@@ -100,7 +102,12 @@ export default function EditProfile() {
         height="100%"
         marginTop="10px"
       >
-        
+        { isLoading?<>
+       <Box height="100vh" justifyContent="center"
+        alignItems="center">
+        <CircularProgress size="10rem" color="success" />
+       </Box>
+       </>:<>
         <Grid container direction="row" paddingTop="26px" marginBottom="2px" >
           <Box
             sx={{
@@ -219,7 +226,6 @@ export default function EditProfile() {
             </Grid>
           </Box>
         </Grid>
-
         <Grid container mr={"100px"}>
           <Grid container justifyContent="center" alignItems="center"   >
             <Box
@@ -383,6 +389,7 @@ export default function EditProfile() {
             </Box>
           </Grid>
         </Grid>
+        </>}
       </Stack>
       <Outlet />
     </div>

@@ -35,10 +35,11 @@ import Navbar from "../components/Navbar";
 // }
 
 type FilePageProps = {
+  startLoading: () => void;
   stopLoading: () => void;
 };
 
-export default function Filepage({ stopLoading }: FilePageProps) {
+export default function Filepage({ startLoading,stopLoading }: FilePageProps) {
   const loc = useLocation();
   const nav = useNavigate();
   const fileId = loc.state.fileid;
@@ -112,6 +113,7 @@ export default function Filepage({ stopLoading }: FilePageProps) {
   };
 
   const downloadFile = async () => {
+    startLoading();
     axios({
       url: "https://datamate-api.onrender.com/downloadFile/" + fileId,
       method: "GET",
@@ -120,6 +122,7 @@ export default function Filepage({ stopLoading }: FilePageProps) {
       const blobData: Blob = new Blob([response.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml;charset=UTF-8",
       });
+      stopLoading();
       const href = URL.createObjectURL(blobData);
 
       // create "a" HTML element with href to file & click

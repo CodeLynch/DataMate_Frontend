@@ -1,5 +1,5 @@
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Box, Button, Container, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, MenuItem, Modal, Select, SelectChangeEvent, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Container, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, MenuItem, Modal, Select, SelectChangeEvent, Stack, TextField, Typography } from '@mui/material';
 import * as React from 'react';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -17,6 +17,7 @@ export default function EditProfile() {
     const userId = useSelector((state: RootState) => state.auth.userId);
     const [passwordLengthError, setPasswordLengthError] = useState(false);
     const [usernameExists, setUsernameExists] = useState(false);
+    const [isLoading, setLoading] = useState(true);
     const canSave = !passwordLengthError;
 
     const [data, setData]= useState({
@@ -150,6 +151,12 @@ export default function EditProfile() {
             <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
             <Grid component="form" onSubmit={putUser}>
                 <Grid container justifyContent="center" alignItems="center" mt={4.5}>
+                    {
+                    isLoading?
+                    <Box height="100vh" justifyContent="center"
+                    alignItems="center">
+                    <CircularProgress size="10rem" color="success" />
+                    </Box>:    
                     <Box sx={{ backgroundColor: 'white', margin: {xs: '30px'}, padding: {xs: '25px 30px 25px 30px', md: '25px 35px 25px 35px'}, borderRadius: '20px', boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)' }}>
                         <Stack direction='column' divider={<Divider orientation="horizontal" flexItem sx={{ borderBottomWidth: '2px', borderColor: '#374248' }} />} spacing={2}>
                             <Typography variant="h6" fontWeight="bold">
@@ -291,7 +298,7 @@ export default function EditProfile() {
                                 </Grid>
                             </Container>
                         </Stack>
-                    </Box>
+                    </Box>}
                 
                 </Grid>
             </Grid>

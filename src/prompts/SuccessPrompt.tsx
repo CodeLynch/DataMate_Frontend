@@ -23,6 +23,8 @@ type SuccessProps = {
   reset: () => void;
   workbook: XLSX.WorkBook | null | undefined;
   sdata: Object;
+  startLoading: () => void,
+  stopLoading: () => void,
 };
 
 interface WorkbookData {
@@ -39,14 +41,17 @@ const SuccessPrompt = ({
   reset,
   workbook,
   sdata,
+  startLoading, 
+  stopLoading,
 }: SuccessProps) => {
   const nav = useNavigate();
   const [fileName, setFName] = useState("");
 
   useEffect(() => {
-    console.log("Sheet Data Now: ", sdata);
+    startLoading();
     FileService.getFile(fileId)
       .then((res) => {
+        stopLoading();
         setFName(res.fileName);
       })
       .catch((err) => {
@@ -81,10 +86,12 @@ const SuccessPrompt = ({
       var blob = new Blob([s2ab(wbString)], {
         type: "application/octet-stream",
       });
+      startLoading();
       FileService.putFile(fileId, blob as File, fileName)
         .then((res) => {
           reset();
           toggleImportSuccess(false);
+          stopLoading();
           nav("/files/file", {
             state: {
               fileid: fileId,

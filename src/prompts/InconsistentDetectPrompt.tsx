@@ -29,6 +29,8 @@ type IncProps = {
     sheetdata: object,
     reset: () => void,
     updateSData: (data:Object) => void,
+    startLoading: () => void,
+    stopLoading: () => void,
   }
 type IncSheet ={
   sheetIndex: number,
@@ -46,7 +48,7 @@ interface ColumnTypes {
     [columnName: string]: string[];
 }
 
-const InconsistentDetectPrompt = ({fileId, toggleImportSuccess, toggleInconsistentDetect, reset, workbook, sheets, vsheets, sheetdata, inclist, updateSData}: IncProps) => {  
+const InconsistentDetectPrompt = ({startLoading, stopLoading, fileId, toggleImportSuccess, toggleInconsistentDetect, reset, workbook, sheets, vsheets, sheetdata, inclist, updateSData}: IncProps) => {  
   const nav = useNavigate();
   const [currentSheet, setCurrentSheet] = useState("");
   const [currentSheetIndex, setCurrSheetIndex] = useState(-1);
@@ -272,9 +274,11 @@ useEffect(()=>{
   }
   
   const cancelProcess = () => {
+    startLoading();
         FileService.deleteFile(fileId).then((res)=>{
             toggleInconsistentDetect(false);
             reset();
+            stopLoading();
             nav("/");
         }).catch((err)=>{
             console.log(err);

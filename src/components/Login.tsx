@@ -12,8 +12,13 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import SecureLogin from '../images/seclogin.gif';
 
+type LoginProps = {
+  startLoading: () => void,
+  stopLoading: () => void,
+}
 
-export default function Login(){
+export default function Login({startLoading, stopLoading}:
+  LoginProps){
 
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
@@ -72,12 +77,14 @@ export default function Login(){
         setUsernameError(null);
         setPasswordError(null);
       
+        startLoading()
         UserService.getUserByUsernameDetails(loginData.username)
           .then((res) => {
             if (res.data !== "") {
               if (res.data.password === loginData.password) {
                 UserService.getUserById(res.data.userId)
                   .then((user) => {
+                    stopLoading();
                     if (user.data.length !== 0) {
                       dispatch(loginSuccess(res.data.userId));
                       console.log('success')
@@ -91,9 +98,11 @@ export default function Login(){
                     dispatch(loginFailure(error.message + ". Failed to login."));
                   });
               } else {
+                stopLoading();
                 setPasswordError("Password is incorrect.");
               }
             } else {
+              stopLoading();
               setUsernameError("Username does not exist.");
             }
           });

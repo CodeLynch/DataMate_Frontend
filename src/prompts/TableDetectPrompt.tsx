@@ -39,6 +39,8 @@ type DetectProps = {
     // normSheets: string[],
     reset: () => void,
     updateSData: (data:Object) => void,
+    startLoading: () => void,
+    stopLoading: () => void,    
     wb: XLSX.WorkBook | null | undefined;
   }
 
@@ -55,7 +57,7 @@ interface ListItem {
   checked: boolean;
 }
 
-const TableDetectPrompt = ({toggleTableDetect, toggleSelect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
+const TableDetectPrompt = ({startLoading, stopLoading, toggleTableDetect, toggleSelect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
 toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb}: DetectProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
@@ -218,9 +220,11 @@ useEffect(()=>{
   }
 
   const cancelProcess = () => {
+    startLoading();
       FileService.deleteFile(fileId).then((res)=>{
         toggleTableDetect(false);
         reset();
+        stopLoading();
         nav("/");
       }).catch((err)=>{
         console.log(err);

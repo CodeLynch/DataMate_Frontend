@@ -341,6 +341,8 @@ function App() {
                         >
                           <div>
                             <TableDetectPrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleTableDetect={toggleTableDetect}
                               toggleSelect={toggleSelect}
                               toggleEmptyDetect={toggleEmptyDetect}
@@ -372,6 +374,8 @@ function App() {
                         >
                           <div>
                             <SelectTablePrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleSelect={toggleSelect}
                               toggleTableDetect={toggleTableDetect}
                               toggleEmptyDetect={toggleEmptyDetect}
@@ -401,6 +405,8 @@ function App() {
                         >
                           <div>
                             <NoTablesDetectPrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleNoTable={toggleUpload}
                               fileId={uploadedFileId}
                               reset={resetVariables}
@@ -417,6 +423,8 @@ function App() {
                         >
                           <div>
                             <EmptyDetectPrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleEmptyDetect={toggleEmptyDetect}
                               toggleInconsistentDetect={toggleInconsistent}
                               toggleImportSuccess={toggleImportSuccess}
@@ -442,6 +450,8 @@ function App() {
                         >
                           <div>
                             <InconsistentDetectPrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleInconsistentDetect={toggleInconsistent}
                               toggleImportSuccess={toggleImportSuccess}
                               fileId={uploadedFileId}
@@ -464,6 +474,8 @@ function App() {
                         >
                           <div>
                             <SuccessPrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleImportSuccess={toggleImportSuccess}
                               fileId={uploadedFileId}
                               reset={resetVariables}
@@ -568,7 +580,7 @@ function App() {
                       path="file"
                       element={
                         <PrivateRoute>
-                          <Filepage stopLoading={StopLoading} />
+                          <Filepage startLoading={StartLoading} stopLoading={StopLoading} />
                         </PrivateRoute>
                       }
                     />
@@ -668,11 +680,13 @@ function App() {
                   {/* Public pages */}
                   <Route
                     path="/login"
-                    element={isLoggedIn ? <Navigate to="/" /> : <Login />}
+                    element={isLoggedIn ? <Navigate to="/" /> : <Login startLoading={StartLoading}
+                    stopLoading={StopLoading}/>}
                   />
                   <Route
                     path="/registration"
-                    element={<Registration />}
+                    element={<Registration startLoading={StartLoading}
+                    stopLoading={StopLoading} />}
                   ></Route>
                 </Routes>
               </Box>
