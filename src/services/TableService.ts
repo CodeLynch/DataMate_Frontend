@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URL = 'http://localhost:8080'
 
 class TableService{
-    async postTable(tblName:string, dbid:number, userid:number, cols:string[]){
+    async postTable(tblName:string, dbid:number, userid:string, cols:string[]){
         return axios.post(`${API_URL}/postTable`,{
             "tableName": tblName,
             "database":{

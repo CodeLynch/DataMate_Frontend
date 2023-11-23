@@ -56,6 +56,10 @@ import ForgotPassword from "./components/ForgotPassword";
 import PrivateRoute from "./components/PrivateRoute";
 import DatabaseScreen from "./components/DatabaseScreen";
 import Profile from "./components/Profile";
+import FileLogs from "./components/FileLogs";
+import VerifyCode from "./components/VerifyEmail";
+import Snackbar from "./components/Snackbar";
+import ResetPassword from "./components/ResetPassword";
 
 /* Customize default MUI theme */
 declare module "@mui/material/styles" {
@@ -166,8 +170,9 @@ function App() {
     setSelect(status);
   };
 
-  const toggleNormalized = (status: boolean) => {
+  const toggleNormalized = (status: boolean, fileId: number) => {
     setNormTable(status);
+    setFileId(fileId);
   };
 
   const StartLoading = () => {
@@ -195,6 +200,10 @@ function App() {
   };
 
   const setFileId = (id: number) => {
+    setUploadedFileId(id);
+  };
+
+  const setDatabaseId = (id: number) => {
     setUploadedFileId(id);
   };
 
@@ -326,9 +335,9 @@ function App() {
                         }
                         <Modal
                           open={TableDetect}
-                          onClose={() => {
-                            toggleTableDetect(false);
-                          }}
+                          // onClose={() => {
+                          //   toggleTableDetect(false);
+                          // }}
                         >
                           <div>
                             <TableDetectPrompt
@@ -347,10 +356,8 @@ function App() {
                               updateEmpty={updateEmptyList}
                               updateInc={updateIncList}
                               updateSData={updateSheetData}
-                              updateNorm={updateNormList}
                               emptySheets={SheetsWithEmpty}
                               incSheets={IncSheets}
-                              normSheets={normSheets}
                               reset={resetVariables}
                               wb={workbook}
                             />
@@ -362,9 +369,9 @@ function App() {
                         }
                         <Modal
                           open={SelectTable}
-                          onClose={() => {
-                            toggleSelect(false, 0);
-                          }}
+                          // onClose={() => {
+                          //   toggleSelect(false, 0);
+                          // }}
                         >
                           <div>
                             <SelectTablePrompt
@@ -388,7 +395,6 @@ function App() {
                               reset={resetVariables}
                               wb={workbook}
                               sheetIndex={sheetIndex}
-                              normSheets={normSheets}
                               updateNorm={updateNormList}
                             />
                           </div>
@@ -397,7 +403,7 @@ function App() {
                         {/* modal for no tables detected here  */}
                         <Modal
                           open={NoTableDetect}
-                          onClose={toggleNoTableDetect}
+                          // onClose={toggleNoTableDetect}
                         >
                           <div>
                             <NoTablesDetectPrompt
@@ -410,33 +416,12 @@ function App() {
                           </div>
                         </Modal>
 
-                        {/* modal for normalize tables here  */}
-                        <Modal open={NormalizeTable} onClose={toggleUpload}>
-                          <div>
-                            <NormalizePrompt
-                              toggleNormalized={toggleNormalized}
-                              toggleEmptyDetect={toggleEmptyDetect}
-                              toggleInconsistentDetect={toggleInconsistent}
-                              toggleImportSuccess={toggleImportSuccess}
-                              fileId={uploadedFileId}
-                              vsheets={visibleSheetNames}
-                              sheetdata={sheetData}
-                              updateSData={updateSheetData}
-                              updateWB={updateWorkbook}
-                              reset={resetVariables}
-                              workbook={workbook}
-                              normList={normSheets}
-                              inclist={IncSheets}
-                              sheets={sheetNames}
-                            />
-                          </div>
-                        </Modal>
-
                         <Modal
                           open={EmptyDetect}
-                          onClose={() => {
-                            toggleEmptyDetect(false);
-                          }}
+                          // onClose={() => {
+                          //   resetVariables();
+                          //   toggleEmptyDetect(false);
+                          // }}
                         >
                           <div>
                             <EmptyDetectPrompt
@@ -455,16 +440,16 @@ function App() {
                               reset={resetVariables}
                               inclist={IncSheets}
                               updateSData={updateSheetData}
-                              normSheets={normSheets}
                             />
                           </div>
                         </Modal>
 
                         <Modal
                           open={InconsistentDetect}
-                          onClose={() => {
-                            toggleInconsistent(false);
-                          }}
+                          // onClose={() => {
+                          //   resetVariables();
+                          //   toggleInconsistent(false);
+                          // }}
                         >
                           <div>
                             <InconsistentDetectPrompt
@@ -481,16 +466,15 @@ function App() {
                               reset={resetVariables}
                               inclist={IncSheets}
                               updateSData={updateSheetData}
-                              normSheets={normSheets}
                             />
                           </div>
                         </Modal>
 
                         <Modal
                           open={ImportSuccess}
-                          onClose={() => {
-                            toggleImportSuccess(false);
-                          }}
+                          // onClose={() => {
+                          //   toggleImportSuccess(false);
+                          // }}
                         >
                           <div>
                             <SuccessPrompt
@@ -517,51 +501,126 @@ function App() {
                       </>
                     }
                   />
-                  <Route path="/template/1">
-                    <Route
-                      index
-                      element={
-                        <Box sx={{ padding: "1px" }}>
-                          <SpecificTemplatePage />
-                        </Box>
-                      }
-                    />
-                  </Route>
-                  <Route path="/template/2">
-                    <Route
-                      index
-                      element={
-                        <Box sx={{ padding: "1px" }}>
-                          <SpecificTemplatePageTwo />
-                        </Box>
-                      }
-                    />
-                  </Route>
-                  <Route path="/template/3">
-                    <Route
-                      index
-                      element={
-                        <Box sx={{ padding: "1px" }}>
-                          <SpecificTemplatePageThree />
-                        </Box>
-                      }
-                    />
-                  </Route>
                   <Route
-                    path="/file"
+                    path="/convert"
                     element={
+                      <PrivateRoute>
                       <>
-                        <Filepage startLoading={StartLoading} stopLoading={StopLoading} />
+                      {/* modal for normalize tables here  */}
+                      <Modal open={NormalizeTable} onClose={()=>{
+                        toggleNormalized(false, -1);
+                      }}>
+                      <div>
+                        <NormalizePrompt
+                          toggleNormalized={toggleNormalized}
+                          fileId={uploadedFileId}
+                          reset={resetVariables}
+                          normList={normSheets}
+                          startLoading={StartLoading}
+                        />
+                      </div>
+                      </Modal>
+                      <ConvertFilePage 
+                      startLoading={StartLoading}
+                      updateNorm={updateNormList}
+                      normSheets={normSheets}
+                      toggleNormalized={toggleNormalized} />
                       </>
-                    }
+                      </PrivateRoute> 
+                      }
                   />
-                  <Route path="/template/" element={<SpecificTemplatePage />} />
-                  <Route
-                    path="/file/"
-                    element={<Filepage startLoading={StartLoading} stopLoading={StopLoading} />}
-                  />
-                  <Route path="/convert" element={<ConvertFilePage />} />
-                  <Route path="/templates" element={<TemplatesPage />} />
+                  {/* nested for Templates */}
+                  <Route path="templates">
+                    <Route
+                      index
+                      element={
+                        <PrivateRoute>
+                          <TemplatesPage />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route path="1">
+                      <Route
+                        index
+                        element={
+                          <Box sx={{ padding: "1px" }}>
+                            <SpecificTemplatePage />
+                          </Box>
+                        }
+                      />
+                    </Route>
+                    <Route path="2">
+                      <Route
+                        index
+                        element={
+                          <Box sx={{ padding: "1px" }}>
+                            <SpecificTemplatePageTwo />
+                          </Box>
+                        }
+                      />
+                    </Route>
+                    <Route path="3">
+                      <Route
+                        index
+                        element={
+                          <Box sx={{ padding: "1px" }}>
+                            <SpecificTemplatePageThree />
+                          </Box>
+                        }
+                      />
+                    </Route>
+                  </Route>
+                  {/* nested for Files */}
+                  <Route path="files">
+                    <Route
+                      index
+                      element={
+                        <PrivateRoute>
+                          <FileScreenPage setFileId={setFileId} />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="file"
+                      element={
+                        <PrivateRoute>
+                          <Filepage stopLoading={StopLoading} />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="file-logs"
+                      element={
+                        <PrivateRoute>
+                          <FileLogs />
+                        </PrivateRoute>
+                      }
+                    />{" "}
+                    <Route path="deleted-files" element={<DeletedFiles />} />
+                  </Route>
+                  {/* nested for Databases */}
+                  <Route path="databases">
+                    {" "}
+                    <Route
+                      index
+                      element={
+                        <PrivateRoute>
+                          <DatabaseScreen setDatabaseId={setDatabaseId} />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="database"
+                      element={
+                        <PrivateRoute>
+                          <DatabasePage startLoading={StartLoading} stopLoading={StopLoading} />
+                        </PrivateRoute>
+                      }
+                    />
+                  </Route>
+
+
+                  
                   <Route
                     path="/files"
                     element={
@@ -574,9 +633,9 @@ function App() {
                   />
                   <Route
                     path="/database"
-                    element={<DatabasePage stopLoading={StopLoading} />}
+                    element={<DatabasePage startLoading={StartLoading} stopLoading={StopLoading} />}
                   />
-                  <Route path="/databases" element={<DatabaseScreen setFileId={setFileId} />} />
+                  <Route path="/databases" element={<DatabaseScreen setDatabaseId={setDatabaseId} />} />
                   <Route path="/delete-profile/" element={<DeleteProfile />} />
                   <Route path="/deleted-files" element={<DeletedFiles />} />
                   <Route
@@ -587,15 +646,41 @@ function App() {
                       </PrivateRoute>
                     }
                   ></Route>
-                  <Route
-                    path="/profile"
-                    element={
-                      <PrivateRoute>
-                        <Profile />
-                      </PrivateRoute>
-                    }
-                  />
 
+                  {/* nested for Profile  */}
+                  <Route path="profile">
+                    <Route
+                      index
+                      element={
+                        <PrivateRoute>
+                          <Profile />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="edit-profile"
+                      element={
+                        <PrivateRoute>
+                          <EditProfile />
+                        </PrivateRoute>
+                      }
+                    ></Route>
+
+                    <Route
+                      path="delete-profile"
+                      element={
+                        <PrivateRoute>
+                          <DeleteProfile />
+                        </PrivateRoute>
+                      }
+                    />
+                  </Route>
+                  {/* nested for forgot pass */}
+                  <Route path="forgot-password">
+                    <Route index element={<ForgotPassword />} />
+                    <Route path="verify-code" element={<VerifyCode />} />
+                    <Route path="reset-password" element={<ResetPassword />} />
+                  </Route>
                   {/* Public pages */}
                   <Route
                     path="/login"
@@ -603,16 +688,13 @@ function App() {
                   />
                   <Route
                     path="/registration"
-                    element={<Registration startLoading={StartLoading} stopLoading={StopLoading} />}
-                  ></Route>
-                  <Route
-                    path="/forgot-password"
-                    element={<ForgotPassword />}
+                    element={<Registration />}
                   ></Route>
                 </Routes>
               </Box>
             </Box>
           </Router>
+          <Snackbar />
         </SnackbarContextProvider>
       </ThemeProvider>
     </Provider>

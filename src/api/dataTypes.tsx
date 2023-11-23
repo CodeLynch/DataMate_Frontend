@@ -21,7 +21,7 @@ export interface FileEntity {
   latestDateModified: string;
   isdeleted: boolean;
   data?: Uint8Array; // Make 'data' property optional
-  userId: number;
+  userId: string;
 }
 
 export interface ResponseFile {
@@ -32,12 +32,21 @@ export interface ResponseFile {
   latestDateModified: string;
   isdeleted: boolean;
   fileDownloadUri: string;
-  userId: number;
+  userId: string;
   // thumbnailUrl: string;
 }
 
 export interface DatabaseEntity {
   databaseId: number;
   databaseName: string,
-  userId: number;
+  userId: string;
+}
+
+
+export interface FileActivityLogEntity {
+  logId: number;
+  activity: string;
+  timestamp: string;
+  fileId: number;
+  userId: string;
 }

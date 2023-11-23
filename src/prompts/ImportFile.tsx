@@ -6,6 +6,8 @@ import FileService from "../services/FileService";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
+import CryptoJS from 'crypto-js';
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 
 type ImportProps = {
   toggleImport: () => void;
@@ -20,8 +22,9 @@ const styles = {
   },
   uploadButton: {
     marginTop: "5px",
-    borderRadius: "50px",
-    width: "250px",
+    borderRadius: "20px",
+    height: "45px",
+    width: "160px",
     background: "#71C887",
   },
 };
@@ -52,7 +55,10 @@ const ImportFile = ({ toggleImport, startLoading, setFileId }: ImportProps) => {
         return;
       } else {
         startLoading();
-        FileService.uploadFile(file[0], userId)
+
+        const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+        const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+        FileService.uploadFile(file[0], decryptedUserId)
           .then((res) => {
             toggleImport();
             // nav('/file',{
@@ -129,10 +135,10 @@ const ImportFile = ({ toggleImport, startLoading, setFileId }: ImportProps) => {
       <div ref={drop} className={hover ? "dropAreaHover" : "dropArea"}>
         <div className="dropAreaLine" />
         <div className="uploadTextContainer">
-          <p style={{ paddingLeft: "5rem" }} className="uploadText largeText">
+          <p style={{ paddingLeft: "5rem", fontSize: "20px" }} className="uploadText largeText">
             Drag your file here
           </p>
-          <p style={{ paddingLeft: "5rem" }} className="uploadText smallText">
+          <p style={{ paddingLeft: "5rem", fontSize: "18px" }} className="uploadText smallText">
             or
           </p>
         </div>
@@ -142,7 +148,7 @@ const ImportFile = ({ toggleImport, startLoading, setFileId }: ImportProps) => {
           component="label"
           style={styles.uploadButton}
         >
-          Upload
+          Browse
           <input
             type="file"
             style={{ display: "none" }}

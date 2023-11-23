@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../helpers/Store';
 import Topbar from './Topbar';
 import Navbar from './Navbar';
+import CryptoJS from 'crypto-js';
 
 export default function EditProfile() {
     const [showPassword, setShowPassword] = useState(false);
@@ -82,16 +83,20 @@ export default function EditProfile() {
     };
 
     useEffect(() => {
-        if (userId) {
-            UserService.getUserById(userId)
-                .then(response => {
-                    setData(response.data);
-                })
-                .catch(error => {
-                    console.error('Error fetching user data:', error);
-                });
+        console.log("This is key:", process.env.REACT_APP_ENCRYPTION_KEY);
+        const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+        const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    
+        if (decryptedUserId) {
+          UserService.getUserById(decryptedUserId)
+            .then((response) => {
+              setData(response.data);
+            })
+            .catch((error) => {
+              console.error('Error fetching user data:', error);
+            });
         }
-    }, [userId]);
+      }, [userId]);
 
     const putUser = async (e: { preventDefault: () => void; }) => {
         e.preventDefault()

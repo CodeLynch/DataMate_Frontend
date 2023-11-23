@@ -27,6 +27,7 @@ import Navbar from "./Navbar";
 import Topbar from "./Topbar";
 import { useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
+import CryptoJS from 'crypto-js';
 
 type FileId = string;
 
@@ -67,7 +68,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   const handleClickFileName = (file: any) => {
     let id = file?.fileId;
 
-    nav("/file", {
+    nav("/files/file", {
       state: {
         fileid: id,
       },
@@ -152,8 +153,11 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     setCurrentSortOption("All");
     setSelectedOption("All");
 
-    if (userId) {
-      FileService.getFilesByUserId(userId)
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+
+    if (decryptedUserId ) {
+      FileService.getFilesByUserId(decryptedUserId)
         .then((res) => {
           console.log(res);
           setFiles(res);
@@ -206,8 +210,11 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   );
 
   useEffect(() => {
-    if (userId) {
-      FileService.getFilesByUserId(userId)
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+
+    if (decryptedUserId ) {
+      FileService.getFilesByUserId(decryptedUserId)
         .then((res) => {
           console.log(res);
           setFiles(res);
@@ -311,7 +318,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
           )}
 
           {isLargeScreen && (
-            <Link underline="none" href="/deleted-files" color={"black"}>
+            <Link underline="none" href="/files/deleted-files" color={"black"}>
               <IconButton
                 style={{
                   marginLeft: "24px",
@@ -328,7 +335,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
             </Link>
           )}
           {isLargeScreen && (
-            <Link underline="none" href="/" color={"black"}>
+            <Link underline="none" href="/files/file-logs" color={"black"}>
               <IconButton
                 style={{
                   marginLeft: "24px",

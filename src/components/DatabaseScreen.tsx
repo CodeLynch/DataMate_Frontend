@@ -8,6 +8,7 @@ import {
   Stack,
   IconButton,
   Link,
+  Box,
 } from "@mui/material";
 import Popover from "@mui/material/Popover";
 import List from "@mui/material/List";
@@ -18,34 +19,38 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchIcon from "@mui/icons-material/Search";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import FileService from "../api/FileService";
-import { DatabaseEntity, FileEntity, ResponseFile, User } from "../api/dataTypes";
-import ImportFile from "../prompts/ImportFile";
+import DatabaseIcon from "../images/database-svgrepo-com (6).svg";
+
+import { DatabaseEntity, User } from "../api/dataTypes";
+
 import { useNavigate } from "react-router-dom";
-import FileDetails from "./FileDetails";
+
 import Navbar from "./Navbar";
 import Topbar from "./Topbar";
 import { useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
 import DatabaseService from "../services/DatabaseService";
+import CryptoJS from 'crypto-js';
 
-type FileId = string;
+type DatabaseId = string;
 
 //Importfile
-type FileListProp = {
-  setFileId: (num: number) => void;
+type DatabaseListProp = {
+  setDatabaseId: (num: number) => void;
 };
-const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isLargeScreen, setIsLargeScreen] = useState(false);
-  // const [files, setFiles] = useState<DatabaseEntity[]>([]);
+const DatabaseList: React.FC<DatabaseListProp> = ({
+  setDatabaseId,
+}: DatabaseListProp) => {
   const [databases, setDatabases] = useState<DatabaseEntity[]>([]);
   const [filteredDBs, setFilteredDBs] = useState<DatabaseEntity[]>([]);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState("All");
   const [selectedMenuOption, setSelectedMenuOption] = useState("");
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [selectedFileId, setSelectedFileId] = useState<FileId | null>(null);
+  const [selectedDatabaseId, setSelectedDatabaseId] =
+    useState<DatabaseId | null>(null);
   const [anchorE2, setAnchorE2] = useState<null | HTMLElement>(null);
   const [selectedOptionPopMenu, setSelectedOptionPopMenu] = useState("All");
   const open = Boolean(anchorE2);
@@ -53,7 +58,8 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   const [searchQuery, setSearchQuery] = useState(""); // State for the search query
   const [searchResult, setSearchResult] = useState<DatabaseEntity[]>([]);
   const [currentSortOption, setCurrentSortOption] = useState("All");
-  const [selectedFile, setSelectedFile] = useState<DatabaseEntity | null>(null);
+  const [selectedDatabase, setSelectedDatabase] =
+    useState<DatabaseEntity | null>(null);
   const [database, setDatabase] = useState<DatabaseEntity | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const anchorRef = useRef(null);
@@ -63,26 +69,25 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   const nav = useNavigate();
 
   // const itemsPerRow = Math.min(searchResult.length, 3); // Maximum 3 items per row
-  const itemsPerRow = Math.min(databases.length, 3);
+  const itemsPerRow = Math.min(databases?.length, 3);
   const lgValue = Math.floor(12 / itemsPerRow);
   const xlValue = Math.floor(12 / itemsPerRow);
 
-  const handleClickFileName = (db: DatabaseEntity) => {
-    let id = db?.databaseId
- console.log(id)
-    nav("/database", {
+  const handleClickDatabaseName = (db: DatabaseEntity) => {
+    let id = db?.databaseId;
+    console.log(id);
+    nav("/databases/database", {
       state: {
         dbid: id,
       },
     });
   };
 
-  const handleOptionSelectPop = (option: string, db: DatabaseEntity| null) => {
+  const handleOptionSelectPop = (option: string, db: DatabaseEntity | null) => {
     setSelectedMenuOption(option);
-    setSelectedFile(db);
+    setSelectedDatabase(db);
     setIsOpen(!!db);
   };
-
 
   useEffect(() => {
     const handleResize = () => {
@@ -96,7 +101,6 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     };
   }, []);
 
-
   //to fully get
   const handleIconButtonClick = (
     event: React.MouseEvent<HTMLButtonElement>
@@ -106,37 +110,38 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
 
     if (databaseId) {
       setAnchorEl(target);
-      setSelectedFileId(databaseId);
+      setSelectedDatabaseId(databaseId);
     }
   };
 
   const handlePopoverClose = () => {
     setAnchorEl(null);
-    setSelectedFileId(null);
+    setSelectedDatabaseId(null);
   };
 
   //smallscreen menu
- 
 
   //search funtion
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  useEffect(()=>{
-    if(databases.length > 0){
+  useEffect(() => {
+    if (databases && databases.length > 0) {
       console.log("db state ", databases);
-      setFilteredDBs(databases.filter((db) =>
-      db.databaseName.toLowerCase().includes(searchQuery.toLowerCase())));
+      setFilteredDBs(
+        databases.filter((db) =>
+          db.databaseName.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
     }
-    
-  },[databases])
-  
-  
+  }, [databases, searchQuery]);
 
   useEffect(() => {
-    if (userId) {
-      DatabaseService.getDBsByUser(userId)
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    if (decryptedUserId) {
+      DatabaseService.getDBsByUser(decryptedUserId)
         .then((res) => {
           console.log(res);
           setDatabases(res);
@@ -151,62 +156,67 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     setSearchResult(filteredDBs);
   }, [searchQuery, filteredDBs]);
 
+  //Sort by
+  const handleDropdownToggle = () => {
+    setIsDropdownOpen((prev) => !prev);
+  };
 
-    //Sort by
-    const handleDropdownToggle = () => {
-      setIsDropdownOpen((prev) => !prev);
-    };
-  
-    // Sort your files function
-    const handleOptionSelect = (option: string) => {
-      setIsDropdownOpen(false);
-  
-      let sortedFiles = [...databases];
-      setSelectedOption(option);
-  
-      if (option === "Name") {
-        sortedFiles.sort((a, b) => a.databaseName.localeCompare(b.databaseName));
-      } 
-  
-      setDatabases(sortedFiles);
-    };
+  // Sort your files function
+  const handleOptionSelect = (option: string) => {
+    setIsDropdownOpen(false);
 
+    let sortedDatabases = [...databases];
+    setSelectedOption(option);
 
-    const openImportModal = () => {
-      setIsImportModalOpen(true);
-      document.body.style.overflow = "hidden"; // Prevent scrolling
-    };
-  
-    const closeImportModal = () => {
-      setIsImportModalOpen(false);
-      document.body.style.overflow = "auto"; // Allow scrolling
-    };
+    if (option === "Name") {
+      sortedDatabases.sort((a, b) =>
+        a.databaseName.localeCompare(b.databaseName)
+      );
+    }
 
-    const handleClearfilter = () => {
-      setSearchQuery("");
-      setCurrentSortOption("All");
-      setSelectedOption("All");
-  
-      if (userId) {
-        DatabaseService.getDBsByUser(userId)
-          .then((res) => {
-            console.log(res);
-            setDatabase(res);
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }
-    };
-    
-    const handlePopoverOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
-      setAnchorE2(event.currentTarget);
-    };
-  
-    const handlePopoverCloseE2 = () => {
-      setAnchorE2(null);
-    };
+    setDatabases(sortedDatabases);
+  };
+
+  const openImportModal = () => {
+    setIsImportModalOpen(true);
+    document.body.style.overflow = "hidden"; // Prevent scrolling
+  };
+
+  const closeImportModal = () => {
+    setIsImportModalOpen(false);
+    document.body.style.overflow = "auto"; // Allow scrolling
+  };
+
+  const handleClearfilter = () => {
+    setSearchQuery("");
+    setCurrentSortOption("All");
+    setSelectedOption("All");
+
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+
+    if (decryptedUserId) {
+      DatabaseService.getDBsByUser(decryptedUserId)
+        .then((res) => {
+          console.log(res);
+          setDatabase(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
+
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorE2(event.currentTarget);
+  };
+
+  const handlePopoverCloseE2 = () => {
+    setAnchorE2(null);
+  };
   return (
+    <>
+    {databases?.length <= 0 ? <h1>No or empty Response Received</h1>:
     <Grid
       paddingX={{ xs: 5, sm: 5, lg: 10 }}
       style={{
@@ -215,7 +225,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
         flexDirection: "column",
       }}
     >
-        <section style={{ marginTop: "50px" }}>
+      <section style={{ marginTop: "50px" }}>
         <Grid
           maxWidth={{ lg: "95%", xl: "80%" }}
           marginX="auto"
@@ -253,30 +263,6 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
               onChange={handleSearchInputChange}
             />
           </Grid>
-      
-          {isImportModalOpen && (
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
-                zIndex: 999,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              // onClick={closeImportModal}
-            >
-              <ImportFile
-                toggleImport={closeImportModal}
-                startLoading={() => {}}
-                setFileId={setFileId}
-              />
-            </div>
-          )}
 
           {isLargeScreen && (
             <Link underline="none" href="/deleted-files" color={"black"}>
@@ -438,7 +424,6 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
                   alignItems: "flex-start",
                 }}
               >
-                
                 <IconButton
                   style={{
                     fontSize: "20px",
@@ -570,7 +555,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
           {searchResult.map((database) => (
             <Grid
               key={database.databaseId}
-item
+              item
               xs={12}
               sm={6}
               md={4}
@@ -601,9 +586,9 @@ item
                   <div style={{ flex: "1" }}>
                     <div
                       key={database.databaseId}
-                      onClick={() => handleClickFileName(database)}
+                      onClick={() => handleClickDatabaseName(database)}
                     >
-                     {database.databaseName}
+                      {database.databaseName}
                     </div>
                   </div>
                   <IconButton
@@ -625,7 +610,8 @@ item
                   <Popover
                     open={
                       isPopoverOpen &&
-                      String(selectedFileId) === String(database.databaseName)
+                      String(selectedDatabaseId) ===
+                        String(database.databaseName)
                     }
                     anchorEl={anchorEl}
                     onClose={handlePopoverClose}
@@ -651,19 +637,16 @@ item
                         <ListItemText primary="Details" />
                       </ListItem>
 
-
                       <ListItem
                         button
                         onClick={() => {
                           console.log(
                             `Delete option selected for fileId: ${database.databaseId}`
                           );
-
                         }}
                       >
                         <ListItemText primary="Delete" />
                       </ListItem>
-                      
                     </List>
                   </Popover>
                 </div>
@@ -676,16 +659,34 @@ item
                     height: "100%",
                   }}
                 >
-                  <div
+                  {/* <div
                     key={database.databaseId}
-                    onClick={() => handleClickFileName(database)}
+                    onClick={() => handleClickDatabaseName(database)}
                   >
                     <img
-                      src="https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png"
+                      src={DatabaseIcon}
                       alt="Thumbnail preview of a Drive item"
                       style={{
                         width: "100%",
                         height: "200px",
+                        paddingTop: "3px",
+                        paddingBottom: "10px",
+                        borderRadius: "8px",
+                        display: "block",
+                        margin: "0 auto",
+                      }}
+                    />
+                  </div> */}
+                  <div
+                    key={database.databaseId}
+                    onClick={() => handleClickDatabaseName(database)}
+                  >
+                    <img
+                      src={DatabaseIcon}
+                      alt="Thumbnail preview of a Drive item"
+                      style={{
+                        width: "100%",
+                        height: "150px",
                         paddingTop: "3px",
                         paddingBottom: "10px",
                         borderRadius: "8px",
@@ -723,7 +724,9 @@ item
         </div>
       )}
     </Grid>
+  }
+  </>
   );
 };
 
-export default FileList;
+export default DatabaseList;

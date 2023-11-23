@@ -6,6 +6,12 @@ import { useEffect, useState } from "react";
 import FileService from "../services/FileService";
 import { table } from "console";
 import { tab } from "@testing-library/user-event/dist/tab";
+import TableService from "../services/TableService";
+import DatabaseService from "../services/DatabaseService";
+import { useSelector } from "react-redux";
+import { RootState } from "../helpers/Store";
+import ConvertService from "../services/ConvertService";
+import CryptoJS from 'crypto-js';
 
 
 
@@ -22,27 +28,51 @@ const styles = {
       },
 };
 interface TableRow {
-    [columnName: string]: string | number | boolean;
-  }
+  [key: string]: string | number | boolean | Date;
+}
   
-  interface SheetData {
-    [sheetName: string]: TableRow[];
-  }
+interface SheetData {
+  [sheetName: string]: TableRow[];
+}
+
+type ConvertCommand = {
+  tblName: string;
+  tblColumns: string;
+  insertValues: string;
+}
+
+type DatabaseResponse ={
+  databaseId: number;
+  databaseName: string;
+  user: Object;
+}
+
+type TableResponse ={
+  tableId: number;
+  tableName: string;
+  database: Object;
+  user: Object;
+}
+
+interface HeaderConfig {
+  name: string;
+  header: string;
+  defaultVisible?: boolean,
+  defaultFlex: number,
+  headerProps?: {
+      style: {
+      backgroundColor: string;
+      color: string;
+      fontWeight: string;
+  };},
+}
+
 type NormalizeProps = {
-    toggleNormalized: (status:boolean) => void,
-    toggleEmptyDetect: (status:boolean) => void,
-    toggleInconsistentDetect: (status:boolean) => void,
-    toggleImportSuccess: (status:boolean) => void,
+    toggleNormalized: (status:boolean, id: number) => void,
     fileId: number,
-    workbook: XLSX.WorkBook | null | undefined, 
-    sheets:string[], 
-    vsheets:string[],
     normList:string[],
-    inclist:string[],
-    sheetdata: object,
     reset: () => void,
-    updateSData: (data:Object) => void,
-    updateWB: (workbook:XLSX.WorkBook) => void,
+    startLoading: () => void,
   }
 
 interface WorkbookData {
@@ -59,15 +89,16 @@ interface NewTable {
 }
 
 
-const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImportSuccess, 
-  toggleInconsistentDetect, workbook, sheets, vsheets, normList, sheetdata, reset, inclist, 
-  updateSData, updateWB}: NormalizeProps) => {  
+const NormalizePrompt = ({toggleNormalized, fileId, startLoading, normList, reset}: NormalizeProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
+  const [workbook, setWB] = useState<XLSX.WorkBook | null>()
   const [sheetNames, setSheetNames] = useState<string[]>([]);
+  const [vsheets, setVSheets] = useState<string[]>([]);
+  const [sheetdata, setSData] = useState<Object>({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
-  const [HeaderArr, setHArr] = useState<[][] | undefined>(undefined)
-  const [BodyArr, setBArr] = useState<[][] | undefined>(undefined)
+  const [HeaderArr, setHArr] = useState<[][] | undefined>(undefined);
+  const [BodyArr, setBArr] = useState<[][] | undefined>(undefined);
   const [newTablesArr, setTablesArr] = useState<NewTable[]>([])
   const [doneNormalizing, setNormDone] = useState(false);
   const [toReread, setReread] = useState(false);
@@ -76,10 +107,16 @@ const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImp
   const [startProcess, setStartProcess] = useState(false);
   const [normWB, setNormWB] = useState<XLSX.WorkBook | null>();
   const nav = useNavigate();
+  const [databaseId, setDatabaseId] = useState(-1);
+  const [SQLCommands, setSQLCmds] = useState<ConvertCommand[]>([]);
+  const [fileName, setFileName] = useState("");
+  const [isDone, setDone] = useState(false);
   var nameid = 1;
+  const userId = useSelector((state: RootState) => state.auth.userId);
+  const TableHeight = (vsheets.length * 50).toString() + "px";
 
-  //function to remove empty rows in Sheet Object Data
-  function sheetjs_cleanEmptyRows(sd:XLSX.SheetType) {
+//Helper functions ---------------------------------------------------------------------------------
+function sheetjs_cleanEmptyRows(sd:XLSX.SheetType) {
     const data = []
         for (var row = 0; row < sd.length; row++) {
               var i = sd[row].length;
@@ -94,33 +131,7 @@ const NormalizePrompt = ({toggleNormalized, toggleEmptyDetect, fileId, toggleImp
           }
         }
         return data;
- }
-
-const readData = (wb: XLSX.WorkBook) => {
-    let sheetdata:Object = {}
-    wb.SheetNames.map((sheet, i) => 
-    {
-        const worksheet = wb.Sheets[sheet];
-        const jsondata = XLSX.utils.sheet_to_json(worksheet,{
-            header: 1,
-            raw: true,
-            defval: "",
-        }) as unknown;
-        const sd = sheetjs_cleanEmptyRows(jsondata as XLSX.SheetType)
-        const js = sd as Object
-        sheetdata = {...sheetdata, [sheet]: js}            
-    })
-    updateSData(sheetdata)
-    
-     //typing currentSheet as key of sheetData
-     const currSheet = currentSheet as keyof typeof sheetdata
-     //typing object value as unknown before converting to row
-     const row =  sheetdata[currSheet] as unknown
-     let rowArr = row as [][]
-     setHArr(rowArr)
-     console.log("Sheet Data: ",sheetdata);
 }
-
 function convertObjectToArray(obj: Record<string, string>[] | (number | string)[][]): (number | string)[][] {
   if (Array.isArray(obj[0])) {
     // If the first element is already an array, assume it's an array of arrays
@@ -138,9 +149,7 @@ function convertObjectToArray(obj: Record<string, string>[] | (number | string)[
 
   return resultArray;
 }
-
-  //add primary key function
-  function addPrimaryKey(table: (number | string)[][], tableName:string): void {
+function addPrimaryKey(table: (number | string)[][], tableName:string): void {
     // Check if the table is empty
     if (table.length === 0 || table[0].length === 0) {
       console.log("Table is empty. No modifications needed.");
@@ -153,7 +162,7 @@ function convertObjectToArray(obj: Record<string, string>[] | (number | string)[
   
     // Check if the table already has an auto-increment primary key
     const hasNumberIDColumn = headerRow.some((columnName, columnIndex) => {
-      if (typeof table[1][columnIndex] === 'number') {
+      if (typeof table[1][columnIndex] === 'number' || !Number.isNaN(Number(table[1][columnIndex]))) {
         console.log("checking", table[1][columnIndex])
         let uniqueVal: number[] = [];
         for(let i=1; i < table.length; i++){
@@ -188,15 +197,11 @@ function convertObjectToArray(obj: Record<string, string>[] | (number | string)[
     }
   
     console.log("Added an auto-increment 'id' column to the table.");
-  }
-
+}
 function getUniquePrimaryTableName(): string{
   nameid++;
   return `PrimaryTable_${nameid - 1}`;
 }
-
-
-//getting a string array of a column name and its dependencies
 function getColumnDependencies(columnName: string, table: (string | number)[][], doneSearching: string[]): string[] {
   const columnIndex = table[0].indexOf(columnName);
 
@@ -230,7 +235,6 @@ function getColumnDependencies(columnName: string, table: (string | number)[][],
 
   return dependencies;
 }
-
 function hasCorrespondingValue(table: (string | number)[][], columnName1: string, columnName2: string, targetValue: any, currentValue: any): boolean {
   const columnIndex1 = table[0].indexOf(columnName1);
   const columnIndex2 = table[0].indexOf(columnName2);
@@ -247,7 +251,6 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
 
   return true;
 }
-//checking if a column hasrepeating values
 function hasRepeatingValues(columnName: string, table: (string | number)[][]): boolean {
   const columnIndex = table[0].indexOf(columnName);
 
@@ -269,7 +272,6 @@ function hasRepeatingValues(columnName: string, table: (string | number)[][]): b
 
   return false; // No repeating values found
 }
-
 function concatenateColumns(columnNames: string[], table: (string | number)[][]): (string | number)[][] {
   const columnIndexList: number[] = [];
   const newTable: (string | number)[][] = [];
@@ -300,8 +302,6 @@ function concatenateColumns(columnNames: string[], table: (string | number)[][])
 
   return newTable;
 }
-
-//function to remove repeating rows in a table
 function removeRepeatingRows(table: (string | number)[][]): (string | number)[][] {
   const seenRows: Set<string> = new Set();
   const uniqueTable: (string | number)[][] = [table[0]]; // Copy the header row
@@ -317,7 +317,6 @@ function removeRepeatingRows(table: (string | number)[][]): (string | number)[][
 
   return uniqueTable;
 }
-
 function findPrimaryKey(table: (string | number)[][], columnName: string, searchValue: string | number): string | number {
   console.log("searching for ", searchValue, " at " , columnName)
   
@@ -342,8 +341,6 @@ function findPrimaryKey(table: (string | number)[][], columnName: string, search
   // If no match is found
   return -1;
 }
-
-//replacing values in primary tables with foreign keys
 function replaceWithFK(tableA: (string | number)[][], tableB: (string | number)[][]) {
   // Deep copy of tableA
   const mergedTable: (string | number)[][] = JSON.parse(JSON.stringify(tableA));
@@ -422,8 +419,6 @@ function replaceWithFK(tableA: (string | number)[][], tableB: (string | number)[
 
   return mergedTable;
 }
-
-
 function normalizeTbl(inputTable: (string | number)[][]): void {
     let doNotSearch:string[] = [];
     const numCols = inputTable[0].length;
@@ -478,19 +473,7 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
     setNormDone(true);
   }
 }
-
-  //pagination functions ------------------------------------------
-    const handleChangePage = (event: unknown, newPage: number) => {
-      setPage(newPage);
-  };
-  
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  setRowsPerPage(+event.target.value);
-  setPage(0);
-  };
-  //---------------------------------------------------------------
-
-  function delete_ws(wb:XLSX.WorkBook, wsname:string) {
+function delete_ws(wb:XLSX.WorkBook, wsname:string) {
     const sidx = wb.SheetNames.indexOf(wsname);
     if(sidx == -1) throw `cannot find ${wsname} in workbook`;
     
@@ -508,18 +491,190 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
     //     }
     //   }
     // }
-  }
+}
+const fetchData = async () =>{
+  FileService.getFile(fileId).then((res)=>{
+      const wb = XLSX.read(res.data);
+      setFileName(res.fileName);
+      setWB(wb);
+  }).catch((err)=>{
+      console.log(err);
+  }) 
+}
+const readData = (wb: XLSX.WorkBook) => {
+  console.log("and this workbook is passed ", wb);
+  setSheetNames(wb.SheetNames)
+  let sheetdata:Object = {}
+  wb.SheetNames.map((sheet, i) => 
+  {
+      const worksheet = wb.Sheets[sheet];
+      const jsondata = XLSX.utils.sheet_to_json(worksheet,{
+          header: 1,
+          raw: false,
+          defval: "",
+      }) as unknown;
+      const sd = sheetjs_cleanEmptyRows(jsondata as XLSX.SheetType)
+      const js = sd as Object
+      sheetdata = {...sheetdata, [sheet]: js}            
+  })
+  console.log("sheetdata on readData: ",sheetdata)
+  setSData(sheetdata)
+  setStartProcess(true);
+}
+function createDataSrc(headerConfigs: HeaderConfig[], values:[][]): TableRow[]{
+  console.log("values are ", values);
+  const table:TableRow[] = [];
+  const headers: string[] = headerConfigs.map(config => config.name);
 
+
+  values.forEach(rowValues => {
+      console.log("rowvalues: ", rowValues.length, " === headers:", headers.length);
+    if (rowValues.length !== headers.length) {
+      throw new Error('Number of values does not match number of headers.');
+    }
+    const row: TableRow = {};
+    
+    headers.forEach((header, index) => {
+      const value = rowValues[index] as string;
+      if (!isNaN(value as unknown as number) && !isNaN(parseFloat(value))) {
+          // Check if the value is a valid number
+          row[header] = parseFloat(value);
+      } else if (!isNaN(Date.parse(value))) {
+          // Check if the value is a valid date
+          row[header] = new Date(value).toDateString();
+      }else {
+          // If not a number, date, or boolean, keep it as a string
+          row[header] = value;
+      }       
+    });
+
+    table.push(row);
+  });
+  return table;
+}
+function createColumns(strings: string[]): HeaderConfig[] {
+  let strArr:HeaderConfig[] = [];
+
+  strings.map((str, i)=>
+  {
+    strArr.push({
+      name: str,
+      header: str,
+      defaultFlex: 1,
+      headerProps:{
+        style: { backgroundColor: '#71C887', color:"white", fontWeight: 'bold' 
+      },
+      }
+    } 
+    );
+  });
+
+  return strArr;
+}
+function getColumnType(value: any): string {
+  console.log("Type of ", value, " is ", typeof value);
+  if (typeof value === "string") {
+      return "VARCHAR(255)";
+  } else if (typeof value === "number") {
+      if (Number.isInteger(value)) {
+         if(value > 2000000000){
+          return "VARCHAR(255)";
+         }else{
+          return "INTEGER";
+         }
+      } else {
+          return "DOUBLE";
+      }
+  } else if (typeof value === "boolean") {
+      return "BOOLEAN";
+  } else if (value instanceof Date) {
+      return "DATE";
+  } else {
+      throw new Error(`Unsupported data type: ${typeof value}`);
+  }}
+function generateConvertCommandObject(jsonData: TableRow[], tableName: string): ConvertCommand {
+  if (jsonData.length === 0) {
+      throw new Error("JSON array is empty.");
+  }
+  const columns: string[] = Object.keys(jsonData[0]);
+  let newTblName = tableName.replace(/[^a-zA-Z0-9]/g,'_'); 
+  console.log("new name: ",newTblName)
+  const tblColsQuery = `(${columns.map(col => `${col.replace(/[^a-zA-Z0-9]/g,'_')} ${getColumnType(jsonData[0][col])}`).join(', ')});`;
+
+
+  const insertValues = jsonData.map(record => `(${columns.map(col => {
+      const value = record[col];
+      if(value === "NULL"){
+          return 'NULL';
+      }
+      if (typeof value === "string") {
+          return `'${value}'`;
+      } else if (value instanceof Date) {
+          // Format date as 'YYYY-MM-DD'
+          return `'${value.toISOString().split('T')[0]}'`;
+      } else {
+          if(value as number > 2000000000){
+              return `'${value}'`;
+          }else{
+              return value;
+          }
+      }
+  }).join(', ')})`).join(', ');
+
+  let SQLcolumns: string[] = Object.keys(jsonData[0]).map(key => key.replace(/[^a-zA-Z0-9]/g,'_'));
+  console.log("join: ", SQLcolumns.join(', '));
+  const valsQuery = `(${SQLcolumns.join(', ')}) VALUES ${insertValues};`;
+  
+  return {
+      tblName: `${newTblName}`,
+      tblColumns:`${tblColsQuery}`,
+      insertValues: `${valsQuery}`
+  };
+}
+const uid = function(){
+  return Date.now().toString(36) + Math.floor(Math.pow(10, 12) + Math.random() * 9*Math.pow(10, 12)).toString(36);
+}
+//--------------------------------------------------------------------------------------------------------------
+
+//pagination functions ------------------------------------------
+const handleChangePage = (event: unknown, newPage: number) => {
+      setPage(newPage);
+  };
+const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  setRowsPerPage(+event.target.value);
+  setPage(0);
+  };
+//---------------------------------------------------------------
+
+  
+//UseEffects ----------------------------------------------------------------------------------------------
+  //for logging new tables array  
   useEffect(()=>{
-    console.log("Array contains: ",newTablesArr);
+    console.log("New Tables Array contains: ",newTablesArr);
   },[newTablesArr])
 
+  //fetch data on load
   useEffect(()=>{
-    console.log("wb: ", workbook);
-    setOrigWB(workbook);
+      setVSheets([]);
+      fetchData();
   },[])
 
-  //useEffect for normalizing table on load;
+  //read workbook
+  useEffect(()=>{
+    if(workbook !== undefined){
+      setOrigWB(workbook);
+      readData(workbook!); 
+    }
+},[workbook])
+
+  // old useEffect for setting startProcess to true 
+  // useEffect(()=>{
+  //     if(JSON.stringify(sheetdata) !== '{}' && sheetdata !== undefined){
+  //       setStartProcess(true);
+  //     }
+  // },[workbook, sheetNames])
+
+
   useEffect(()=>{
     if(startProcess && JSON.stringify(sheetdata) !== '{}'){
       let sd = sheetdata as WorkbookData; 
@@ -561,18 +716,15 @@ function normalizeTbl(inputTable: (string | number)[][]): void {
           }          
         }
       }
-      updateSData(sd as Object);
+      setSData(sd as Object);
       setNormWB(newWB);         
       console.log("setting normalization to done...")
       setNormDone(true);
     }
   },[startProcess])
-
-  useEffect(()=>{
-      if(JSON.stringify(sheetdata) !== '{}' && sheetdata !== undefined){
-        setStartProcess(true);
-      }
-  },[workbook, sheetNames])
+  //useEffect for normalizing table on load;
+  
+  
 
   //useEffect once normalization process is done
   useEffect(()=>{
@@ -633,32 +785,120 @@ useEffect(()=>{
         setBArr(rowsArr)
     }
   },[HeaderArr])
+  
+  useEffect(()=>{
+    if(SQLCommands !== null && SQLCommands.length > 0){
+        console.log("SQL Commands are: ", SQLCommands);
+        let i = 0;
+        SQLCommands.map((com, i)=>{
+        ConvertService.postCommand(com.tblName, com.tblColumns, 1)
+        .then((res)=>{
+            console.log("Table Created!");
+            ConvertService.postCommand(com.tblName, com.insertValues, 2)
+            .then((res)=>{
+                i++;
+                console.log("Values Inserted!");
+                if(i === SQLCommands.length){
+                    setDone(true);
+                    
+                }            
+            }).catch((err)=>{
+                console.log(err);
+            })
+        }).catch((err)=>{
+            console.log(err);
+        })
+        })
+    }
+}, [SQLCommands])
+
+useEffect(()=>{
+  if(isDone){
+    toggleNormalized(false, -1);
+    nav('/database',{
+      state:{
+        dbid: databaseId
+      }
+    }); 
+  }
+},[isDone])
+//-----------------------------------------------------------------------------------------------------------
+
 
   const changeSheet = (stringevent: React.SyntheticEvent, newValue: string) =>{
       setCurrentSheet(newValue);
   }
   
   const cancelProcess = () => {
-      FileService.deleteFile(fileId).then((res)=>{
-        toggleNormalized(false);
-        reset();
-        nav("/");
-      }).catch((err)=>{
-        console.log(err);
-      })      
+    while(normList.length > 0){
+      normList.pop();
+    }
+    toggleNormalized(false, -1); 
+  }
+
+  
+
+  //Button and SQL functions -----------------------------------------------------------------------------------------------------
+  
+  function getSQLQuery(wb:XLSX.WorkBook){
+    if(sheetdata !== undefined){
+        let sql2dArr:ConvertCommand[] = [...SQLCommands];
+        let dbname = fileName.replace(/\.[^/.]+$/, "");
+        console.log("dbname val: ", dbname);
+        startLoading();
+
+        const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
+        const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+
+        DatabaseService.postDatabase(dbname, decryptedUserId).then((res)=>{
+                console.log("post res:", res);
+                let dbres = res as unknown as DatabaseResponse;
+                let dbId = dbres.databaseId;
+                setDatabaseId(dbId);
+                wb.SheetNames.map((sheet, i) =>{
+                    const ws = wb.Sheets[sheet];
+                    const jsondata = XLSX.utils.sheet_to_json(ws,{
+                        header: 1,
+                        raw: false,
+                        defval: "",
+                    }) as unknown;
+                    const JSSD = sheetjs_cleanEmptyRows(jsondata as XLSX.SheetType)
+                    let sheetSD = JSON.parse(JSON.stringify(JSSD as unknown as [][]));
+                    console.log("sheet data of workbook ", sheetSD)
+                    let headers = sheetSD.shift();
+                    let dataCols = createColumns(headers);
+                    let dataSrc = createDataSrc(dataCols, sheetSD);
+                    let uniquetblName = sheet.replace(/[^a-zA-Z0-9]/g,'_') + "_" + uid();
+                    TableService.postTable(uniquetblName, dbId, decryptedUserId, headers)
+                    .then((res)=>{
+                        console.log("post table res:", res);
+                    }).catch((err)=>{
+                        console.log(err);
+                    })
+                    sql2dArr.push(generateConvertCommandObject(dataSrc as TableRow[], uniquetblName));
+                })
+                setSQLCmds(sql2dArr);
+        }).catch((err)=>{
+            console.log(err);
+        })
+    }
   }
 
   function nextFunc(){
-    updateWB(normWB!);
-    toggleNormalized(false);
-    toggleImportSuccess(true);
+    if(normWB === undefined || normWB === null){
+      alert("Please wait. Normalization still in progress");
+    }else{
+      console.log("turn this to SQL: ", normWB);
+      getSQLQuery(normWB);
+    }
   }
 
   function declineFunc(){
-    updateWB(origWB!);
-    toggleNormalized(false);
-    toggleImportSuccess(true);
+    console.log("turn this to SQL: ", origWB);
+    getSQLQuery(origWB!);
   }
+  //-----------------------------------------------------------------------------------------------------
+
   
   return (
     <Box sx={{
@@ -678,7 +918,7 @@ useEffect(()=>{
           <div style={{display:'flex', flexDirection:'row'}}>
             <div style={{width: '85%'}}>
             {HeaderArr !== undefined && BodyArr !== undefined? <>
-                          <Paper elevation={0} sx={{ minHeight:"150px", maxHeight:'270px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
+                          <Paper elevation={0} sx={{ height:vsheets.length > 3? {TableHeight}:150, overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
                           <TableContainer>
                               <Table stickyHeader aria-label="sticky table">
                               <TableHead >
@@ -747,7 +987,7 @@ useEffect(()=>{
                     >
                     {vsheets.length > 0? vsheets.map((sheet,i) =>{
                         return(                                
-                          <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left"}}  value={sheet} label={sheet} />
+                          <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left", textOverflow:"ellipsis"}}  value={sheet} label={sheet} />
                         )
                     }):<p></p>}
                   </Tabs>

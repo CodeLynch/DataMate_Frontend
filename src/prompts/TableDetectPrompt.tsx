@@ -25,7 +25,7 @@ type DetectProps = {
     toggleSelect: (status:boolean, sheetIndex:number) => void,
     toggleEmptyDetect: (status:boolean) => void,
     toggleInconsistentDetect: (status:boolean) => void,
-    toggleNormalized:(status:boolean) => void,
+    // toggleNormalized:(status:boolean) => void,
     toggleImportSuccess: (status:boolean) => void,
     tblCount: number,
     fileId: number,
@@ -33,10 +33,10 @@ type DetectProps = {
     sheetdata: object,
     updateEmpty: (sheet:string) => void,
     updateInc: (sheet:string) => void,
-    updateNorm: (sheet:string) => void,
+    // updateNorm: (sheet:string) => void,
     emptySheets: string[],
     incSheets: string[],
-    normSheets: string[],
+    // normSheets: string[],
     reset: () => void,
     updateSData: (data:Object) => void,
     wb: XLSX.WorkBook | null | undefined;
@@ -58,8 +58,7 @@ interface ListItem {
 }
 
 const TableDetectPrompt = ({startLoading, stopLoading, toggleTableDetect, toggleSelect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
-toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb, toggleNormalized,
-normSheets, updateNorm}: DetectProps) => {  
+toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb}: DetectProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -70,10 +69,10 @@ normSheets, updateNorm}: DetectProps) => {
   const [CheckboxList, setCBList] = useState<ListItem[]>([]);
   const [hasEmpty, SetEmpty] = useState(false);
   const [isInconsistent, SetInconsistent] = useState(false);
-  const [isNotNormalized, setNotNormalized] = useState(false);
+  // const [isNotNormalized, setNotNormalized] = useState(false);
   const [isCheckDone, setCheckDone] = useState(false);
-
   const nav = useNavigate();
+  const TableHeight = (vsheets.length * 50).toString() + "px";
 
 
   function delete_ws(wb:XLSX.WorkBook, wsname:string) {
@@ -136,7 +135,6 @@ normSheets, updateNorm}: DetectProps) => {
       }
       return false;
     }
-
   }
 
   
@@ -190,16 +188,17 @@ useEffect(()=>{
           toggleTableDetect(false);
           toggleInconsistentDetect(true);
           console.log("Inconsistency triggered");
-        }else if(isNotNormalized){
-          toggleTableDetect(false);
-          toggleNormalized(true);
-          console.log("Normalized Prompt triggered");
         }
+        //open normalize table prompt
+        // else if(isNotNormalized){
+        //   toggleTableDetect(false);
+        //   toggleNormalized(true);
+        //   console.log("Normalized Prompt triggered");
+        // }
         else{
           toggleTableDetect(false);
           toggleImportSuccess(true);
           console.log("Success Triggered")
-          console.log("Cause isNotNormalized:", isNotNormalized)
         }
   }
     
@@ -279,117 +278,119 @@ useEffect(()=>{
     return false; // No inconsistent values found in any column
   }
 
+  // Normalization Functions ------------------------------------------------------------------------------
   //function for checking if a table has a primary key
-  function hasPossiblePrimaryKey(table: TableRow[]): boolean {
-    if (table.length === 0) {
-      return false; // The table is empty
-    }
+  // function hasPossiblePrimaryKey(table: TableRow[]): boolean {
+  //   if (table.length === 0) {
+  //     return false; // The table is empty
+  //   }
   
-    let isFirstIteration = true;
-    const firstColumnValues: Set<number> = new Set();
+  //   let isFirstIteration = true;
+  //   const firstColumnValues: Set<number> = new Set();
 
-    for (const row of table) {
-      if (isFirstIteration) {
-        isFirstIteration = false;
-        continue; // Skip the first iteration (headers)
-      }
+  //   for (const row of table) {
+  //     if (isFirstIteration) {
+  //       isFirstIteration = false;
+  //       continue; // Skip the first iteration (headers)
+  //     }
 
-      const firstColumnValue = row[Object.keys(row)[0]]; // Get the value of the first column in each row
+  //     const firstColumnValue = row[Object.keys(row)[0]]; // Get the value of the first column in each row
 
-      if (typeof firstColumnValue !== "number" || firstColumnValues.has(firstColumnValue)) {
-        return false; // The first column has a non-numeric value or a duplicate value
-      }
+  //     if (typeof firstColumnValue !== "number" || firstColumnValues.has(firstColumnValue)) {
+  //       return false; // The first column has a non-numeric value or a duplicate value
+  //     }
 
-      firstColumnValues.add(firstColumnValue);
-    }
+  //     firstColumnValues.add(firstColumnValue);
+  //   }
     
   
   
-    return true; // The first column has unique numeric values
-  }
+  //   return true; // The first column has unique numeric values
+  // }
 
   //getting a string array of a column name and its dependencies
-function getColumnDependencies(columnName: string, table: (string | number)[][], doneSearching: string[]): string[] {
-  const columnIndex = table[0].indexOf(columnName);
+//   function getColumnDependencies(columnName: string, table: (string | number)[][], doneSearching: string[]): string[] {
+//   const columnIndex = table[0].indexOf(columnName);
 
-  if (columnIndex === -1) {
-    return [];
-  }
+//   if (columnIndex === -1) {
+//     return [];
+//   }
 
-  const numRows = table.length;
-  const dependencies: string[] = [columnName];
+//   const numRows = table.length;
+//   const dependencies: string[] = [columnName];
 
-  for (let col = 1; col < table[0].length; col++) {
-    if (col !== columnIndex) {
-      const otherColumn = table[0][col];
-      let isDependency = true;
+//   for (let col = 1; col < table[0].length; col++) {
+//     if (col !== columnIndex) {
+//       const otherColumn = table[0][col];
+//       let isDependency = true;
 
-      for (let row = 1; row < numRows; row++) {
-        const targetValue = table[row][columnIndex];
-        const otherValue = table[row][col];
+//       for (let row = 1; row < numRows; row++) {
+//         const targetValue = table[row][columnIndex];
+//         const otherValue = table[row][col];
 
-        if (!hasCorrespondingValue(table, columnName, otherColumn as string, targetValue, otherValue)) {
-          isDependency = false;
-          break;
-        }
-      }
+//         if (!hasCorrespondingValue(table, columnName, otherColumn as string, targetValue, otherValue)) {
+//           isDependency = false;
+//           break;
+//         }
+//       }
 
-      if (isDependency && !doneSearching.includes(otherColumn as string)) {
-        dependencies.push(otherColumn as string);
-      }
-    }
-  }
+//       if (isDependency && !doneSearching.includes(otherColumn as string)) {
+//         dependencies.push(otherColumn as string);
+//       }
+//     }
+//   }
 
-  return dependencies;
-}
+//   return dependencies;
+// }
 
-function hasCorrespondingValue(table: (string | number)[][], columnName1: string, columnName2: string, targetValue: any, currentValue: any): boolean {
-  const columnIndex1 = table[0].indexOf(columnName1);
-  const columnIndex2 = table[0].indexOf(columnName2);
+// function hasCorrespondingValue(table: (string | number)[][], columnName1: string, columnName2: string, targetValue: any, currentValue: any): boolean {
+//   const columnIndex1 = table[0].indexOf(columnName1);
+//   const columnIndex2 = table[0].indexOf(columnName2);
 
-  if (columnIndex1 === -1 || columnIndex2 === -1) {
-    return false;
-  }
+//   if (columnIndex1 === -1 || columnIndex2 === -1) {
+//     return false;
+//   }
 
-  for (let row = 1; row < table.length; row++) {
-    if (table[row][columnIndex1] === targetValue && table[row][columnIndex2] !== currentValue) {
-      return false;
-    }
-  }
+//   for (let row = 1; row < table.length; row++) {
+//     if (table[row][columnIndex1] === targetValue && table[row][columnIndex2] !== currentValue) {
+//       return false;
+//     }
+//   }
 
-  return true;
-}
+//   return true;
+// }
 
-  function canBeNormalized(rows: (string | number)[][]): boolean {
-    let doNotSearch:string[] = [];
-    const numCols = rows[0].length;
-    let res = false;
+  // function canBeNormalized(rows: (string | number)[][]): boolean {
+  //   let doNotSearch:string[] = [];
+  //   const numCols = rows[0].length;
+  //   let res = false;
 
-    for (let col = 0; col < numCols; col++) {
-      const columnName = rows[0][col];
-      console.log(`Column Name: ${columnName}`);
-      if(!doNotSearch.includes(columnName as string)){
-        console.log(columnName," not found in do not search");
-        let depArr = getColumnDependencies(columnName as string, rows, doNotSearch);
-        console.log("Dependency array: ", depArr);
-        console.log("total cols left:", numCols - col)
-        if(depArr.length > 1 && depArr.length !== numCols - col){
-          for(const col in depArr){
-            //inserting the column and the dependencies into do not search
-            doNotSearch.push(depArr[col]); 
-          } 
-          //concat the columns in the depArr as table
-          console.log("depArr", depArr)
-          res = true;
-          break;
-        }else{
-          doNotSearch.push(columnName as string);
-        }
-      }
-    }
+  //   for (let col = 0; col < numCols; col++) {
+  //     const columnName = rows[0][col];
+  //     console.log(`Column Name: ${columnName}`);
+  //     if(!doNotSearch.includes(columnName as string)){
+  //       console.log(columnName," not found in do not search");
+  //       let depArr = getColumnDependencies(columnName as string, rows, doNotSearch);
+  //       console.log("Dependency array: ", depArr);
+  //       console.log("total cols left:", numCols - col)
+  //       if(depArr.length > 1 && depArr.length !== numCols - col){
+  //         for(const col in depArr){
+  //           //inserting the column and the dependencies into do not search
+  //           doNotSearch.push(depArr[col]); 
+  //         } 
+  //         //concat the columns in the depArr as table
+  //         console.log("depArr", depArr)
+  //         res = true;
+  //         break;
+  //       }else{
+  //         doNotSearch.push(columnName as string);
+  //       }
+  //     }
+  //   }
 
-    return res;
-  }
+  //   return res;
+  // }
+  // ------------------------------------------------------------------------------------------------
 
 
   function togglePrompts(){
@@ -410,17 +411,19 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
           SetInconsistent(true);
         }
       }
-      console.log("result: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as [][]));
-      console.log("has possible pk: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]), "can be normalized: ", canBeNormalized(sd[vsheets[s]] as [][]));
-      //if block for normalized prompt
-      if(!(hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as [][]))){
-        console.log("this happened");
-        if(!normSheets.includes(vsheets[s])){
-          updateNorm(vsheets[s]);
-          setNotNormalized(true);
-        }
+
+      //checking if can be normalized
+      // console.log("result: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as [][]));
+      // console.log("has possible pk: ", hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]), "can be normalized: ", canBeNormalized(sd[vsheets[s]] as [][]));
+      // //if block for normalized prompt
+      // if(!(hasPossiblePrimaryKey(sd[vsheets[s]] as TableRow[]) && !canBeNormalized(sd[vsheets[s]] as [][]))){
+      //   console.log("this happened");
+      //   if(!normSheets.includes(vsheets[s])){
+      //     updateNorm(vsheets[s]);
+      //     setNotNormalized(true);
+      //   }
         
-      }
+      // }
     }
      setCheckDone(true);    
   }
@@ -461,10 +464,10 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
           <p style={{fontSize:"32px", padding:0, margin:0}}>DataMate has detected <b>{tblCount}</b> possible table</p>}
           <p style={{fontSize:"16px", paddingTop:'1em', paddingLeft:0, paddingBottom:'1em', margin:0}}>Please check the tables you want to include for processing.</p>
           <div style={{display:'flex', flexDirection:'row'}}>
-            <div style={{width: '85%'}}>
+            <div style={{width: '80%'}}>
               {/* for table preview */}
-              {HeaderArr !== undefined && BodyArr !== undefined?  <>
-                          <Paper elevation={0} sx={{ maxHeight:'270px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
+              {HeaderArr !== undefined && BodyArr !== undefined? <>
+                          <Paper elevation={0} sx={{ height: vsheets.length > 3? {TableHeight}:"150px", overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
                           <TableContainer>
                               <Table stickyHeader aria-label="sticky table">
                               <TableHead >
@@ -514,17 +517,7 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
               <><CircularProgress size="10rem" 
               color="success" /></>}
             </div>
-            <div style={{width: '15%', display:"flex", flexDirection:"row"}} >
-              <div style={{display:"flex", flexDirection:"column", width:"25%"}}>
-              {/* for checkbox list*/ }{
-                CheckboxList.length !== 0 && vsheets.length > 0? vsheets.map((sheet,i) =>{
-                  return(
-                    <Checkbox sx={{paddingTop:"15px", paddingBottom:"9px", borderRadius:0 ,backgroundColor:currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC',
-                    "&:hover":{backgroundColor: currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC'}}} checked={CheckboxList[i].checked} onChange={()=>{toggleCheckbox(i);}} />                  
-                  )
-              }):<></>
-              }
-              </div>
+            <div style={{width: '20%', display:"flex", flexDirection:"row", justifyContent:"flex-start"}} >
               {/* for table tabs */}
               <Tabs
                 orientation="vertical"
@@ -532,14 +525,33 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
                 onChange={changeSheet}
                 TabIndicatorProps={{sx:{backgroundColor:'rgba(0,0,0,0)'}}}
                 sx={{
+                display:"flex", 
+                justifyContent:"flex-start",
+                width:'100%',
                 "& button":{borderRadius: 0, color: 'black', backgroundColor: '#DCF1EC'},
                 "& button.Mui-selected":{backgroundColor: '#71C887', color: 'white'},
                 }}
                 aria-label="secondary tabs example"
                 >
-                {vsheets.length > 0? vsheets.map((sheet,i) =>{
+                {vsheets.length > 0 && CheckboxList.length !== 0? vsheets.map((sheet,i) =>{
                     return(
-                          <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left"}}  value={sheet} label={sheet} />                     
+                        <Tab 
+                          sx={{display:"flex", backgroundColor:"#D9D9D9", padding:"5px", maxHeight:"20px", justifyContent:"flex-start"}} 
+                          value={sheet} 
+                          label={
+                            <span style={{display:"flex", flexDirection:"row", maxHeight:"20px", marginTop:"5px", width:"100%"}}>
+                              <div style={{marginRight:"10px"}}>                        
+                                <Checkbox sx={{margin:0, padding:0, backgroundColor:currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC',
+                                "&:hover":{backgroundColor: currentSheet === CheckboxList[i].label? '#71C887': '#DCF1EC'}}} checked={CheckboxList[i].checked} onChange={()=>{toggleCheckbox(i);}} />  
+                              </div>
+                              <div style={{marginLeft:"5px"}}>
+                                <p style={{margin:0, fontSize:"16px", textAlign:"left",display:"flex", alignItems:"center", overflow:"hidden", textOverflow:"ellipsis"}}>
+                                  {sheet}        
+                                </p>
+                              </div>
+                            </span> 
+                          }/>
+                          // <Tab disableRipple sx={{backgroundColor:"#D9D9D9", marginLeft:0, paddingLeft:0, textAlign:"left", textOverflow:"ellipsis"}}  value={sheet} label={sheet} />                     
                     )
                 }):<></>}
               </Tabs>

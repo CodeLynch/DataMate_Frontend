@@ -4,7 +4,7 @@ class FileService {
     
 
     //upload by user
-    async uploadFile(file: File, userId: number) {
+    async uploadFile(file: File, userId: string) {
         let fd = new FormData();
         fd.append('file', file);
         fd.append('userId', userId.toString());
