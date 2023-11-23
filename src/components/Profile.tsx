@@ -3,6 +3,7 @@ import {
   Avatar,
   Box,
   Button,
+  CircularProgress,
   Container,
   Divider,
   FormControl,
@@ -33,6 +34,7 @@ export default function EditProfile() {
   const navigate = useNavigate();
   const para = {id:useSelector((state: RootState) => state.auth.userId)};
   const [userImage, setUserImage] = useState<string | undefined>(undefined);
+  const [isLoading, setLoading] = useState(true);
   //const {user} = useContext(UserContext) as UserContextType;
   const dispatch = useDispatch();
 
@@ -68,9 +70,13 @@ export default function EditProfile() {
   } = data;
 
   useEffect(() => {
+    if(data.firstName === ""){
+      setLoading(true);
+    }
     if (para.id) {
       UserService.getUserById(para.id)
         .then((response) => {
+          setLoading(false);
           setData(response.data);
           setUserImage(response.data.userImage);
         })
@@ -89,12 +95,16 @@ export default function EditProfile() {
       }}
     >
       <Stack direction="row" justifyContent="center" alignItems="center" width= "100%" height= "100%">
+      {isLoading? 
+          <><CircularProgress size="10rem" 
+          color="success" /></>:<> 
         <Grid
           container
           direction="row"
           paddingTop="26px"
           marginBottom="2px"
         >
+          
           <Box
             sx={{
               backgroundColor: "white",
@@ -190,8 +200,8 @@ export default function EditProfile() {
               </Stack>
             </Grid>
           </Box>
+          
         </Grid>
-
         <Grid container>
           <Grid container justifyContent="center" alignItems="center">
             <Box
@@ -331,6 +341,7 @@ export default function EditProfile() {
             </Box>
           </Grid>
         </Grid>
+        </>}
       </Stack>
     </div>
   );

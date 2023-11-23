@@ -40,6 +40,8 @@ type DetectProps = {
     reset: () => void,
     updateSData: (data:Object) => void,
     wb: XLSX.WorkBook | null | undefined;
+    startLoading: () => void,
+    stopLoading: () => void,
   }
 
 interface WorkbookData {
@@ -55,7 +57,7 @@ interface ListItem {
   checked: boolean;
 }
 
-const TableDetectPrompt = ({toggleTableDetect, toggleSelect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
+const TableDetectPrompt = ({startLoading, stopLoading, toggleTableDetect, toggleSelect, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
 toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb, toggleNormalized,
 normSheets, updateNorm}: DetectProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
@@ -219,7 +221,9 @@ useEffect(()=>{
   }
 
   const cancelProcess = () => {
+      startLoading();
       FileService.deleteFile(fileId).then((res)=>{
+        stopLoading();
         toggleTableDetect(false);
         reset();
         nav("/");
@@ -459,7 +463,7 @@ function hasCorrespondingValue(table: (string | number)[][], columnName1: string
           <div style={{display:'flex', flexDirection:'row'}}>
             <div style={{width: '85%'}}>
               {/* for table preview */}
-              {HeaderArr !== undefined && BodyArr !== undefined? <>
+              {HeaderArr !== undefined && BodyArr !== undefined?  <>
                           <Paper elevation={0} sx={{ maxHeight:'270px', overflow: 'auto', border:"5px solid #71C887", borderRadius: 0}}>
                           <TableContainer>
                               <Table stickyHeader aria-label="sticky table">

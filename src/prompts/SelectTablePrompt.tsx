@@ -44,6 +44,8 @@ type SelectProps = {
     sheetIndex: number,
     updateNorm: (sheet:string) => void,
     normSheets: string[],
+    startLoading: () => void,
+    stopLoading: () => void,
   }
 
 interface WorkbookData {
@@ -70,7 +72,7 @@ type TableMapRow = Record<string, string>;
 type TableMap = TableMapRow[];
 type SelectedCell = Record<string, boolean>;
 
-const SelectTablePrompt = ({toggleSelect, toggleTableDetect, toggleNormalized, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
+const SelectTablePrompt = ({startLoading, stopLoading, toggleSelect, toggleTableDetect, toggleNormalized, tblCount, fileId, vsheets, sheetdata, emptySheets, incSheets,
     toggleEmptyDetect, toggleInconsistentDetect, toggleImportSuccess, updateEmpty, updateInc, reset, updateSData, wb,
   sheetIndex, updateNorm, normSheets}: SelectProps) => {  
     const [currentSheet, setCurrentSheet] = useState("");
@@ -329,15 +331,16 @@ function createColumns(strings: string[]): HeaderConfig[] {
 
   
   const cancelProcess = () => {
+      startLoading()
       FileService.deleteFile(fileId).then((res)=>{
         toggleSelect(false,0);
         setCSheets([]);
         reset();
+        stopLoading()
         nav("/");
       }).catch((err)=>{
         console.log(err);
-      })
-      
+      })   
   }
   //function for detecting empty values
   function hasEmptyValues(table: TableRow[]): boolean {

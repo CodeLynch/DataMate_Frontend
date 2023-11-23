@@ -23,6 +23,8 @@ type SuccessProps = {
     reset: () => void,
     workbook: XLSX.WorkBook | null | undefined,
     sdata: Object,
+    startLoading: () => void,
+    stopLoading: () => void,
   }
 
 interface WorkbookData {
@@ -33,15 +35,17 @@ interface TableRow {
     [key: string]: string | number;
 }
 
-const SuccessPrompt = ({fileId, toggleImportSuccess, reset, workbook, sdata}: SuccessProps) => {  
+const SuccessPrompt = ({startLoading, stopLoading, fileId, toggleImportSuccess, reset, workbook, sdata}: SuccessProps) => {  
   const nav = useNavigate();
   const [fileName, setFName] = useState("");
 
   useEffect(()=>{
+    startLoading()
     console.log("Sheet Data Now: ",sdata)
     FileService.getFile(fileId)
     .then((res)=>{
       setFName(res.fileName);
+      stopLoading();
     })
     .catch(err =>{
       console.log(err);
@@ -63,6 +67,7 @@ function s2ab(s:String) {
 }
 
   function okFunction(){
+    startLoading();
     console.log(workbook);
     if(workbook !== undefined && workbook !== null){
       var wopts:XLSX.WritingOptions = { bookType:getFileType(fileName)? 'xlsx': getFileType(fileName) as XLSX.BookType, type:'binary' };
@@ -72,6 +77,7 @@ function s2ab(s:String) {
     .then((res)=>{
       reset();
       toggleImportSuccess(false);
+      stopLoading()
       nav('/file',{
                 state:{
                   fileid: fileId

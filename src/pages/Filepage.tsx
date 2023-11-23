@@ -21,10 +21,11 @@ import Navbar from "../components/Navbar";
 
 type FilePageProps = {
     stopLoading: () => void,
+    startLoading: () => void,
   }
 
 
-export default function Filepage({stopLoading}:FilePageProps) {
+export default function Filepage({startLoading, stopLoading}:FilePageProps) {
     const loc = useLocation();
     const nav = useNavigate();
     const fileId = loc.state.fileid;
@@ -96,11 +97,13 @@ export default function Filepage({stopLoading}:FilePageProps) {
     }
 
     const downloadFile = async () =>{
+        startLoading();
         axios({
             url: "http://localhost:8080/downloadFile/" + fileId,
             method: 'GET',
             responseType: 'arraybuffer', 
         }).then(async (response) => {
+            stopLoading();
             const blobData :Blob = new Blob([response.data], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml;charset=UTF-8"});
             const href = URL.createObjectURL(blobData);
         

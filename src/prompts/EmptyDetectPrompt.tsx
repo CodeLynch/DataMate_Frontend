@@ -35,6 +35,8 @@ type EmptyProps = {
     reset: () => void,
     updateSData: (data:Object) => void,
     normSheets:string[];
+    startLoading: () => void,
+    stopLoading: () => void,
   }
 
 interface WorkbookData {
@@ -45,7 +47,7 @@ interface TableRow {
     [key: string]: string | number;
 }
 
-const EmptyDetectPrompt = ({toggleEmptyDetect, fileId, toggleImportSuccess, toggleInconsistentDetect, workbook, normSheets, toggleNormalized, sheets, vsheets, emptylist, sheetdata, reset, inclist, updateSData}: EmptyProps) => {  
+const EmptyDetectPrompt = ({startLoading, stopLoading, toggleEmptyDetect, fileId, toggleImportSuccess, toggleInconsistentDetect, workbook, normSheets, toggleNormalized, sheets, vsheets, emptylist, sheetdata, reset, inclist, updateSData}: EmptyProps) => {  
   const [currentSheet, setCurrentSheet] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -144,9 +146,11 @@ useEffect(()=>{
   }
   
   const cancelProcess = () => {
+    startLoading();
       FileService.deleteFile(fileId).then((res)=>{
         toggleEmptyDetect(false);
         reset();
+        stopLoading();
         nav("/");
       }).catch((err)=>{
         console.log(err);

@@ -8,15 +8,19 @@ type NoTableProps = {
     toggleNoTable: (status:boolean) => void,
     fileId: number,
     reset: () => void,
+    startLoading: () => void,
+    stopLoading: () => void,
   }
 
-const NoTablesDetectPrompt = ({fileId, toggleNoTable, reset}: NoTableProps) => {  
+const NoTablesDetectPrompt = ({startLoading, stopLoading, fileId, toggleNoTable, reset}: NoTableProps) => {  
   const nav = useNavigate();
 
   function okFunction(){
+    startLoading();
       FileService.deleteFile(fileId).then((res)=>{
         reset();
         toggleNoTable(false);
+        stopLoading();
         nav('/');
       }).catch((err)=>{
         console.log(err);

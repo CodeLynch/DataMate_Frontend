@@ -12,8 +12,11 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import SecureLogin from '../images/seclogin.gif';
 
-
-export default function Login(){
+type LoginProps = {
+  stopLoading: () => void,
+  startLoading: () => void,
+}
+export default function Login({startLoading, stopLoading}:LoginProps){
 
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
@@ -72,6 +75,7 @@ export default function Login(){
         setUsernameError(null);
         setPasswordError(null);
       
+        startLoading();
         UserService.getUserByUsernameDetails(loginData.username)
           .then((res) => {
             if (res.data !== "") {
@@ -82,6 +86,7 @@ export default function Login(){
                       dispatch(loginSuccess(res.data.userId));
                       console.log('success')
                       console.log(loginSuccess)
+                      stopLoading()
                       navigate('/', { replace: true });
                     } else {
                       setUsernameError("User does not exist.");

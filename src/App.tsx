@@ -332,6 +332,8 @@ function App() {
                         >
                           <div>
                             <TableDetectPrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleNormalized={toggleNormalized}
                               toggleTableDetect={toggleTableDetect}
                               toggleSelect={toggleSelect}
@@ -366,6 +368,8 @@ function App() {
                         >
                           <div>
                             <SelectTablePrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleNormalized={toggleNormalized}
                               toggleSelect={toggleSelect}
                               toggleTableDetect={toggleTableDetect}
@@ -397,6 +401,8 @@ function App() {
                         >
                           <div>
                             <NoTablesDetectPrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleNoTable={toggleUpload}
                               fileId={uploadedFileId}
                               reset={resetVariables}
@@ -434,6 +440,8 @@ function App() {
                         >
                           <div>
                             <EmptyDetectPrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleNormalized={toggleNormalized}
                               toggleEmptyDetect={toggleEmptyDetect}
                               toggleInconsistentDetect={toggleInconsistent}
@@ -460,6 +468,8 @@ function App() {
                         >
                           <div>
                             <InconsistentDetectPrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleNormalized={toggleNormalized}
                               toggleInconsistentDetect={toggleInconsistent}
                               toggleImportSuccess={toggleImportSuccess}
@@ -484,6 +494,8 @@ function App() {
                         >
                           <div>
                             <SuccessPrompt
+                              startLoading={StartLoading}
+                              stopLoading={StopLoading}
                               toggleImportSuccess={toggleImportSuccess}
                               fileId={uploadedFileId}
                               reset={resetVariables}
@@ -539,14 +551,14 @@ function App() {
                     path="/file"
                     element={
                       <>
-                        <Filepage stopLoading={StopLoading} />
+                        <Filepage startLoading={StartLoading} stopLoading={StopLoading} />
                       </>
                     }
                   />
                   <Route path="/template/" element={<SpecificTemplatePage />} />
                   <Route
                     path="/file/"
-                    element={<Filepage stopLoading={StopLoading} />}
+                    element={<Filepage startLoading={StartLoading} stopLoading={StopLoading} />}
                   />
                   <Route path="/convert" element={<ConvertFilePage />} />
                   <Route path="/templates" element={<TemplatesPage />} />
@@ -587,11 +599,11 @@ function App() {
                   {/* Public pages */}
                   <Route
                     path="/login"
-                    element={isLoggedIn ? <Navigate to="/" /> : <Login />}
+                    element={isLoggedIn ? <Navigate to="/" /> : <Login stopLoading={StopLoading} startLoading={StartLoading}/>}
                   />
                   <Route
                     path="/registration"
-                    element={<Registration />}
+                    element={<Registration startLoading={StartLoading} stopLoading={StopLoading} />}
                   ></Route>
                   <Route
                     path="/forgot-password"
