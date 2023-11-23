@@ -71,6 +71,9 @@ export default function EditProfile() {
   } = data;
 
   useEffect(() => {
+    if(data.firstName === ""){
+      setLoading(true);
+    }
     const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
     const decryptedUserId = CryptoJS.AES.decrypt(para.id, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
     if (decryptedUserId) {
@@ -78,6 +81,7 @@ export default function EditProfile() {
         .then((response) => {
           setData(response.data);
           setUserImage(response.data.userImage);
+          setLoading(false);
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
