@@ -343,7 +343,6 @@ function App() {
                             <TableDetectPrompt
                               startLoading={StartLoading}
                               stopLoading={StopLoading}
-                              toggleNormalized={toggleNormalized}
                               toggleTableDetect={toggleTableDetect}
                               toggleSelect={toggleSelect}
                               toggleEmptyDetect={toggleEmptyDetect}
@@ -377,7 +376,6 @@ function App() {
                             <SelectTablePrompt
                               startLoading={StartLoading}
                               stopLoading={StopLoading}
-                              toggleNormalized={toggleNormalized}
                               toggleSelect={toggleSelect}
                               toggleTableDetect={toggleTableDetect}
                               toggleEmptyDetect={toggleEmptyDetect}
@@ -427,7 +425,6 @@ function App() {
                             <EmptyDetectPrompt
                               startLoading={StartLoading}
                               stopLoading={StopLoading}
-                              toggleNormalized={toggleNormalized}
                               toggleEmptyDetect={toggleEmptyDetect}
                               toggleInconsistentDetect={toggleInconsistent}
                               toggleImportSuccess={toggleImportSuccess}
@@ -455,7 +452,6 @@ function App() {
                             <InconsistentDetectPrompt
                               startLoading={StartLoading}
                               stopLoading={StopLoading}
-                              toggleNormalized={toggleNormalized}
                               toggleInconsistentDetect={toggleInconsistent}
                               toggleImportSuccess={toggleImportSuccess}
                               fileId={uploadedFileId}
@@ -584,7 +580,7 @@ function App() {
                       path="file"
                       element={
                         <PrivateRoute>
-                          <Filepage stopLoading={StopLoading} />
+                          <Filepage startLoading={StartLoading} stopLoading={StopLoading} />
                         </PrivateRoute>
                       }
                     />
@@ -688,7 +684,7 @@ function App() {
                   />
                   <Route
                     path="/registration"
-                    element={<Registration />}
+                    element={<Registration stopLoading={StopLoading} startLoading={StartLoading} />}
                   ></Route>
                 </Routes>
               </Box>
