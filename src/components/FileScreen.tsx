@@ -8,6 +8,7 @@ import {
   Stack,
   IconButton,
   Link,
+  CircularProgress,
 } from "@mui/material";
 import Popover from "@mui/material/Popover";
 import List from "@mui/material/List";
@@ -57,6 +58,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   const anchorRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const userId = useSelector((state: RootState) => state.auth.userId);
   const nav = useNavigate();
 
@@ -212,12 +214,12 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   useEffect(() => {
     const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
     const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
-
     if (decryptedUserId ) {
       FileService.getFilesByUserId(decryptedUserId)
         .then((res) => {
           console.log(res);
           setFiles(res);
+          setLoading(false);
         })
         .catch((err) => {
           console.log(err);
@@ -612,7 +614,9 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
           justifyContent: "center",
         }}
       >
-        {files.length <= 0? 
+        {isLoading?
+        <><CircularProgress size="10rem" color="success" /></>:
+        files.length <= 0? 
         <div style={{ textAlign: "center", marginTop: "20px" }}>
         No files uploaded.
         </div>:

@@ -9,6 +9,7 @@ import {
   IconButton,
   Link,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import Popover from "@mui/material/Popover";
 import List from "@mui/material/List";
@@ -67,6 +68,7 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
   const [showUpload, setShowUpload] = useState(false);
   const userId = useSelector((state: RootState) => state.auth.userId);
   const nav = useNavigate();
+  const [isLoading, setLoading] = useState(true);
 
   // const itemsPerRow = Math.min(searchResult.length, 3); // Maximum 3 items per row
   const itemsPerRow = Math.min(databases?.length, 3);
@@ -139,12 +141,13 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
 
   useEffect(() => {
     const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
-    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);  
     if (decryptedUserId) {
       DatabaseService.getDBsByUser(decryptedUserId)
         .then((res) => {
           console.log(res);
           setDatabases(res);
+          setLoading(false);
         })
         .catch((err) => {
           console.log(err);
@@ -544,6 +547,13 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
           justifyContent: "center",
         }}
       >
+        {isLoading? <>
+          <CircularProgress size="10rem" color="success" />
+          </>:
+        databases.length <= 0?
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+        No databases created.
+        </div>:
         <Grid
           container
           spacing={{ sm: 3, md: 2, lg: -10, xl: -50 }}
@@ -716,7 +726,7 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
               </Grid>
             </Grid>
           ))}
-        </Grid>
+        </Grid>}
       </section>
       {searchResult.length === 0 && (
         <div style={{ textAlign: "center", marginTop: "20px" }}>
