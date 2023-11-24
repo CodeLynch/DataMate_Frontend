@@ -199,10 +199,12 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
     const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
 
     if (decryptedUserId) {
+      setLoading(true);
       DatabaseService.getDBsByUser(decryptedUserId)
         .then((res) => {
           console.log(res);
           setDatabase(res);
+          setLoading(false);
         })
         .catch((err) => {
           console.log(err);

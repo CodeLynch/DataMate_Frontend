@@ -215,6 +215,7 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
     const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
     if (decryptedUserId ) {
+      setLoading(true);
       FileService.getFilesByUserId(decryptedUserId)
         .then((res) => {
           console.log(res);

@@ -158,7 +158,7 @@ export default function EditProfile() {
                     {
                     isLoading?
                     <Box height="100vh" justifyContent="center"
-                    alignItems="center" paddingTop={280}>
+                    alignItems="center" paddingTop={100}>
                     <CircularProgress size="10rem" color="success" />
                     </Box>:    
                     <Box sx={{ backgroundColor: 'white', margin: {xs: '30px'}, padding: {xs: '25px 30px 25px 30px', md: '25px 35px 25px 35px'}, borderRadius: '20px', boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)' }}>
