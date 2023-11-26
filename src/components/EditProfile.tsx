@@ -155,11 +155,9 @@ export default function EditProfile() {
             <Topbar open={open} handleDrawerOpen={toggleDrawerOpen} />
             <Grid component="form" onSubmit={putUser}>
                 <Grid container justifyContent="center" alignItems="center" mt={4.5}>
-                    {
-                    isLoading?
-                    <Box height="100vh" justifyContent="center"
-                    alignItems="center" paddingTop={100}>
-                    <CircularProgress size="10rem" color="success" />
+                    { isLoading?
+                    <Box height="100vh" justifyContent="center" alignItems="center" mt={35}>
+                        <CircularProgress size="6rem" color="success" />
                     </Box>:    
                     <Box sx={{ backgroundColor: 'white', margin: {xs: '30px'}, padding: {xs: '25px 30px 25px 30px', md: '25px 35px 25px 35px'}, borderRadius: '20px', boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)' }}>
                         <Stack direction='column' divider={<Divider orientation="horizontal" flexItem sx={{ borderBottomWidth: '2px', borderColor: '#374248' }} />} spacing={2}>
