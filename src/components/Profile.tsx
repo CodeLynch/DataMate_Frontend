@@ -114,7 +114,7 @@ export default function EditProfile() {
           alignItems="center"
           width="100%"
           height="100%"
-          marginTop="10px"
+          marginTop="72px"
         >
           
         <Grid container direction="row" paddingTop="26px" marginBottom="2px" >
@@ -122,9 +122,6 @@ export default function EditProfile() {
               sx={{
                 backgroundColor: "white",
                 margin: { xs: "115px"  },
-                // padding: {
-                //   md: "145px 105px 80px 55px",
-                // },
                 borderRadius: "45px",
                 boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
                 marginLeft: {md: "200px"}
@@ -153,7 +150,7 @@ export default function EditProfile() {
                       borderRadius: "50%",
                       position: "absolute",
                       top: 65,
-                      marginTop: "10px"
+                      marginTop: "50px"
                     }}
                   />
                   {/* <IconButton sx={{ backgroundColor: "#71C887" }}>
