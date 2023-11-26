@@ -277,7 +277,7 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
                 />
               </Grid>
 
-              {isLargeScreen && (
+              {/* {isLargeScreen && (
                 <Link underline="none" href="/deleted-files" color={"black"}>
                   <IconButton
                     style={{
@@ -297,7 +297,7 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
                     <span style={{ color: "black" }}>Bin</span>
                   </IconButton>
                 </Link>
-              )}
+              )} */}
               {/* {isLargeScreen && (
                 <Link underline="none" href="/" color={"black"}>
                   <IconButton
@@ -441,7 +441,7 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
                       alignItems: "flex-start",
                     }}
                   >
-                    <IconButton
+                    {/* <IconButton
                       style={{
                         fontSize: "20px",
                       }}
@@ -456,7 +456,7 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
                         }}
                       />
                       <span style={{ color: "black" }}>Bin</span>
-                    </IconButton>
+                    </IconButton> */}
                     {/* <Link underline="none" href="/" color={"black"}>
                       <IconButton
                         style={{

@@ -27,9 +27,10 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  CircularProgress,
 } from "@mui/material";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import InputAdornment from "@mui/material/InputAdornment";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { DataGrid, GridColDef, enUS } from "@mui/x-data-grid";
@@ -41,9 +42,8 @@ import Topbar from "./Topbar";
 import Navbar from "./Navbar";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
-import CloseIcon from '@mui/icons-material/Close';
-import CryptoJS from 'crypto-js';
-
+import CloseIcon from "@mui/icons-material/Close";
+import CryptoJS from "crypto-js";
 
 export default function DeletedFiles() {
   const [isLabelShrunk, setIsLabelShrunk] = useState(false);
@@ -59,6 +59,8 @@ export default function DeletedFiles() {
   const [deletedFiles, setDeletedFiles] = useState<FileEntity[]>([]);
   const [filteredFiles, setFilteredFiles] = useState<FileEntity[]>([]);
   const nav = useNavigate();
+  const [isLoading, setLoading] = useState(true);
+
   const userId = useSelector((state: RootState) => state.auth.userId);
   const dispatch = useDispatch();
 
@@ -66,7 +68,6 @@ export default function DeletedFiles() {
     ...enUS,
     noRowsLabel: "No files",
   };
-
 
   const theme = useTheme();
   const isNotXsScreen = useMediaQuery(theme.breakpoints.up("md"));
@@ -91,8 +92,12 @@ export default function DeletedFiles() {
 
   useEffect(() => {
     const fetchDeletedFiles = async () => {
-      const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
-      const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+      const ENCRYPTION_KEY =
+        process.env.REACT_APP_ENCRYPTION_KEY || "DefaultKey";
+      const decryptedUserId = CryptoJS.AES.decrypt(
+        userId,
+        ENCRYPTION_KEY
+      ).toString(CryptoJS.enc.Utf8);
       try {
         const files = await FileService.getDeletedFilesById(decryptedUserId);
         setDeletedFiles(files);
@@ -104,14 +109,13 @@ export default function DeletedFiles() {
     fetchDeletedFiles();
   }, [userId]);
 
- // hook for search function
+  // hook for search function
   useEffect(() => {
     const filteredFiles = deletedFiles.filter((file) =>
       file.fileName.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredFiles(filteredFiles);
   }, [searchQuery, filteredFiles]);
-  
 
   const handleCheckboxDeleteChange = (event: any) => {
     const value = event.target.value;
@@ -184,10 +188,10 @@ export default function DeletedFiles() {
         <div>
           <Tooltip title="Restore" arrow>
             <RestoreIcon
-            sx={{ color: "#14847C", cursor: "pointer" }}
-            onClick={() => handleRestore()}
-          />
-        </Tooltip>
+              sx={{ color: "#14847C", cursor: "pointer" }}
+              onClick={() => handleRestore()}
+            />
+          </Tooltip>
         </div>
       ),
       disableColumnMenu: true,
@@ -275,7 +279,6 @@ export default function DeletedFiles() {
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [restoreSuccess, setRestoreSuccess] = useState(false);
 
-
   const handleDelete = async () => {
     if (selectedRows.length > 0) {
       const deleteResults = await Promise.all(
@@ -284,24 +287,24 @@ export default function DeletedFiles() {
           return { id, result };
         })
       );
-  
+
       setDeletedFiles((prevDeletedFiles) =>
         prevDeletedFiles.filter(
           (file) => !selectedRows.includes(file.fileId.toString())
         )
       );
-  
+
       setSelectedRows([]);
       setSelectedOption("");
       setIsDeleteDialogOpen(false);
-  
+
       const successfulDeletion = deleteResults.filter(
         (r) => r.result === "Files deleted successfully"
       );
       const failedDeletion = deleteResults.filter(
         (r) => r.result !== "Files deleted successfully"
       );
-  
+
       if (successfulDeletion) {
         setDeleteSuccess(true);
         setRestoreSuccess(false);
@@ -311,7 +314,7 @@ export default function DeletedFiles() {
       }
     }
   };
-  
+
   const handleRestore = async () => {
     if (selectedRows.length > 0) {
       const restoreResults = await Promise.all(
@@ -320,51 +323,65 @@ export default function DeletedFiles() {
           return { id, result };
         })
       );
-  
+
       const successfulRestorations = restoreResults.filter(
         (r) => r.result === "File restored successfully"
       );
       const failedRestorations = restoreResults.filter(
         (r) => r.result !== "File restored successfully"
       );
-  
+
       if (successfulRestorations.length > 0) {
-        const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
-        const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+        const ENCRYPTION_KEY =
+          process.env.REACT_APP_ENCRYPTION_KEY || "DefaultKey";
+        const decryptedUserId = CryptoJS.AES.decrypt(
+          userId,
+          ENCRYPTION_KEY
+        ).toString(CryptoJS.enc.Utf8);
         const files = await FileService.getDeletedFilesById(decryptedUserId);
         setDeletedFiles(files);
-  
+
         setSelectedRows([]);
         setSelectedOption("");
         setIsRestoreDialogOpen(false);
-  
+
         setRestoreSuccess(true);
         setDeleteSuccess(false);
-      } 
-  
+      }
+
       if (failedRestorations.length > 0) {
         console.error("Failed to restore files:", failedRestorations);
       }
     }
   };
-  
 
   return (
     <div>
-      <Grid container sx={{ mt: 10}} className="wrapper-datagrid">
+      <Grid container sx={{ mt: 10 }} className="wrapper-datagrid">
         <Grid container>
           <Box my={5}>
-              <Stack direction="row">
-                <ArrowBackIosNewIcon sx={{ fontSize: '25px', color: '#374248', cursor: 'pointer', mr: 2, mt: .6 }} onClick={() => { nav('/files'); }}/>
-                <Typography variant="h5" fontWeight="bold" color="#374248">
-                  Deleted Files
-                </Typography>
-              </Stack>
-            </Box>
+            <Stack direction="row">
+              <ArrowBackIosNewIcon
+                sx={{
+                  fontSize: "25px",
+                  color: "#374248",
+                  cursor: "pointer",
+                  mr: 2,
+                  mt: 0.6,
+                }}
+                onClick={() => {
+                  nav("/files");
+                }}
+              />
+              <Typography variant="h5" fontWeight="bold" color="#374248">
+                Deleted Files
+              </Typography>
+            </Stack>
+          </Box>
         </Grid>
         <Stack direction="row">
           <Stack direction="row">
-            <Grid container sx={{ ml: { sm: 4} }}>
+            <Grid container sx={{ ml: { sm: 4 } }}>
               <TextField
                 id="outlined-search"
                 label="Search"
@@ -391,8 +408,8 @@ export default function DeletedFiles() {
                   "& .MuiOutlinedInput-notchedOutline": {
                     border: "none",
                   },
-                  width: {xs: 400, sm: 600, md: 500},
-                  mr: {xs: 3, sm: 5, md: 5},
+                  width: { xs: 400, sm: 600, md: 500 },
+                  mr: { xs: 3, sm: 5, md: 5 },
                 }}
               />
             </Grid>
@@ -401,61 +418,61 @@ export default function DeletedFiles() {
             <Stack direction="row">
               {isNotXsScreen ? (
                 <Grid container direction="row">
-                    <Grid item>
-                      <FormControlLabel
-                        value="delete"
-                        control={<Checkbox />}
-                        label="Delete Forever"
-                        labelPlacement="end"
-                        checked={selectedOption === "delete"}
-                        onChange={handleCheckboxDeleteChange}
-                      />
-                    </Grid>
-                    <Grid item>
-                      <FormControlLabel
-                        value="restore"
-                        control={<Checkbox />}
-                        label="Restore Files"
-                        labelPlacement="end"
-                        checked={selectedOption === "restore"}
-                        onChange={handleCheckboxRestoreChange}
-                      />
-                    </Grid>
-                    <Grid item>
-                     <Collapse in={!!deleteError || !!restoreError}>
-                        <Alert severity="error">
-                          {deleteError || restoreError}
-                          <IconButton
-                            aria-label="close"
-                            color="inherit"
-                            size="small"
-                            onClick={() => {
-                              setDeleteError("");
-                              setRestoreError(""); 
-                            }}
-                          >
-                            <CloseIcon fontSize="inherit"/>
-                          </IconButton>
-                        </Alert>
-                      </Collapse>
-                      <Collapse in={deleteSuccess || restoreSuccess}>
-                        <Alert severity="success">
-                          {deleteSuccess && "Files deleted successfully."}
-                          {restoreSuccess && "Files restored successfully."}
-                          <IconButton
-                            aria-label="close"
-                            color="inherit"
-                            size="small"
-                            onClick={() => {
-                              setDeleteSuccess(false);
-                              setRestoreSuccess(false);
-                            }}
-                          >
-                            <CloseIcon fontSize="inherit" />
-                          </IconButton>
-                        </Alert>
-                      </Collapse>
-                    </Grid>
+                  <Grid item>
+                    <FormControlLabel
+                      value="delete"
+                      control={<Checkbox />}
+                      label="Delete Forever"
+                      labelPlacement="end"
+                      checked={selectedOption === "delete"}
+                      onChange={handleCheckboxDeleteChange}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <FormControlLabel
+                      value="restore"
+                      control={<Checkbox />}
+                      label="Restore Files"
+                      labelPlacement="end"
+                      checked={selectedOption === "restore"}
+                      onChange={handleCheckboxRestoreChange}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <Collapse in={!!deleteError || !!restoreError}>
+                      <Alert severity="error">
+                        {deleteError || restoreError}
+                        <IconButton
+                          aria-label="close"
+                          color="inherit"
+                          size="small"
+                          onClick={() => {
+                            setDeleteError("");
+                            setRestoreError("");
+                          }}
+                        >
+                          <CloseIcon fontSize="inherit" />
+                        </IconButton>
+                      </Alert>
+                    </Collapse>
+                    <Collapse in={deleteSuccess || restoreSuccess}>
+                      <Alert severity="success">
+                        {deleteSuccess && "Files deleted successfully."}
+                        {restoreSuccess && "Files restored successfully."}
+                        <IconButton
+                          aria-label="close"
+                          color="inherit"
+                          size="small"
+                          onClick={() => {
+                            setDeleteSuccess(false);
+                            setRestoreSuccess(false);
+                          }}
+                        >
+                          <CloseIcon fontSize="inherit" />
+                        </IconButton>
+                      </Alert>
+                    </Collapse>
+                  </Grid>
                 </Grid>
               ) : (
                 <Box mt={1}>
@@ -489,8 +506,8 @@ export default function DeletedFiles() {
                           onChange={handleCheckboxRestoreChange}
                         />
                       </MenuItem>
-                     
-                     <Collapse in={!!deleteError || !!restoreError}>
+
+                      <Collapse in={!!deleteError || !!restoreError}>
                         <Alert severity="error" sx={{ mx: 2 }}>
                           {deleteError || restoreError}
                           <IconButton
@@ -499,10 +516,10 @@ export default function DeletedFiles() {
                             size="small"
                             onClick={() => {
                               setDeleteError("");
-                              setRestoreError(""); 
+                              setRestoreError("");
                             }}
                           >
-                            <CloseIcon fontSize="inherit"/>
+                            <CloseIcon fontSize="inherit" />
                           </IconButton>
                         </Alert>
                       </Collapse>
@@ -512,120 +529,132 @@ export default function DeletedFiles() {
               )}
             </Stack>
           </Grid>
-      </Stack>
+        </Stack>
+        <Box sx={{ height: calculateDataGridHeight(), width: "100%", mt: 5 }}>
+          {isLoading ? (
+            <CircularProgress size="10rem" color="success" />
+          ) : filteredFiles.length <= 0 ? (
+            <div style={{ textAlign: "center", marginTop: "20px" }}>
+              No files available.
+            </div>
+          ) : (
+            <DataGrid
+              rows={filteredFiles}
+              columns={columns}
+              getRowId={(row) => row.fileId}
+              isRowSelectable={(params) => true}
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 5,
+                  },
+                },
+              }}
+              pageSizeOptions={[5, 10, 20, 30, 50]}
+              checkboxSelection
+              // rowSelectionModel={selectedRows}
+              onRowSelectionModelChange={(newSelection) => {
+                setSelectedRows(newSelection.map((id) => id.toString()));
+              }}
+              disableRowSelectionOnClick
+              localeText={customLocaleText}
+            />
+          )}
+        </Box>
 
-      <Box sx={{ height: calculateDataGridHeight(), width: "100%", mt: 5 }}>
-        <DataGrid
-          rows={filteredFiles}
-          columns={columns}
-          getRowId={(row) => row.fileId}
-          isRowSelectable={(params) => true}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
-              },
-            },
-          }}
-          pageSizeOptions={[5, 10, 20, 30, 50]}
-          checkboxSelection
-          // rowSelectionModel={selectedRows}
-          onRowSelectionModelChange={(newSelection) => {
-            setSelectedRows(newSelection.map((id) => id.toString()));
-          }}
-          disableRowSelectionOnClick
-          localeText={customLocaleText}
-        />
-      </Box>
-      
-      {/* for restore and delete prompt */}
-      <Dialog
-      open={isRestoreDialogOpen}
-      onClose={handleRestoreDialogClose}
-      aria-labelledby="restore-dialog-title"
-      aria-describedby="restore-dialog-description"
-    >
-      <DialogTitle id="restore-dialog-title">Restore Files</DialogTitle>
-      <DialogContent>
-        <DialogContentText id="restore-dialog-description">
-          Are you sure you want to restore these files?
-        </DialogContentText>
+        {/* for restore and delete prompt */}
+        <Dialog
+          open={isRestoreDialogOpen}
+          onClose={handleRestoreDialogClose}
+          aria-labelledby="restore-dialog-title"
+          aria-describedby="restore-dialog-description"
+        >
+          <DialogTitle id="restore-dialog-title">Restore Files</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="restore-dialog-description">
+              Are you sure you want to restore these files?
+            </DialogContentText>
 
-        {/* display selected files for restore */}
-        {selectedRows.length > 0 && (
-          <div>
-            <Typography fontSize='13px' mt={2}>Selected Files:</Typography>
-            <ul style={{ fontSize: '15px' }}>
-              {selectedRows.map((fileId) => {
-                const selectedFile = deletedFiles.find(
-                  (file) => file.fileId.toString() === fileId
-                );
-                if (selectedFile) {
-                  return (
-                    <li key={selectedFile.fileId}>{selectedFile.fileName}</li>
-                  );
-                }
-                return null;
-              })}
-            </ul>
-          </div>
-        )}
-       
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleRestoreDialogClose} color="primary">
-          Back
-        </Button>
-        <Button onClick={handleRestore} color="primary">
-          Confirm
-        </Button>
-      </DialogActions>
-    </Dialog>
+            {/* display selected files for restore */}
+            {selectedRows.length > 0 && (
+              <div>
+                <Typography fontSize="13px" mt={2}>
+                  Selected Files:
+                </Typography>
+                <ul style={{ fontSize: "15px" }}>
+                  {selectedRows.map((fileId) => {
+                    const selectedFile = deletedFiles.find(
+                      (file) => file.fileId.toString() === fileId
+                    );
+                    if (selectedFile) {
+                      return (
+                        <li key={selectedFile.fileId}>
+                          {selectedFile.fileName}
+                        </li>
+                      );
+                    }
+                    return null;
+                  })}
+                </ul>
+              </div>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleRestoreDialogClose} color="primary">
+              Back
+            </Button>
+            <Button onClick={handleRestore} color="primary">
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
 
+        <Dialog
+          open={isDeleteDialogOpen}
+          onClose={handleDeleteDialogClose}
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+        >
+          <DialogTitle id="delete-dialog-title">Delete Forever</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="delete-dialog-description">
+              Are you sure you want to delete these files?
+            </DialogContentText>
 
-    <Dialog
-      open={isDeleteDialogOpen}
-      onClose={handleDeleteDialogClose}
-      aria-labelledby="delete-dialog-title"
-      aria-describedby="delete-dialog-description"
-    >
-      <DialogTitle id="delete-dialog-title">Delete Forever</DialogTitle>
-      <DialogContent>
-        <DialogContentText id="delete-dialog-description">
-          Are you sure you want to delete these files?
-        </DialogContentText>
-
-        {/* display selected files for delete */}
-        {selectedRows.length > 0 && (
-          <div>
-            <Typography fontSize='13px' mt={2}>Selected Files:</Typography>
-            <ul style={{ fontSize: '15px' }}>
-              {selectedRows.map((fileId) => {
-                const selectedFile = deletedFiles.find(
-                  (file) => file.fileId.toString() === fileId
-                );
-                if (selectedFile) {
-                  return (
-                    <li key={selectedFile.fileId}>{selectedFile.fileName}</li>
-                  );
-                }
-                return null;
-              })}
-            </ul>
-          </div>
-        )}
-
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleDeleteDialogClose} color="primary">
-          Back
-        </Button>
-        <Button onClick={handleDelete} color="primary">
-          Confirm
-        </Button>
-      </DialogActions>
-    </Dialog>
-    </Grid>
+            {/* display selected files for delete */}
+            {selectedRows.length > 0 && (
+              <div>
+                <Typography fontSize="13px" mt={2}>
+                  Selected Files:
+                </Typography>
+                <ul style={{ fontSize: "15px" }}>
+                  {selectedRows.map((fileId) => {
+                    const selectedFile = deletedFiles.find(
+                      (file) => file.fileId.toString() === fileId
+                    );
+                    if (selectedFile) {
+                      return (
+                        <li key={selectedFile.fileId}>
+                          {selectedFile.fileName}
+                        </li>
+                      );
+                    }
+                    return null;
+                  })}
+                </ul>
+              </div>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteDialogClose} color="primary">
+              Back
+            </Button>
+            <Button onClick={handleDelete} color="primary">
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Grid>
     </div>
   );
 }
