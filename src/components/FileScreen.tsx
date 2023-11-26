@@ -28,7 +28,7 @@ import Navbar from "./Navbar";
 import Topbar from "./Topbar";
 import { useSelector } from "react-redux";
 import { RootState } from "../helpers/Store";
-import CryptoJS from 'crypto-js';
+import CryptoJS from "crypto-js";
 
 type FileId = string;
 
@@ -155,10 +155,13 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
     setCurrentSortOption("All");
     setSelectedOption("All");
 
-    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
-    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || "DefaultKey";
+    const decryptedUserId = CryptoJS.AES.decrypt(
+      userId,
+      ENCRYPTION_KEY
+    ).toString(CryptoJS.enc.Utf8);
 
-    if (decryptedUserId ) {
+    if (decryptedUserId) {
       FileService.getFilesByUserId(decryptedUserId)
         .then((res) => {
           console.log(res);
@@ -212,9 +215,12 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
   );
 
   useEffect(() => {
-    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || 'DefaultKey';
-    const decryptedUserId = CryptoJS.AES.decrypt(userId, ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
-    if (decryptedUserId ) {
+    const ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY || "DefaultKey";
+    const decryptedUserId = CryptoJS.AES.decrypt(
+      userId,
+      ENCRYPTION_KEY
+    ).toString(CryptoJS.enc.Utf8);
+    if (decryptedUserId) {
       setLoading(true);
       FileService.getFilesByUserId(decryptedUserId)
         .then((res) => {
@@ -615,143 +621,146 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
           justifyContent: "center",
         }}
       >
-        {isLoading?
-        <><CircularProgress size="10rem" color="success" /></>:
-        files.length <= 0? 
-        <div style={{ textAlign: "center", marginTop: "20px" }}>
-        No files uploaded.
-        </div>:
-        <Grid
-          container
-          spacing={{ sm: 3, md: 2, lg: -10, xl: -50 }}
-          style={{ margin: "auto" }}
-          paddingY={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
-          paddingRight={{ xs: 2, sm: 2 }}
-          justifyContent="text-start"
-        >
-          {searchResult.map((file) => (
-            <Grid
-              key={file.fileId}
-              item
-              // paddingLeft={2}
-              xs={12}
-              sm={6}
-              md={4}
-              lg={4}
-              xl={xlValue}
-              paddingBottom={2}
-              // style={{
-              //   display: "flex",
-              //   flexDirection: "column",
-              //   alignItems: "center",
-              // }}
-            >
+        {isLoading ? (
+          <>
+            <CircularProgress size="10rem" color="success" />
+          </>
+        ) : files.length <= 0 ? (
+          <div style={{ textAlign: "center", marginTop: "20px" }}>
+            No files uploaded.
+          </div>
+        ) : (
+          <Grid
+            container
+            spacing={{ sm: 3, md: 2, lg: -10, xl: -50 }}
+            style={{ margin: "auto" }}
+            paddingY={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
+            paddingRight={{ xs: 2, sm: 2 }}
+            justifyContent="text-start"
+          >
+            {searchResult.map((file) => (
               <Grid
-                maxWidth="100%"
-                width={{ xs: "full", sm: "full", lg: "320px" }}
-                paddingX={"20px"}
-                paddingY={{ lg: "10px" }}
-                style={{
-                  backgroundColor: "#71C887",
-                  borderRadius: "8px",
-                  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
-                }}
+                key={file.fileId}
+                item
+                // paddingLeft={2}
+                xs={12}
+                sm={6}
+                md={4}
+                lg={4}
+                xl={xlValue}
+                paddingBottom={2}
+                // style={{
+                //   display: "flex",
+                //   flexDirection: "column",
+                //   alignItems: "center",
+                // }}
               >
-                <div
+                <Grid
+                  maxWidth="100%"
+                  width={{ xs: "full", sm: "full", lg: "320px" }}
+                  paddingX={"20px"}
+                  paddingY={{ lg: "10px" }}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    backgroundColor: "#71C887",
+                    borderRadius: "8px",
+                    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
                   }}
                 >
-                  <div style={{ flex: "1" }}>
-                    <div
-                      key={file.fileId}
-                      onClick={() => handleClickFileName(file)}
-                    >
-                      {file.fileName}
-                    </div>
-                  </div>
-                  <IconButton
+                  <div
                     style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
-                    }}
-                    onClick={handleIconButtonClick}
-                    data-file-id={file.fileId}
-                  >
-                    <MoreHorizIcon
-                      style={{ fill: "black", width: "1em", height: "1em" }}
-                    />
-                  </IconButton>
-
-                  <Popover
-                    open={
-                      isPopoverOpen &&
-                      String(selectedFileId) === String(file.fileId)
-                    }
-                    anchorEl={anchorEl}
-                    onClose={handlePopoverClose}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "center",
-                    }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "center",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    <List>
-                      <ListItem
-                        button
-                        onClick={() => {
-                          console.log(
-                            `Details option selected for fileId: ${file.fileId}`
-                          );
-                          handleOptionSelectPop("Details", file);
-                        }}
+                    <div style={{ flex: "1" }}>
+                      <div
+                        key={file.fileId}
+                        onClick={() => handleClickFileName(file)}
                       >
-                        <ListItemText primary="Details" />
-                      </ListItem>
-
-                      <FileDetails
-                        open={isOpen}
-                        anchorEl={anchorRef.current}
-                        onClose={handleClose}
-                        file={file}
-                        user={
-                          user || {
-                            userId: 0,
-                            firstName: "",
-                            lastName: "",
-                            email: "",
-                            address: "",
-                            username: "",
-                            password: "",
-                            businessName: "",
-                            businessType: "",
-                            userImage: null,
-                          }
-                        }
+                        {file.fileName}
+                      </div>
+                    </div>
+                    <IconButton
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                      onClick={handleIconButtonClick}
+                      data-file-id={file.fileId}
+                    >
+                      <MoreHorizIcon
+                        style={{ fill: "black", width: "1em", height: "1em" }}
                       />
+                    </IconButton>
 
-                      <ListItem
-                        button
-                        onClick={() => {
-                          console.log(
-                            `Delete option selected for fileId: ${file.fileId}`
-                          );
-                          handleDelete(file.fileId);
-                        }}
-                      >
-                        <ListItemText primary="Delete" />
-                      </ListItem>
-                      {/* <ListItem
+                    <Popover
+                      open={
+                        isPopoverOpen &&
+                        String(selectedFileId) === String(file.fileId)
+                      }
+                      anchorEl={anchorEl}
+                      onClose={handlePopoverClose}
+                      anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "center",
+                      }}
+                      transformOrigin={{
+                        vertical: "top",
+                        horizontal: "center",
+                      }}
+                    >
+                      <List>
+                        <ListItem
+                          button
+                          onClick={() => {
+                            console.log(
+                              `Details option selected for fileId: ${file.fileId}`
+                            );
+                            handleOptionSelectPop("Details", file);
+                          }}
+                        >
+                          <ListItemText primary="Details" />
+                        </ListItem>
+
+                        <FileDetails
+                          open={isOpen}
+                          anchorEl={anchorRef.current}
+                          onClose={handleClose}
+                          file={file}
+                          user={
+                            user || {
+                              userId: 0,
+                              firstName: "",
+                              lastName: "",
+                              email: "",
+                              address: "",
+                              username: "",
+                              password: "",
+                              businessName: "",
+                              businessType: "",
+                              userImage: null,
+                            }
+                          }
+                        />
+
+                        <ListItem
+                          button
+                          onClick={() => {
+                            console.log(
+                              `Delete option selected for fileId: ${file.fileId}`
+                            );
+                            handleDelete(file.fileId);
+                          }}
+                        >
+                          <ListItemText primary="Delete" />
+                        </ListItem>
+                        {/* <ListItem
                         button
                         onClick={() => {
                           console.log(
@@ -762,40 +771,40 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
                       >
                         <ListItemText primary="Open" />
                       </ListItem> */}
-                    </List>
-                  </Popover>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "100%",
-                  }}
-                >
-                  <div
-                    key={file.fileId}
-                    onClick={() => handleClickFileName(file)}
-                  >
-                    <img
-                      src="https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png"
-                      alt="Thumbnail preview of a Drive item"
-                      style={{
-                        width: "100%",
-                        height: "200px",
-                        paddingTop: "3px",
-                        paddingBottom: "10px",
-                        borderRadius: "8px",
-                        display: "block",
-                        margin: "0 auto",
-                      }}
-                    />
+                      </List>
+                    </Popover>
                   </div>
-                </div>
-              </Grid>
 
-              <Grid
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                    }}
+                  >
+                    <div
+                      key={file.fileId}
+                      onClick={() => handleClickFileName(file)}
+                    >
+                      <img
+                        src="https://www.cleverducks.com/wp-content/uploads/2018/01/Excel-Icon-1024x1024.png"
+                        alt="Thumbnail preview of a Drive item"
+                        style={{
+                          width: "100%",
+                          height: "200px",
+                          paddingTop: "3px",
+                          paddingBottom: "10px",
+                          borderRadius: "8px",
+                          display: "block",
+                          margin: "0 auto",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </Grid>
+
+                {/* <Grid
                 style={{
                   marginTop: "0.5rem",
                   fontSize: "14px",
@@ -810,11 +819,11 @@ const FileList: React.FC<FileListProp> = ({ setFileId }: FileListProp) => {
                 paddingLeft={{ xs: 6, sm: 5, md: 5, lg: 5 }}
               >
                 Last Modified: {file.latestDateModified}
+              </Grid> */}
               </Grid>
-            </Grid>
-          ))}
-        </Grid>
-        }
+            ))}
+          </Grid>
+        )}
       </section>
       {searchResult.length === 0 && (
         <div style={{ textAlign: "center", marginTop: "20px" }}>
