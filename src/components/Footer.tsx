@@ -99,7 +99,7 @@ export default function Footer(){
                                             Follow us
                                         </Typography>
                                         <Stack direction="row" mt={1}>
-                                            <Link to="https://www.facebook.com/cara.q.encabo" style={{ textDecoration: 'none' }}>
+                                            <Link to="#" style={{ textDecoration: 'none' }}>
                                                 <FacebookIcon sx={{ color: "white", width: 25, height: 25, mr: 2 }}/>
                                             </Link>
                                             <Link to="#" style={{ textDecoration: 'none' }}>
