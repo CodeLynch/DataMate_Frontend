@@ -1,6 +1,7 @@
 import * as React from "react";
 import AppBar from "@mui/material/AppBar";
-import { Box, Toolbar, Button, Stack } from "@mui/material";
+import { Box, Toolbar, Button, Stack, IconButton, Drawer } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import Logo from "../images/datamate-logo.png";
 import { NavLink, useLocation } from "react-router-dom";
 import { Grid } from "@mui/material";
@@ -15,6 +16,11 @@ export default function TopbarInit() {
   ];
 
   const [isHovered, setIsHovered] = React.useState(false);
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+
+  const handleDrawerToggle = () => {
+    setDrawerOpen(!drawerOpen);
+  };
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -28,38 +34,80 @@ export default function TopbarInit() {
         <Toolbar>
           <Grid
             container
-            direction={{ xs: "column", sm: "row", md: "row", lg: "row" }}
+            direction="row"
             justifyContent="space-between"
             alignItems="center"
           >
             <a href="/">
               <img src={Logo} alt={"datamate-logo"} style={{ width: '130px', height: 'auto', paddingTop: "4px" }} />
             </a>
-            <Stack direction="row" spacing={2}>
+
+            <Stack direction="row" spacing={2} sx={{ display: { xs: "none", sm: "flex" } }}>
               {navItems.map((listItem, index) => (
                 <NavLink key={index} to={listItem.link}>
                   <div className='hover-style' onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-                  <Button
-                    color="inherit"
-                    sx={{
-                      color:
-                        location.pathname === listItem.link
-                          ? "#17A2A6"
-                          : "#374248",
-                      whiteSpace: "nowrap",
-                      textTransform: "none",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {listItem.text}
-                  </Button>
+                    <Button
+                      color="inherit"
+                      sx={{
+                        color:
+                          location.pathname === listItem.link
+                            ? "#17A2A6"
+                            : "#374248",
+                        whiteSpace: "nowrap",
+                        textTransform: "none",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {listItem.text}
+                    </Button>
                   </div>
                 </NavLink>
               ))}
             </Stack>
+
+            {/* hamburger menu for xs */}
+            <IconButton
+              sx={{ display: { xs: "flex", sm: "none" } }}
+              onClick={handleDrawerToggle}
+            >
+              <MenuIcon />
+            </IconButton>
           </Grid>
         </Toolbar>
       </AppBar>
+
+      {/* drawer */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={handleDrawerToggle}
+      >
+        <Stack
+          direction="column-reverse"
+          spacing={2}
+          sx={{ width: 200, padding: 2 }}
+        >
+          {navItems.map((listItem, index) => (
+            <NavLink key={index} to={listItem.link}>
+              <Button
+                color="inherit"
+                sx={{
+                  color:
+                    location.pathname === listItem.link
+                      ? "#17A2A6"
+                      : "#374248",
+                  whiteSpace: "nowrap",
+                  textTransform: "none",
+                  fontWeight: "bold",
+                }}
+                onClick={handleDrawerToggle}
+              >
+                {listItem.text}
+              </Button>
+            </NavLink>
+          ))}
+        </Stack>
+      </Drawer>
     </Box>
   );
 }
