@@ -148,7 +148,7 @@ export default function EditProfile() {
 
 
     return (
-        <div className='gradientbg edit-spacing' style={{ width: '100%', height: '100%'}}>
+        <div className='gradientbg edit-spacing' style={{ width: '100%', height: '100vh'}}>
             <Modal open={open} onClose={toggleDrawerOpen}>
                 <Navbar open={open} handleDrawerClose={toggleDrawerOpen} />
             </Modal>
