@@ -531,35 +531,35 @@ export default function DeletedFiles() {
           </Grid>
         </Stack>
         <Box sx={{ height: calculateDataGridHeight(), width: "100%", mt: 5 }}>
-          {isLoading ? (
+          {/* {isLoading ? (
             <CircularProgress size="10rem" color="success" />
           ) : filteredFiles.length <= 0 ? (
             <div style={{ textAlign: "center", marginTop: "20px" }}>
               No files available.
             </div>
-          ) : (
-            <DataGrid
-              rows={filteredFiles}
-              columns={columns}
-              getRowId={(row) => row.fileId}
-              isRowSelectable={(params) => true}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 5,
-                  },
+          ) : ( */}
+          <DataGrid
+            rows={filteredFiles}
+            columns={columns}
+            getRowId={(row) => row.fileId}
+            isRowSelectable={(params) => true}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 5,
                 },
-              }}
-              pageSizeOptions={[5, 10, 20, 30, 50]}
-              checkboxSelection
-              // rowSelectionModel={selectedRows}
-              onRowSelectionModelChange={(newSelection) => {
-                setSelectedRows(newSelection.map((id) => id.toString()));
-              }}
-              disableRowSelectionOnClick
-              localeText={customLocaleText}
-            />
-          )}
+              },
+            }}
+            pageSizeOptions={[5, 10, 20, 30, 50]}
+            checkboxSelection
+            // rowSelectionModel={selectedRows}
+            onRowSelectionModelChange={(newSelection) => {
+              setSelectedRows(newSelection.map((id) => id.toString()));
+            }}
+            disableRowSelectionOnClick
+            localeText={customLocaleText}
+          />
+          {/* )} */}
         </Box>
 
         {/* for restore and delete prompt */}
