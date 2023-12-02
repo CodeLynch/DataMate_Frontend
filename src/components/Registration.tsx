@@ -7,12 +7,12 @@ import TopbarInit from './TopbarInit';
 import UserService from '../api/UserService';
 import { SnackbarContext, SnackbarContextType } from '../helpers/SnackbarContext';
 
-
 type RegisterProps = {
     startLoading: () => void,
     stopLoading: () => void,
 }
-export default function Registration({startLoading, stopLoading,}: RegisterProps) {
+
+export default function Registration({startLoading, stopLoading}: RegisterProps) {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     // const [businessType, setBusinessType] = React.useState('');
@@ -87,10 +87,40 @@ export default function Registration({startLoading, stopLoading,}: RegisterProps
         }
     };
 
+    // const handleFileChange = (e: any) => {
+    //     console.log(e.target.files[0])
+    //     setUserImage(e.target.files[0])
+    // };
+
     const handleFileChange = (e: any) => {
-        console.log(e.target.files[0])
-        setUserImage(e.target.files[0])
+        const selectedFile = e.target.files[0];
+    
+        if (selectedFile) {
+            const isImage = selectedFile.type.startsWith('image/');
+    
+            if (isImage) {
+                const reader = new FileReader();
+    
+                reader.onloadend = () => {
+                    if (reader.result && typeof reader.result === 'string') {
+                        setUserImage(selectedFile);
+                    }
+                };
+    
+                reader.readAsDataURL(selectedFile);
+            } else {
+                alert('Please upload an image file only.');
+                setUserImage(null);
+    
+                if (e.target instanceof HTMLInputElement) {
+                    e.target.value = '';
+                }
+            }
+        } else {
+            setUserImage(null);
+        }
     };
+    
 
     const [emailError, setEmailError] = useState(false);
 
@@ -106,7 +136,12 @@ export default function Registration({startLoading, stopLoading,}: RegisterProps
     const postUser = async (event: { preventDefault: () => void; }) =>{
         event.preventDefault();
 
-        if (passwordMatchError || passwordLengthError || emailError) { 
+        const containsOnlySpaces = Object.values(data).some((value) => value.trim() === '');
+
+        if (containsOnlySpaces || passwordMatchError || passwordLengthError || emailError) {
+            if (containsOnlySpaces) {
+                alert('Please fill in all fields. DataMate does not accept spaces-only entries.');
+            }
             return;
         }
         
@@ -121,12 +156,17 @@ export default function Registration({startLoading, stopLoading,}: RegisterProps
             businessName: data.businessName,
             businessType: data.businessType,
         })], {type: 'application/json'}));
-        if(userImage){
+        if (userImage !== null) {
             formData.append("userImage", userImage);
+    
+            const isImage = userImage.type.startsWith('image/');
+            if (!isImage) {
+                alert('Please upload an image file only.');
+                return;
+            }
         }
         console.log(formData)
         console.log(formData.keys())
-        
         startLoading();
         UserService.postUser(formData)
         .then((res:any)=> {
