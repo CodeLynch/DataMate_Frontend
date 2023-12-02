@@ -91,7 +91,7 @@ export default function Login({startLoading, stopLoading}:
                       console.log(loginSuccess)
                       navigate('/', { replace: true });
                     } else {
-                      setUsernameError("User does not exist.");
+                      setUsernameError("Invalid credentials.");
                     }
                   })
                   .catch((error) => {
@@ -103,7 +103,7 @@ export default function Login({startLoading, stopLoading}:
               }
             } else {
               stopLoading();
-              setUsernameError("Username does not exist.");
+              setUsernameError("Invalid credentials.");
             }
           });
       };
