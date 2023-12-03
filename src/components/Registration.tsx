@@ -22,6 +22,7 @@ export default function Registration({startLoading, stopLoading}: RegisterProps)
     const passwordRef = React.useRef<HTMLInputElement | null>(null);
     const [usernameExists, setUsernameExists] = useState(false);
     const navigate = useNavigate();
+    const formats = ["jpg", "jpeg", "png", "bmp", "gif", "tiff"];
     const { handleSetMessage } = useContext(SnackbarContext) as SnackbarContextType;
 
     const [data, setData]= useState({
@@ -96,7 +97,10 @@ export default function Registration({startLoading, stopLoading}: RegisterProps)
         const selectedFile = e.target.files[0];
     
         if (selectedFile) {
-            const isImage = selectedFile.type.startsWith('image/');
+            const isImage = selectedFile.type.startsWith('image/') && formats.some((format) =>
+            selectedFile.name.toLowerCase().endsWith(format.toLowerCase())
+          )
+            
     
             if (isImage) {
                 const reader = new FileReader();
@@ -111,7 +115,6 @@ export default function Registration({startLoading, stopLoading}: RegisterProps)
             } else {
                 alert('Please upload an image file only.');
                 setUserImage(null);
-    
                 if (e.target instanceof HTMLInputElement) {
                     e.target.value = '';
                 }

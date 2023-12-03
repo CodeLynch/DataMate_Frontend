@@ -63,7 +63,7 @@ export default function VerifyCode() {
   }, [remainingTime]);
 
   const handleCancelClick = () => {
-    navigate("/forgot-password");
+    navigate("/login");
   };
 
   const handleFormSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
