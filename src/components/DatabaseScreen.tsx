@@ -227,9 +227,6 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
   };
   return (
     <>
-      {databases?.length <= 0 ? (
-        <h1>No or empty Response Received</h1>
-      ) : (
         <Grid
           paddingX={{ xs: 5, sm: 5, lg: 10 }}
           style={{
@@ -755,7 +752,7 @@ const DatabaseList: React.FC<DatabaseListProp> = ({
             </div>
           )}
         </Grid>
-      )}
+
     </>
   );
 };

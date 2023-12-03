@@ -92,6 +92,7 @@ export default function Login({startLoading, stopLoading}:
                       navigate('/', { replace: true });
                     } else {
                       setUsernameError("Invalid credentials.");
+                      setPasswordError("");
                     }
                   })
                   .catch((error) => {
@@ -99,11 +100,13 @@ export default function Login({startLoading, stopLoading}:
                   });
               } else {
                 stopLoading();
-                setPasswordError("Password is incorrect.");
+                setUsernameError("Invalid credentials.");
+                setPasswordError("");
               }
             } else {
               stopLoading();
               setUsernameError("Invalid credentials.");
+              setPasswordError("");
             }
           });
       };

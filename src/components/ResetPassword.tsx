@@ -33,7 +33,7 @@ export default function ResetPassword() {
   const isSmallScreen = window.innerWidth < 600;
 
   const handleCancelClick = () => {
-    navigate("/forgot-password/verify-code");
+    navigate("/login");
   };
 
   const handleFormSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
