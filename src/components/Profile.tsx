@@ -346,17 +346,6 @@ export default function EditProfile() {
                       />
                       <TextField
                         id="outlined-read-only-input"
-                        name="password"
-                        type="password"
-                        value={password}
-                        InputProps={{ readOnly: true }}
-                        label="Password"
-                        size="small"
-                        fullWidth
-                        sx={{ marginBottom: { xs: 2, sm: 2, md: 3 } }}
-                      />
-                      <TextField
-                        id="outlined-read-only-input"
                         size="small"
                         name="businessName"
                         label="Business Name"
