@@ -88,7 +88,6 @@ export default function Login({startLoading, stopLoading}:
                     if (user.data.length !== 0) {
                       dispatch(loginSuccess(res.data.userId));
                       console.log('success')
-                      console.log(loginSuccess)
                       navigate('/', { replace: true });
                     } else {
                       setUsernameError("Invalid credentials.");
